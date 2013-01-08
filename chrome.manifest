@@ -1,0 +1,4 @@
+content privatetab ./
+
+locale privatetab en-US locale/en-US/
+locale privatetab ru    locale/ru/
