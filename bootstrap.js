@@ -170,7 +170,7 @@ var windowsObserver = {
 		this.handleCommand(e.target, e.shiftKey || e.ctrlKey || e.altKey || e.metaKey);
 	},
 	clickHandler: function(e) {
-		if(e.button == 1)
+		if(e.button == 1 && e.target.getAttribute("disabled") != "true")
 			this.handleCommand(e.target, true, true);
 	},
 	handleCommand: function(trg, shifted, closeMenus) {
