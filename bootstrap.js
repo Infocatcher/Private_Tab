@@ -74,7 +74,8 @@ var windowsObserver = {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window))
 			return;
 		this.loadStyles(window);
-		var gBrowser = window.gBrowser;
+		var gBrowser = window.gBrowser
+			|| window.getBrowser(); // For SeaMonkey
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
