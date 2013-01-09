@@ -24,6 +24,7 @@ var windowsObserver = {
 		this.initialized = true;
 
 		prefs.init();
+		this.initHotkeys();
 
 		var ws = Services.wm.getEnumerator("navigator:browser");
 		while(ws.hasMoreElements())
@@ -59,7 +60,8 @@ var windowsObserver = {
 			case "TabSelect":        this.tabSelectHandler(e);    break;
 			case "popupshowing":     this.popupShowingHandler(e); break;
 			case "command":          this.commandHandler(e);      break;
-			case "click":            this.clickHandler(e);
+			case "click":            this.clickHandler(e);        break;
+			case "keypress":         this.keypressHandler(e);     break;
 		}
 	},
 	loadHandler: function(e) {
@@ -82,11 +84,13 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
+		if(this.hotkeys)
+			window.addEventListener("keypress", this, true);
 		if(!this.isPrivateWindow(window)) {
 			var document = window.document;
-			this.registerHotkeys(document);
 			window.setTimeout(function() {
 				this.initControls(document);
+				this.initHotkeysText(document);
 			}.bind(this), 50);
 		}
 	},
@@ -109,10 +113,16 @@ var windowsObserver = {
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
+		window.removeEventListener("keypress", this, true);
 		this.destroyControls(window, force);
 	},
 	isTargetWindow: function(window) {
 		return window.document.documentElement.getAttribute("windowtype") == "navigator:browser";
+	},
+
+	prefChanged: function(pName, pVal) {
+		if(pName.substr(0, 4) == "key.")
+			this.updateHotkeys();
 	},
 
 	tabOpenHandler: function(e) {
@@ -181,6 +191,30 @@ var windowsObserver = {
 		else if(cmd == "openNewPrivateTab")
 			this.openNewPrivateTab(window);
 		closeMenus && window.closeMenus(trg);
+	},
+	keypressHandler: function(e) {
+		var keys = this.hotkeys;
+		for(var kId in keys) {
+			var k = keys[kId];
+			if(
+				e.ctrlKey == k.ctrlKey
+				&& e.altKey == k.altKey
+				&& e.shiftKey == k.shiftKey
+				&& e.metaKey == k.metaKey
+				&& (
+					k.char && String.fromCharCode(e.charCode).toUpperCase() == k.char
+					|| k.code && e.keyCode == k.code
+				)
+			) {
+				e.preventDefault();
+				e.stopPropagation();
+				var ct = e.currentTarget;
+				this.doCommand(ct.document || ct.ownerDocument || ct, kId);
+			}
+		}
+	},
+	doCommand: function(document, cmd) {
+		document.getElementsByAttribute(this.cmdAttr, cmd)[0].click();
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
@@ -278,7 +312,6 @@ var windowsObserver = {
 		var menuItem = createMenuitem(this.newTabMenuId, {
 			label:     this.getLocalized("openNewPrivateTab"),
 			accesskey: this.getLocalized("openNewPrivateTabAccesskey"),
-			key: "privateTab-key-openNewPrivateTab",
 			"privateTab-command": "openNewPrivateTab"
 		});
 		insertMenuitem(menuItem, menuItemParent, ["menu_newNavigatorTab"]);
@@ -287,7 +320,6 @@ var windowsObserver = {
 		if(appMenuItemParent) {
 			var appMenuItem = createMenuitem(this.newTabAppMenuId, {
 				label:     this.getLocalized("openNewPrivateTab"),
-				key: "privateTab-key-openNewPrivateTab",
 				"privateTab-command": "openNewPrivateTab"
 			});
 			insertMenuitem(appMenuItem, appMenuItemParent, ["appmenu_newPrivateWindow"]);
@@ -305,37 +337,157 @@ var windowsObserver = {
 			force && node.parentNode.removeChild(node);
 		});
 	},
-	registerHotkeys: function(document) {
-		_log("registerHotkeys()");
-		var keyset = document.getElementById("mainKeyset")
-			|| document.getElementsByTagName("keyset")[0];
-		function registerHotkey(kId) {
-			_log("registerHotkey: " + kId);
+
+	hotkeys: null,
+	_hotkeysHasText: false,
+	get accelKey() {
+		var accelKey = "ctrlKey";
+		var ke = Components.interfaces.nsIDOMKeyEvent;
+		switch(prefs.getPref("ui.key.accelKey")) {
+			case ke.DOM_VK_ALT:  accelKey = "altKey";  break;
+			case ke.DOM_VK_META: accelKey = "metaKey";
+		}
+		delete accelKey;
+		return accelKey = accelKey;
+	},
+	initHotkeys: function() {
+		_log("initHotkeys()");
+		this._hotkeysHasText = false;
+		var hasKeys = false;
+		var keys = { __proto__: null };
+		function initHotkey(kId) {
 			var keyStr = prefs.get("key." + kId);
-			var kElt = document.createElement("key");
-			kElt.id = "privateTab-key-" + kId;
-			kElt.setAttribute(this.cmdAttr, "key-" + kId);
-			keyset.appendChild(kElt);
-			if(!keyStr) {
-				kElt.setAttribute("disabled", "true");
+			_log("initHotkey: " + kId + " = " + keyStr);
+			if(!keyStr)
 				return;
-			}
+			hasKeys = true;
+			var k = keys[kId] = {
+				ctrlKey:  false,
+				altKey:   false,
+				shiftKey: false,
+				metaKey:  false,
+				char: null,
+				code: null,
+				_key: null,
+				_keyCode: null,
+				_modifiers: null,
+				_keyText: "",
+				__proto__: null
+			};
 			var tokens = keyStr.split(" ");
 			var key = tokens.pop() || " ";
-			var modifiers = tokens.join(",");
-			kElt.setAttribute(key.indexOf("VK_") == 0 ? "keycode" : "key", key);
-			kElt.setAttribute("modifiers", modifiers);
-			//kElt.addEventListener("command", this, false);
-			// Unfortunately doesn't work... So let's use click emulation:
-			kElt.setAttribute(
-				"oncommand",
-				'document.getElementsByAttribute("' + this.cmdAttr + '", "' + kId + '")[0].click();'
-			);
-			_log("registerHotkey: " + kId + " - ok");
+			if(key.length == 1) {
+				k.char = key.toUpperCase();
+				k._key = key;
+			}
+			else { // VK_*
+				k.code = Components.interfaces.nsIDOMKeyEvent["DOM_" + key];
+				k._keyCode = key;
+			}
+			k._modifiers = tokens.join(",");
+			tokens.forEach(function(token) {
+				switch(token) {
+					case "control": k.ctrlKey  = true;       break;
+					case "alt":     k.altKey   = true;       break;
+					case "shift":   k.shiftKey = true;       break;
+					case "meta":    k.metaKey  = true;       break;
+					case "accel":   k[this.accelKey] = true;
+				}
+			}, this);
 		}
 		Services.prefs.getBranch(prefs.ns + "key.")
 			.getChildList("", {})
-			.forEach(registerHotkey, this);
+			.forEach(initHotkey, this);
+		this.hotkeys = hasKeys ? keys : null;
+		_log("Keys:\n" + JSON.stringify(keys, null, "\t"));
+	},
+	initHotkeysText: function(document) {
+		var keys = this.hotkeys;
+		if(!keys)
+			return;
+		if(this._hotkeysHasText) {
+			_log("setHotkeysText()");
+			this.setHotkeysText(document);
+			return;
+		}
+		_log("initHotkeysText()");
+		//~ hack: show fake hidden popup to get descriptions
+		var root = document.documentElement;
+		var keyset = document.createElement("keyset");
+		var mp = document.createElement("menupopup");
+		mp.style.visibility = "collapse";
+		for(var kId in keys) {
+			var k = keys[kId];
+			var id = "_privateTab-key-" + kId;
+			var key = document.createElement("key");
+			key.setAttribute("id", id);
+			k._key       && key.setAttribute("key",       k._key);
+			k._keyCode   && key.setAttribute("keycode",   k._keyCode);
+			k._modifiers && key.setAttribute("modifiers", k._modifiers);
+			var mi = document.createElement("menuitem");
+			mi.setAttribute("key", id);
+			mi._id = kId;
+			keyset.appendChild(key);
+			mp.appendChild(mi);
+		}
+		root.appendChild(keyset);
+		root.appendChild(mp);
+
+		var window = document.defaultView;
+		mp._onpopupshown = (function() {
+			Array.forEach(
+				mp.childNodes,
+				function(mi) {
+					var k = keys[mi._id];
+					k._keyText = mi.getAttribute("acceltext") || "";
+					_log("Key text: " + mi.getAttribute("acceltext"));
+				}
+			);
+			this._hotkeysHasText = true;
+			_log("=> setHotkeysText()");
+			this.setHotkeysText(document);
+			mp.parentNode.removeChild(mp);
+			keyset.parentNode.removeChild(keyset);
+			window.clearInterval(bak);
+		}).bind(this);
+		mp.setAttribute("onpopupshown", "this._onpopupshown();");
+		var bak = window.setInterval(function() {
+			_log("initHotkeysText(), next try...");
+			mp.openPopup();
+		}, 500);
+		mp.openPopup();
+	},
+	setHotkeysText: function(document) {
+		var keys = this.hotkeys;
+		for(var kId in keys) {
+			var keyText = keys[kId]._keyText;
+			_log("Set " + keyText);
+			Array.forEach(
+				document.getElementsByAttribute(this.cmdAttr, kId),
+				function(node) {
+					node.setAttribute("acceltext", keyText);
+				}
+			);
+		}
+	},
+	updateHotkeys: function() {
+		_log("updateHotkeys()");
+		this.initHotkeys();
+		var hasHotkeys = !!this.hotkeys;
+		var ws = Services.wm.getEnumerator("navigator:browser");
+		while(ws.hasMoreElements()) {
+			var window = ws.getNext();
+			window.removeEventListener("keypress", this, true);
+			hasHotkeys && window.addEventListener("keypress", this, true);
+			var document = window.document;
+			Array.forEach(
+				document.getElementsByAttribute(this.cmdAttr, "*"),
+				function(node) {
+					node.removeAttribute("acceltext");
+				}
+			);
+			hasHotkeys && this.initHotkeysText(document);
+		}
 	},
 
 	isEmptyTab: function(tab, gBrowser) {
@@ -512,8 +664,12 @@ var prefs = {
 		Services.prefs.removeObserver(this.ns, this);
 	},
 	observe: function(subject, topic, pName) {
-		if(topic == "nsPref:changed")
-			this._cache[pName.substr(this.ns.length)] = this.getPref(pName);
+		if(topic != "nsPref:changed")
+			return;
+		var shortName = pName.substr(this.ns.length);
+		var val = this.getPref(pName);
+		this._cache[shortName] = val;
+		windowsObserver.prefChanged(shortName, val);
 	},
 
 	loadDefaultPrefs: function() {
