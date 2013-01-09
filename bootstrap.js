@@ -23,13 +23,12 @@ var windowsObserver = {
 			return;
 		this.initialized = true;
 
+		prefs.init();
+
 		var ws = Services.wm.getEnumerator("navigator:browser");
 		while(ws.hasMoreElements())
 			this.initWindow(ws.getNext(), reason);
 		Services.ww.registerNotification(this);
-
-		//if(reason != APP_STARTUP)
-		prefs.init();
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
