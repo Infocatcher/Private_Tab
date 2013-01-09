@@ -72,7 +72,7 @@ var windowsObserver = {
 	initWindow: function(window, reason) {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window))
 			return;
-		this.loadStyles();
+		this.loadStyles(window);
 		var gBrowser = window.gBrowser;
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
@@ -432,13 +432,14 @@ var windowsObserver = {
 	},
 
 	_stylesLoaded: false,
-	loadStyles: function() {
+	loadStyles: function(window) {
 		if(this._stylesLoaded)
 			return;
 		this._stylesLoaded = true;
 		var sss = this.sss;
-		if(!sss.sheetRegistered(this.cssURI, sss.USER_SHEET))
-			sss.loadAndRegisterSheet(this.cssURI, sss.USER_SHEET);
+		var cssURI = this.cssURI = this.makeCSSURI(window);
+		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
+			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
 	},
 	unloadStyles: function() {
 		if(!this._stylesLoaded)
@@ -453,19 +454,22 @@ var windowsObserver = {
 		return this.sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
 			.getService(Components.interfaces.nsIStyleSheetService);
 	},
-	get cssURI() {
+	makeCSSURI: function(window) {
+		var s = window.document.documentElement.style;
+		var prefix = "textDecorationColor" in s && "textDecorationStyle" in s
+			? ""
+			: "-moz-";
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("chrome://browser/content/browser.xul"),\n\
 				url("chrome://navigator/content/navigator.xul") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '] {\n\
 					text-decoration: underline !important;\n\
-					-moz-text-decoration-color: -moz-nativehyperlinktext !important;\n\
-					-moz-text-decoration-style: dashed !important;\n\
+					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
+					' + prefix + 'text-decoration-style: dashed !important;\n\
 				}\n\
 			}';
-		delete this.cssURI;
-		return this.cssURI = Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
+		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
 	},
 
 	get bundle() {
