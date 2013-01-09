@@ -201,6 +201,7 @@ var windowsObserver = {
 				&& e.altKey == k.altKey
 				&& e.shiftKey == k.shiftKey
 				&& e.metaKey == k.metaKey
+				&& e.getModifierState("OS") == k.osKey
 				&& (
 					k.char && String.fromCharCode(e.charCode).toUpperCase() == k.char
 					|| k.code && e.keyCode == k.code
@@ -378,6 +379,7 @@ var windowsObserver = {
 				altKey:   false,
 				shiftKey: false,
 				metaKey:  false,
+				osKey:    false,
 				char: null,
 				code: null,
 				_key: null,
@@ -403,6 +405,7 @@ var windowsObserver = {
 					case "alt":     k.altKey   = true;       break;
 					case "shift":   k.shiftKey = true;       break;
 					case "meta":    k.metaKey  = true;       break;
+					case "os":      k.osKey    = true;       break;
 					case "accel":   k[this.accelKey] = true;
 				}
 			}, this);
