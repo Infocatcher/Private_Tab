@@ -327,9 +327,10 @@ var windowsObserver = {
 			var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
 			if(newPrivateWin) {
 				var s = document.defaultView.getComputedStyle(newPrivateWin, null);
-				if(s.listStyleImage) {
+				var icon = s.listStyleImage;
+				if(icon && icon != "none") {
 					appMenuItem.className = "menuitem-iconic";
-					appMenuItem.style.listStyleImage = s.listStyleImage;
+					appMenuItem.style.listStyleImage = icon;
 					appMenuItem.style.MozImageRegion = s.MozImageRegion;
 				}
 			}
