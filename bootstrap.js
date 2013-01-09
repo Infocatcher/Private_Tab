@@ -459,10 +459,10 @@ var windowsObserver = {
 			);
 			this._hotkeysHasText = true;
 			_log("=> setHotkeysText()");
-			this.setHotkeysText(document);
 			mp.parentNode.removeChild(mp);
 			keyset.parentNode.removeChild(keyset);
 			window.clearInterval(bak);
+			this.setHotkeysText(document);
 		}).bind(this);
 		mp.setAttribute("onpopupshown", "this._onpopupshown();");
 		var bak = window.setInterval(function() {
