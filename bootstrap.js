@@ -157,8 +157,6 @@ var windowsObserver = {
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
-		if(!tab.linkedBrowser.currentURI.spec) //???
-			return;
 		var window = tab.ownerDocument.defaultView;
 		this.updateWindowTitle(window.gBrowser);
 	},
