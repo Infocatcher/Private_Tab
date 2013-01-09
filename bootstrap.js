@@ -468,7 +468,7 @@ var windowsObserver = {
 		var bak = window.setInterval(function() {
 			_log("initHotkeysText(), next try...");
 			mp.openPopup();
-		}, 500);
+		}, 1000);
 		mp.openPopup();
 	},
 	setHotkeysText: function(document) {
@@ -500,7 +500,10 @@ var windowsObserver = {
 					node.removeAttribute("acceltext");
 				}
 			);
-			hasHotkeys && this.initHotkeysText(document);
+			// May fail without setTimeout(), if other popup not yet hidden
+			hasHotkeys && window.setTimeout(function() {
+				this.initHotkeysText(document);
+			}.bind(this), 0);
 		}
 	},
 
