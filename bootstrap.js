@@ -475,7 +475,7 @@ var windowsObserver = {
 		var keys = this.hotkeys;
 		for(var kId in keys) {
 			var keyText = keys[kId]._keyText;
-			_log("Set " + keyText);
+			_log("Set " + keyText + " for " + kId);
 			Array.forEach(
 				document.getElementsByAttribute(this.cmdAttr, kId),
 				function(node) {
