@@ -341,7 +341,7 @@ var windowsObserver = {
 		_log("destroyControls(), force: " + force);
 		var document = window.document;
 		var mp = document.getElementById("contentAreaContextMenu");
-		mp.removeEventListener("popupshowing", this, false);
+		mp && mp.removeEventListener("popupshowing", this, false);
 
 		Array.slice(document.getElementsByAttribute(this.cmdAttr, "*")).forEach(function(node) {
 			node.removeEventListener("command", this, false);
