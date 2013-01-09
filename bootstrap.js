@@ -288,7 +288,10 @@ var windowsObserver = {
 				return;
 			var insPos;
 			for(var i = 0, l = insertAfter.length; i < l; ++i) {
-				var node = parent.getElementsByAttribute("id", insertAfter[i])[0];
+				var id = insertAfter[i];
+				var node = typeof id == "string"
+					? parent.getElementsByAttribute("id", insertAfter[i])[0]
+					: id;
 				if(node && node.parentNode == parent) {
 					insPos = node;
 					break;
@@ -322,7 +325,16 @@ var windowsObserver = {
 				label:     this.getLocalized("openNewPrivateTab"),
 				"privateTab-command": "openNewPrivateTab"
 			});
-			insertMenuitem(appMenuItem, appMenuItemParent, ["appmenu_newPrivateWindow"]);
+			var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
+			if(newPrivateWin) {
+				var s = document.defaultView.getComputedStyle(newPrivateWin, null);
+				if(s.listStyleImage) {
+					appMenuItem.className = "menuitem-iconic";
+					appMenuItem.style.listStyleImage = s.listStyleImage;
+					appMenuItem.style.MozImageRegion = s.MozImageRegion;
+				}
+			}
+			insertMenuitem(appMenuItem, appMenuItemParent, [newPrivateWin]);
 		}
 	},
 	destroyControls: function(window, force) {
