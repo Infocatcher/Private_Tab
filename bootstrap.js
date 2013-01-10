@@ -262,7 +262,11 @@ var windowsObserver = {
 	},
 	privateChangedHandler: function(e) {
 		var tab = e.originalTarget || e.target;
-		this.setTabState(tab, e.detail == 1);
+		var isPrivate = e.detail == 1;
+		this.setTabState(tab, isPrivate);
+		var gBrowser = tab.ownerDocument.defaultView.gBrowser;
+		if(gBrowser.selectedTab == tab)
+			this.updateWindowTitle(gBrowser, isPrivate);
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
