@@ -195,12 +195,16 @@ var windowsObserver = {
 		}
 		else {
 			var tab = this.getContextTab(window);
-			var check = tab && this.isPrivateTab(tab);
+			var hide = !tab || tab.localName != "tab";
 			var mi = document.getElementById(this.tabContextId);
-			if(check)
-				mi.setAttribute("checked", "true");
-			else
-				mi.removeAttribute("checked");
+			mi.hidden = hide;
+			if(!hide) {
+				var check = this.isPrivateTab(tab);
+				if(check)
+					mi.setAttribute("checked", "true");
+				else
+					mi.removeAttribute("checked");
+			}
 		}
 	},
 	commandHandler: function(e) {
