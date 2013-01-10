@@ -77,6 +77,7 @@ var windowsObserver = {
 		this.loadStyles(window);
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
+		this.ensureTitleModifier(window.document);
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
@@ -111,7 +112,8 @@ var windowsObserver = {
 				if(makeNotPrivate)
 					this.toggleTabPrivate(tab, false);
 			}, this);
-			this.updateWindowTitle(gBrowser);
+			_log("Restore title...");
+			this.updateWindowTitle(gBrowser, false);
 		}
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
@@ -639,16 +641,33 @@ var windowsObserver = {
 				return node;
 		return tab.ownerDocument.defaultView.gBrowser;
 	},
-	updateWindowTitle: function(gBrowser) {
+	ensureTitleModifier: function(document) {
+		var root = document.documentElement;
+		if(
+			root.hasAttribute("titlemodifier_normal")
+			&& root.hasAttribute("titlemodifier_privatebrowsing")
+		)
+			return;
+		var tm = root.getAttribute("titlemodifier");
+		root.setAttribute("privateTab_titlemodifier_normal", tm);
+		root.setAttribute(
+			"privateTab_titlemodifier_privatebrowsing",
+			tm + this.getLocalized("privateBrowsingTitleModifier")
+		);
+	},
+	updateWindowTitle: function(gBrowser, isPrivate) {
 		var document = gBrowser.ownerDocument;
-		var selectedTab = gBrowser.selectedTab;
-		var isPrivate = this.isPrivateTab(selectedTab);
+		if(isPrivate === undefined)
+			isPrivate = this.isPrivateTab(gBrowser.selectedTab);
 		var root = document.documentElement;
 		var tm = isPrivate
 			? root.getAttribute("titlemodifier_privatebrowsing")
-			: root.getAttribute("titlemodifier_normal");
+				|| root.getAttribute("privateTab_titlemodifier_privatebrowsing")
+			: root.getAttribute("titlemodifier_normal")
+				|| root.getAttribute("privateTab_titlemodifier_normal");
 		if(root.getAttribute("titlemodifier") == tm)
 			return;
+		_log("updateWindowTitle() " + tm);
 		root.setAttribute("titlemodifier", tm);
 		root.setAttribute(
 			"title",
