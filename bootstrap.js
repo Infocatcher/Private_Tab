@@ -140,7 +140,7 @@ var windowsObserver = {
 		);
 		if(inheritPrivate)
 			this.toggleTabPrivate(tab, true);
-		this.setTabState(tab, inheritPrivate);
+		this.setTabState(tab, inheritPrivate ? true : undefined);
 		if(!inheritPrivate) {
 			tab.ownerDocument.defaultView.setTimeout(function() {
 				this.setTabState(tab);
@@ -184,11 +184,23 @@ var windowsObserver = {
 			return;
 		var document = popup.ownerDocument;
 		var window = document.defaultView;
-		var hide = !window.gContextMenu || !window.gContextMenu.onSaveableLink;
-		var mi = document.getElementById(this.contextId);
-		mi.hidden = hide;
-		if(!hide)
-			mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
+		if(popup.id == "contentAreaContextMenu") {
+			var hide = !window.gContextMenu || !window.gContextMenu.onSaveableLink;
+			var mi = document.getElementById(this.contextId);
+			mi.hidden = hide;
+			if(!hide)
+				mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
+		}
+		else {
+			var check = window.TabContextMenu
+				&& window.TabContextMenu.contextTab
+				&& this.isPrivateTab(window.TabContextMenu.contextTab);
+			var mi = document.getElementById(this.tabContextId);
+			if(check)
+				mi.setAttribute("checked", "true");
+			else
+				mi.removeAttribute("checked");
+		}
 	},
 	commandHandler: function(e) {
 		_log(e.type + ": " + e.target.nodeName + " " + e.target.id);
@@ -206,6 +218,8 @@ var windowsObserver = {
 			this.openInNewPrivateTab(window, shifted);
 		else if(cmd == "openNewPrivateTab")
 			this.openNewPrivateTab(window);
+		else if(cmd == "togglePrivate")
+			this.toggleContextTabPrivate(window);
 		closeMenus && window.closeMenus(trg);
 	},
 	keypressHandler: function(e) {
@@ -285,9 +299,16 @@ var windowsObserver = {
 
 		return tab;
 	},
+	toggleContextTabPrivate: function(window) {
+		var tab = window.TabContextMenu
+			&& window.TabContextMenu.contextTab;
+		var isPrivate = this.toggleTabPrivate(tab);
+		this.setTabState(tab, isPrivate);
+	},
 
 	cmdAttr: "privateTab-command",
 	contextId: "privateTab-context-openInNewPrivateTab",
+	tabContextId: "privateTab-tabContext-togglePrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
 	initControls: function(document) {
@@ -354,6 +375,16 @@ var windowsObserver = {
 			}
 			insertMenuitem(appMenuItem, appMenuItemParent, [newPrivateWin]);
 		}
+
+		var tabContext = document.getElementById("tabContextMenu");
+		tabContext.addEventListener("popupshowing", this, false);
+		var tabContextItem = createMenuitem(this.tabContextId, {
+			label:     this.getLocalized("privateTab"),
+			accesskey: this.getLocalized("privateTabAccesskey"),
+			type: "checkbox",
+			"privateTab-command": "togglePrivate"
+		});
+		insertMenuitem(tabContextItem, tabContext, ["context_pinTab"]);
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
@@ -545,10 +576,17 @@ var windowsObserver = {
 		}
 		return undefined;
 	},
-	setTabState: function(tab, inherit) {
-		if(inherit || this.isPrivateTab(tab)) {
+	setTabState: function(tab, isPrivate) {
+		if(isPrivate === undefined)
+			isPrivate = this.isPrivateTab(tab);
+		if(!isPrivate ^ tab.hasAttribute(this.privateAttr))
+			return;
+		if(isPrivate) {
 			tab.setAttribute(this.privateAttr, "true");
 			this.persistTabAttributeOnce();
+		}
+		else {
+			tab.removeAttribute(this.privateAttr);
 		}
 	},
 	toggleTabPrivate: function(tab, isPrivate) {
@@ -556,6 +594,7 @@ var windowsObserver = {
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
+		return isPrivate;
 	},
 	getTabBrowser: function(tab) {
 		var browser = tab.linkedBrowser;
