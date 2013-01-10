@@ -143,8 +143,7 @@ var windowsObserver = {
 		);
 		if(inheritPrivate)
 			this.toggleTabPrivate(tab, true);
-		this.setTabState(tab, inheritPrivate ? true : undefined);
-		if(!inheritPrivate) {
+		else {
 			tab.ownerDocument.defaultView.setTimeout(function() {
 				this.setTabState(tab);
 			}.bind(this), 0);
@@ -309,8 +308,7 @@ var windowsObserver = {
 	toggleContextTabPrivate: function(window) {
 		var tab = window.TabContextMenu
 			&& window.TabContextMenu.contextTab;
-		var isPrivate = this.toggleTabPrivate(tab);
-		this.setTabState(tab, isPrivate);
+		this.toggleTabPrivate(tab);
 	},
 
 	cmdAttr: "privateTab-command",
