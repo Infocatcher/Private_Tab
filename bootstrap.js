@@ -46,8 +46,14 @@ var windowsObserver = {
 	},
 
 	observe: function(subject, topic, data) {
-		if(topic == "domwindowopened")
+		if(topic == "domwindowopened") {
+			if(!subject.opener) {
+				var aw = Services.ww.activeWindow;
+				if(aw && this.isTargetWindow(aw))
+					subject.__privateTabOpener = aw;
+			}
 			subject.addEventListener("DOMContentLoaded", this, false);
+		}
 		else if(topic == "domwindowclosed")
 			this.destroyWindow(subject, WINDOW_CLOSED);
 	},
@@ -74,10 +80,25 @@ var windowsObserver = {
 	initWindow: function(window, reason) {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window))
 			return;
+
 		this.loadStyles(window);
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		this.ensureTitleModifier(window.document);
+
+		if(reason == WINDOW_LOADED) {
+			var opener = window.opener || window.__privateTabOpener || null;
+			delete window.__privateTabOpener;
+			if(opener && opener.gBrowser && this.isPrivateTab(opener.gBrowser.selectedTab)) {
+				_log("Inherit private state from current tab of the opener window");
+				//~ todo: add pref for this?
+				//this.getPrivacyContext(window).usePrivateBrowsing = true;
+				Array.forEach(gBrowser.tabs, function(tab) {
+					this.toggleTabPrivate(tab, true);
+				}, this);
+			}
+		}
+
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
