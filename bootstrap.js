@@ -410,8 +410,8 @@ var windowsObserver = {
 
 		this.destroyNodes(document, force);
 		var tabContext = this.getTabContextMenu(document);
-		tabContext.removeEventListener("popupshowing", this, false);
-		if(!tabContext.id)
+		tabContext && tabContext.removeEventListener("popupshowing", this, false);
+		if(tabContext && !tabContext.id)
 			this.destroyNodes(tabContext, force);
 	},
 	destroyNodes: function(parent, force) {
