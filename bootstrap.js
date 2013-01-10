@@ -54,14 +54,15 @@ var windowsObserver = {
 
 	handleEvent: function(e) {
 		switch(e.type) {
-			case "DOMContentLoaded": this.loadHandler(e);         break;
-			case "TabOpen":          this.tabOpenHandler(e);      break;
-			case "SSTabRestoring":   this.tabRestoringHandler(e); break;
-			case "TabSelect":        this.tabSelectHandler(e);    break;
-			case "popupshowing":     this.popupShowingHandler(e); break;
-			case "command":          this.commandHandler(e);      break;
-			case "click":            this.clickHandler(e);        break;
-			case "keypress":         this.keypressHandler(e);     break;
+			case "DOMContentLoaded":          this.loadHandler(e);           break;
+			case "TabOpen":                   this.tabOpenHandler(e);        break;
+			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
+			case "TabSelect":                 this.tabSelectHandler(e);      break;
+			case "popupshowing":              this.popupShowingHandler(e);   break;
+			case "command":                   this.commandHandler(e);        break;
+			case "click":                     this.clickHandler(e);          break;
+			case "keypress":                  this.keypressHandler(e);       break;
+			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -85,6 +86,7 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
+		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		if(this.hotkeys)
 			window.addEventListener("keypress", this, true);
 		if(!this.isPrivateWindow(window)) {
@@ -115,6 +117,7 @@ var windowsObserver = {
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
 		window.removeEventListener("keypress", this, true);
+		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		this.destroyControls(window, force);
 	},
 	isTargetWindow: function(window) {
@@ -246,6 +249,10 @@ var windowsObserver = {
 	},
 	doCommand: function(document, cmd) {
 		document.getElementsByAttribute(this.cmdAttr, cmd)[0].click();
+	},
+	privateChangedHandler: function(e) {
+		var tab = e.originalTarget || e.target;
+		this.setTabState(tab, e.detail == 1);
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
@@ -594,6 +601,13 @@ var windowsObserver = {
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
+
+		var document = tab.ownerDocument;
+		var window = document.defaultView;
+		var evt = document.createEvent("UIEvent");
+		evt.initUIEvent("PrivateTab:PrivateChanged", true, false, window, isPrivate ? 1 : 0);
+		tab.dispatchEvent(evt);
+
 		return isPrivate;
 	},
 	getTabBrowser: function(tab) {
