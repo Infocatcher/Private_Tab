@@ -64,6 +64,7 @@ var windowsObserver = {
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
+			case "drop":                      this.dropHandler(e);           break;
 			case "popupshowing":              this.popupShowingHandler(e);   break;
 			case "command":                   this.commandHandler(e);        break;
 			case "click":                     this.clickHandler(e);          break;
@@ -108,6 +109,7 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
+		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		if(this.hotkeys)
 			window.addEventListener("keypress", this, true);
@@ -139,6 +141,7 @@ var windowsObserver = {
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
+		window.removeEventListener("drop", this, true);
 		window.removeEventListener("keypress", this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		this.destroyControls(window, force);
@@ -202,6 +205,45 @@ var windowsObserver = {
 		else {
 			this.updateWindowTitle(window.gBrowser);
 		}
+	},
+	dropHandler: function(e) {
+		var window = e.currentTarget;
+		var dt = e.dataTransfer;
+
+		const TAB_DROP_TYPE = window.TAB_DROP_TYPE || "application/x-moz-tabbrowser-tab";
+		if(!dt.types.contains(TAB_DROP_TYPE))
+			return;
+
+		var sourceNode = dt.mozSourceNode || dt.sourceNode;
+		if(!sourceNode || sourceNode.ownerDocument.defaultView == window)
+			return;
+		var sourceTab;
+		for(; sourceNode; sourceNode = sourceNode.parentNode) {
+			if(
+				sourceNode.localName == "tab"
+				&& sourceNode.classList.contains("tabbrowser-tab")
+			) {
+				sourceTab = sourceNode;
+				break;
+			}
+		}
+		if(!sourceTab || !this.isPrivateTab(sourceTab))
+			return;
+
+		_log(e.type + ": source tab are private");
+		var tabOpen = function(e) {
+			window.removeEventListener("TabOpen", tabOpen, true);
+			window.clearTimeout(timer);
+			var tab = e.originalTarget || e.target;
+			_log("Inherit private state from original tab");
+			window.setTimeout(function() {
+				this.toggleTabPrivate(tab, true);
+			}.bind(this), 0);
+		}.bind(this);
+		window.addEventListener("TabOpen", tabOpen, true);
+		var timer = window.setTimeout(function() {
+			window.removeEventListener("TabOpen", tabOpen, true);
+		}, 0);
 	},
 	popupShowingHandler: function(e) {
 		var popup = e.target;
