@@ -206,6 +206,9 @@ var windowsObserver = {
 					mi.setAttribute("checked", "true");
 				else
 					mi.removeAttribute("checked");
+				var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
+				if(accel)
+					accel.hidden = tab != window.gBrowser.selectedTab;
 			}
 		}
 	},
@@ -225,7 +228,7 @@ var windowsObserver = {
 			this.openInNewPrivateTab(window, shifted);
 		else if(cmd == "openNewPrivateTab")
 			this.openNewPrivateTab(window);
-		else if(cmd == "togglePrivate")
+		else if(cmd == "toggleTabPrivate")
 			this.toggleContextTabPrivate(window);
 		closeMenus && window.closeMenus(trg);
 	},
@@ -252,7 +255,10 @@ var windowsObserver = {
 		}
 	},
 	doCommand: function(document, cmd) {
-		document.getElementsByAttribute(this.cmdAttr, cmd)[0].click();
+		var node = document.getElementsByAttribute(this.cmdAttr, cmd)[0]
+			|| this.getTabContextMenu(document)
+				.getElementsByAttribute(this.cmdAttr, cmd)[0];
+		node.click();
 	},
 	privateChangedHandler: function(e) {
 		var tab = e.originalTarget || e.target;
@@ -311,17 +317,20 @@ var windowsObserver = {
 		return tab;
 	},
 	getContextTab: function(window) {
-		return window.TabContextMenu && window.TabContextMenu.contextTab
-			|| window.gBrowser.mContextTab;
+		if("TabContextMenu" in window)
+			return window.TabContextMenu.contextTab;
+		var cm = this.getTabContextMenu(window.document);
+		return cm.triggerNode && window.gBrowser.mContextTab;
 	},
 	toggleContextTabPrivate: function(window) {
-		var tab = this.getContextTab(window);
+		var tab = this.getContextTab(window)
+			|| window.gBrowser.selectedTab; // For hotkey
 		this.toggleTabPrivate(tab);
 	},
 
 	cmdAttr: "privateTab-command",
 	contextId: "privateTab-context-openInNewPrivateTab",
-	tabContextId: "privateTab-tabContext-togglePrivate",
+	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
 	getTabContextMenu: function(document) {
@@ -404,7 +413,7 @@ var windowsObserver = {
 			label:     this.getLocalized("privateTab"),
 			accesskey: this.getLocalized("privateTabAccesskey"),
 			type: "checkbox",
-			"privateTab-command": "togglePrivate"
+			"privateTab-command": "toggleTabPrivate"
 		});
 		insertMenuitem(tabContextItem, tabContext, ["#context_pinTab", '[tbattr="tabbrowser-undoclosetab"]']);
 	},
@@ -551,17 +560,21 @@ var windowsObserver = {
 		}, 1000);
 		mp.openPopup();
 	},
+	getHotkeysNodes: function(document, attr) {
+		var nodes = Array.slice(document.getElementsByAttribute(this.cmdAttr, attr));
+		var tabContext = this.getTabContextMenu(document);
+		if(tabContext && !tabContext.id)
+			nodes.push.apply(nodes, Array.slice(tabContext.getElementsByAttribute(this.cmdAttr, attr)));
+		return nodes;
+	},
 	setHotkeysText: function(document) {
 		var keys = this.hotkeys;
 		for(var kId in keys) {
 			var keyText = keys[kId]._keyText;
 			_log("Set " + keyText + " for " + kId);
-			Array.forEach(
-				document.getElementsByAttribute(this.cmdAttr, kId),
-				function(node) {
-					node.setAttribute("acceltext", keyText);
-				}
-			);
+			this.getHotkeysNodes(document, kId).forEach(function(node) {
+				node.setAttribute("acceltext", keyText);
+			});
 		}
 	},
 	updateHotkeys: function() {
@@ -574,12 +587,9 @@ var windowsObserver = {
 			window.removeEventListener("keypress", this, true);
 			hasHotkeys && window.addEventListener("keypress", this, true);
 			var document = window.document;
-			Array.forEach(
-				document.getElementsByAttribute(this.cmdAttr, "*"),
-				function(node) {
-					node.removeAttribute("acceltext");
-				}
-			);
+			this.getHotkeysNodes(document, "*").forEach(function(node) {
+				node.removeAttribute("acceltext");
+			});
 			// May fail without setTimeout(), if other popup not yet hidden
 			hasHotkeys && window.setTimeout(function() {
 				this.initHotkeysText(document);
