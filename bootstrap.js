@@ -194,9 +194,8 @@ var windowsObserver = {
 				mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
 		}
 		else {
-			var check = window.TabContextMenu
-				&& window.TabContextMenu.contextTab
-				&& this.isPrivateTab(window.TabContextMenu.contextTab);
+			var tab = this.getContextTab(window);
+			var check = tab && this.isPrivateTab(tab);
 			var mi = document.getElementById(this.tabContextId);
 			if(check)
 				mi.setAttribute("checked", "true");
@@ -305,9 +304,12 @@ var windowsObserver = {
 
 		return tab;
 	},
+	getContextTab: function(window) {
+		return window.TabContextMenu && window.TabContextMenu.contextTab
+			|| window.gBrowser.mContextTab;
+	},
 	toggleContextTabPrivate: function(window) {
-		var tab = window.TabContextMenu
-			&& window.TabContextMenu.contextTab;
+		var tab = this.getContextTab(window);
 		this.toggleTabPrivate(tab);
 	},
 
@@ -316,6 +318,14 @@ var windowsObserver = {
 	tabContextId: "privateTab-tabContext-togglePrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
+	getTabContextMenu: function(document) {
+		return document.getElementById("tabContextMenu")
+			|| document.getAnonymousElementByAttribute(
+				document.defaultView.gBrowser,
+				"anonid",
+				"tabContextMenu"
+			);
+	},
 	initControls: function(document) {
 		var createMenuitem = (function(id, attrs) {
 			var mi = document.createElement("menuitem");
@@ -333,7 +343,7 @@ var windowsObserver = {
 			for(var i = 0, l = insertAfter.length; i < l; ++i) {
 				var id = insertAfter[i];
 				var node = typeof id == "string"
-					? parent.getElementsByAttribute("id", insertAfter[i])[0]
+					? parent.querySelector(insertAfter[i])
 					: id;
 				if(node && node.parentNode == parent) {
 					insPos = node;
@@ -351,7 +361,7 @@ var windowsObserver = {
 			accesskey: this.getLocalized("openInNewPrivateTabAccesskey"),
 			"privateTab-command": "openInNewPrivateTab"
 		});
-		insertMenuitem(contextItem, mp, ["context-openlinkintab"]);
+		insertMenuitem(contextItem, mp, ["#context-openlinkintab"]);
 
 		var menuItemParent = document.getElementById("menu_NewPopup") // SeaMonkey
 			|| document.getElementById("menu_FilePopup");
@@ -360,7 +370,7 @@ var windowsObserver = {
 			accesskey: this.getLocalized("openNewPrivateTabAccesskey"),
 			"privateTab-command": "openNewPrivateTab"
 		});
-		insertMenuitem(menuItem, menuItemParent, ["menu_newNavigatorTab"]);
+		insertMenuitem(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
 
 		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
 		if(appMenuItemParent) {
@@ -381,7 +391,8 @@ var windowsObserver = {
 			insertMenuitem(appMenuItem, appMenuItemParent, [newPrivateWin]);
 		}
 
-		var tabContext = document.getElementById("tabContextMenu");
+		var tabContext = this.getTabContextMenu(document);
+		_log("tabContext: " + tabContext);
 		tabContext.addEventListener("popupshowing", this, false);
 		var tabContextItem = createMenuitem(this.tabContextId, {
 			label:     this.getLocalized("privateTab"),
@@ -389,7 +400,7 @@ var windowsObserver = {
 			type: "checkbox",
 			"privateTab-command": "togglePrivate"
 		});
-		insertMenuitem(tabContextItem, tabContext, ["context_pinTab"]);
+		insertMenuitem(tabContextItem, tabContext, ["#context_pinTab", '[tbattr="tabbrowser-undoclosetab"]']);
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
@@ -397,11 +408,20 @@ var windowsObserver = {
 		var mp = document.getElementById("contentAreaContextMenu");
 		mp && mp.removeEventListener("popupshowing", this, false);
 
-		Array.slice(document.getElementsByAttribute(this.cmdAttr, "*")).forEach(function(node) {
+		this.destroyNodes(document, force);
+		var tabContext = this.getTabContextMenu(document);
+		tabContext.removeEventListener("popupshowing", this, false);
+		if(!tabContext.id)
+			this.destroyNodes(tabContext, force);
+	},
+	destroyNodes: function(parent, force) {
+		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
+		for(var i = nodes.length - 1; i >= 0; --i) {
+			var node = nodes[i];
 			node.removeEventListener("command", this, false);
 			node.removeEventListener("click", this, false);
 			force && node.parentNode.removeChild(node);
-		});
+		}
 	},
 
 	hotkeys: null,
