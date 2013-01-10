@@ -154,12 +154,29 @@ var windowsObserver = {
 			_log("Restored tab has " + this.privateAttr + " attribute");
 			this.persistTabAttributeOnce();
 			this.toggleTabPrivate(tab, true);
+			if(tab.hasAttribute("selected")) {
+				_log("Restored selected tab => update window title");
+				this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser);
+			}
 		}
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
 		var window = tab.ownerDocument.defaultView;
-		this.updateWindowTitle(window.gBrowser);
+		var browser = tab.linkedBrowser;
+		if(
+			!browser
+			|| !browser.webProgress
+			|| browser.webProgress.isLoadingDocument
+		) {
+			_log("Selected tab not yet loaded, wait");
+			window.setTimeout(function() {
+				this.updateWindowTitle(window.gBrowser);
+			}.bind(this), 0);
+		}
+		else {
+			this.updateWindowTitle(window.gBrowser);
+		}
 	},
 	popupShowingHandler: function(e) {
 		var popup = e.target;
