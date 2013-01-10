@@ -157,6 +157,10 @@ var windowsObserver = {
 
 	tabOpenHandler: function(e) {
 		var tab = e.originalTarget || e.target;
+		if("_privateTabIsPrivate" in tab) {
+			delete tab._privateTabIsPrivate;
+			return;
+		}
 		var gBrowser = this.getTabBrowser(tab);
 		//~ todo: try get real tab owner!
 		var inheritPrivate = !this.isEmptyTab(tab, gBrowser)
@@ -235,6 +239,7 @@ var windowsObserver = {
 			window.removeEventListener("TabOpen", tabOpen, true);
 			window.clearTimeout(timer);
 			var tab = e.originalTarget || e.target;
+			tab._privateTabIsPrivate = true;
 			_log("Inherit private state from original tab");
 			window.setTimeout(function() {
 				this.toggleTabPrivate(tab, true);
@@ -702,9 +707,35 @@ var windowsObserver = {
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
+		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255));
 
 		var document = tab.ownerDocument;
 		var window = document.defaultView;
+
+		if(isPrivate) {
+			// D'oh, tab.linkedBrowser.webNavigation may changed...
+			var browser = tab.linkedBrowser;
+			var setAgain = function() {
+				this.getTabPrivacyContext(tab).usePrivateBrowsing = isPrivate;
+				_log("Set usePrivateBrowsing, again");
+				window.setTimeout(function() {
+					this.getTabPrivacyContext(tab).usePrivateBrowsing = isPrivate;
+					_log("Set usePrivateBrowsing, and again");
+					window.setTimeout(function() {
+						this.setTabState(tab);
+					}.bind(this), 0);
+				}.bind(this), 100);
+			}.bind(this);
+			if(!browser.webProgress.isLoadingDocument)
+				window.setTimeout(setAgain, 10);
+			else {
+				browser.addEventListener("load", function loader() {
+					browser.removeEventListener("load", loader, true);
+					setAgain();
+				}, true);
+			}
+		}
+
 		var evt = document.createEvent("UIEvent");
 		evt.initUIEvent("PrivateTab:PrivateChanged", true, false, window, isPrivate ? 1 : 0);
 		tab.dispatchEvent(evt);
