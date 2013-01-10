@@ -353,15 +353,15 @@ var windowsObserver = {
 			parent.insertBefore(mi, insPos && insPos.nextSibling);
 		}).bind(this);
 
-		var mp = document.getElementById("contentAreaContextMenu");
-		mp.addEventListener("popupshowing", this, false);
+		var contentContext = document.getElementById("contentAreaContextMenu");
+		contentContext.addEventListener("popupshowing", this, false);
 
 		var contextItem = createMenuitem(this.contextId, {
 			label:     this.getLocalized("openInNewPrivateTab"),
 			accesskey: this.getLocalized("openInNewPrivateTabAccesskey"),
 			"privateTab-command": "openInNewPrivateTab"
 		});
-		insertMenuitem(contextItem, mp, ["#context-openlinkintab"]);
+		insertMenuitem(contextItem, contentContext, ["#context-openlinkintab"]);
 
 		var menuItemParent = document.getElementById("menu_NewPopup") // SeaMonkey
 			|| document.getElementById("menu_FilePopup");
@@ -405,8 +405,8 @@ var windowsObserver = {
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
 		var document = window.document;
-		var mp = document.getElementById("contentAreaContextMenu");
-		mp && mp.removeEventListener("popupshowing", this, false);
+		var contentContext = document.getElementById("contentAreaContextMenu");
+		contentContext && contentContext.removeEventListener("popupshowing", this, false);
 
 		this.destroyNodes(document, force);
 		var tabContext = this.getTabContextMenu(document);
