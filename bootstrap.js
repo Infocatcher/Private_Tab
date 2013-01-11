@@ -248,6 +248,10 @@ var windowsObserver = {
 	},
 	tabRestoringHandler: function(e) {
 		var tab = e.originalTarget || e.target;
+		if("_privateTabIgnore" in tab) {
+			delete tab._privateTabIgnore;
+			return;
+		}
 		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
 		if(tab.hasAttribute(this.privateAttr)) {
 			_log("Restored tab has " + this.privateAttr + " attribute");
@@ -340,6 +344,7 @@ var windowsObserver = {
 				var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
 				if(accel)
 					accel.hidden = tab != window.gBrowser.selectedTab;
+				//mi.disabled = this.isPendingTab(tab);
 			}
 		}
 	},
@@ -456,7 +461,25 @@ var windowsObserver = {
 	toggleContextTabPrivate: function(window) {
 		var tab = this.getContextTab(window)
 			|| window.gBrowser.selectedTab; // For hotkey
-		this.toggleTabPrivate(tab);
+		var isPrivate = this.toggleTabPrivate(tab);
+
+		if(!this.isPendingTab(tab) || !prefs.get("workaroundForPendingTabs"))
+			return;
+		_log("Workaround: manually update session state of pending tab");
+		var ssData = JSON.parse(this.ss.getTabState(tab));
+		//_log("Before:\n" + JSON.stringify(ssData, null, "\t"));
+		var hasAttrs = "attributes" in ssData;
+		if(isPrivate) {
+			if(!hasAttrs)
+				ssData.attributes = {};
+			ssData.attributes[this.privateAttr] = "true";
+		}
+		else if(hasAttrs) {
+			delete ssData.attributes[this.privateAttr];
+		}
+		//_log("After:\n" + JSON.stringify(ssData, null, "\t"));
+		tab._privateTabIgnore = true;
+		this.ss.setTabState(tab, JSON.stringify(ssData));
 	},
 
 	cmdAttr: "privateTab-command",
@@ -858,6 +881,10 @@ var windowsObserver = {
 	},
 	isPrivateTab: function(tab) {
 		return tab && this.getTabPrivacyContext(tab).usePrivateBrowsing;
+	},
+	isPendingTab: function(tab) {
+		return tab.hasAttribute("pending")
+			|| tab.linkedBrowser.contentDocument.readyState == "uninitialized";
 	},
 
 	privateAttr: "privateTab-isPrivate",
