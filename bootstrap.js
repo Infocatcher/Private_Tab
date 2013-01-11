@@ -956,6 +956,7 @@ var windowsObserver = {
 			return this.bundle.GetStringFromName(sid);
 		}
 		catch(e) {
+			Components.utils.reportError(LOG_PREFIX + "Can't get localized string for \"" + sid + "\"");
 			Components.utils.reportError(e);
 		}
 		return sid;
