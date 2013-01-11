@@ -103,9 +103,9 @@ var windowsObserver = {
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
-		window.setTimeout(function() {
-			this.updateWindowTitle(gBrowser);
-		}.bind(this), 0);
+		var updTitle = this.updateWindowTitle.bind(this, gBrowser, undefined);
+		window.setTimeout(updTitle, 0);
+		window.setTimeout(updTitle, 500);
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
