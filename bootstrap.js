@@ -86,8 +86,13 @@ var windowsObserver = {
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		this.ensureTitleModifier(window.document);
+		this.patchBrowser(gBrowser, true);
 
 		if(reason == WINDOW_LOADED) {
+			_log(
+				"window.opener: " + window.opener
+				+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
+			);
 			var opener = window.opener || window.__privateTabOpener || null;
 			delete window.__privateTabOpener;
 			if(opener && opener.gBrowser && this.isPrivateTab(opener.gBrowser.selectedTab)) {
@@ -105,11 +110,12 @@ var windowsObserver = {
 		}, this);
 		var updTitle = this.updateWindowTitle.bind(this, gBrowser, undefined);
 		window.setTimeout(updTitle, 0);
-		window.setTimeout(updTitle, 500);
+		//window.setTimeout(updTitle, 500);
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
-		window.addEventListener("drop", this, true);
+		if(Services.appinfo.name == "SeaMonkey")
+			window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		if(this.hotkeys)
 			window.addEventListener("keypress", this, true);
@@ -137,11 +143,13 @@ var windowsObserver = {
 			}, this);
 			_log("Restore title...");
 			this.updateWindowTitle(gBrowser, false);
+			this.patchBrowser(gBrowser, false);
 		}
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
-		window.removeEventListener("drop", this, true);
+		if(Services.appinfo.name == "SeaMonkey")
+			window.removeEventListener("drop", this, true);
 		window.removeEventListener("keypress", this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		this.destroyControls(window, force);
@@ -155,10 +163,70 @@ var windowsObserver = {
 			this.updateHotkeys();
 	},
 
+	patchBrowser: function(gBrowser, applyPatch) {
+		var browser = gBrowser.browsers && gBrowser.browsers[0];
+		if(!browser) {
+			Components.utils.reportError(LOG_PREFIX + "!!! Can't patch browser.swapDocShells() !!!");
+			return;
+		}
+		var proto = Object.getPrototypeOf(browser);
+		if(!proto || !("swapDocShells")) {
+			_log("Can't patch browser: no swapDocShells() method");
+			return;
+		}
+		if(!applyPatch ^ "__privateTab_swapDocShells" in proto)
+			return;
+		if(applyPatch) {
+			_log("Patch browser.__proto__.swapDocShells() method");
+			proto.__privateTab_swapDocShells = proto.swapDocShells;
+			proto.__privateTab_swapDocShellsDesc = Object.getOwnPropertyDescriptor(proto, "swapDocShells");
+			var _this = this;
+			proto.swapDocShells = function(otherBrowser) {
+				try {
+					var isPrivate = otherBrowser.webNavigation
+						.QueryInterface(Components.interfaces.nsILoadContext)
+						.usePrivateBrowsing;
+					_log("swapDocShells(): usePrivateBrowsing: " + isPrivate);
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+				}
+				try {
+					var ret = this.__privateTab_swapDocShells.apply(this, arguments);
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+				}
+				if(isPrivate !== undefined) try {
+					this.webNavigation
+						.QueryInterface(Components.interfaces.nsILoadContext)
+						.usePrivateBrowsing = isPrivate;
+					_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
+					var tab = _this.getTabForBrowser(this);
+					tab && _this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+				}
+				return ret;
+			};
+		}
+		else {
+			_log("Restore browser.__proto__.swapDocShells method");
+			var desc = proto.__privateTab_swapDocShellsDesc;
+			if(desc)
+				Object.defineProperty(proto, "swapDocShells", desc);
+			else
+				delete proto.swapDocShells;
+			delete proto.__privateTab_swapDocShells;
+			delete proto.__privateTab_swapDocShellsDesc;
+		}
+	},
+
 	tabOpenHandler: function(e) {
 		var tab = e.originalTarget || e.target;
-		if("_privateTabIsPrivate" in tab) {
-			delete tab._privateTabIsPrivate;
+		if("_privateTabIgnore" in tab) {
+			delete tab._privateTabIgnore;
 			return;
 		}
 		var gBrowser = this.getTabBrowser(tab);
@@ -214,50 +282,36 @@ var windowsObserver = {
 		var window = e.currentTarget;
 		var dt = e.dataTransfer;
 
-		const TAB_DROP_TYPE = window.TAB_DROP_TYPE || "application/x-moz-tabbrowser-tab";
-		if(!dt.types.contains(TAB_DROP_TYPE))
+		var sourceNode = dt.mozSourceNode || dt.sourceNode;
+		_log(e.type + ": " + (sourceNode && sourceNode.nodeName));
+		if(
+			!sourceNode
+			|| !(sourceNode instanceof window.XULElement)
+			|| sourceNode.ownerDocument.defaultView == window
+		)
 			return;
-		var tabs = [];
-		for(var i = 0, l = dt.mozItemCount; i < l; ++i) {
-			var tab = dt.mozGetDataAt(TAB_DROP_TYPE, i);
-			if(
-				tab
-				&& tab.ownerDocument.defaultView != window
-				&& this.isPrivateTab(tab)
-			) {
-				tab.__privateTab_docShell = tab.linkedBrowser.docShell;
-				tabs.push(tab);
-				_log(
-					e.type + ": source tab are private: "
-					+ (tab.getAttribute("label") || "").substr(0, 255)
-				);
+		var draggedTab;
+		for(; sourceNode; sourceNode = sourceNode.parentNode) {
+			if(sourceNode.classList.contains("tabbrowser-tab")) {
+				draggedTab = sourceNode;
+				break;
 			}
 		}
-		if(!tabs.length)
+		if(!draggedTab)
 			return;
+		var isPrivate = this.isPrivateTab(draggedTab);
+		_log(e.type + ": Tab: " + (draggedTab.getAttribute("label") || "").substr(0, 255));
 
 		var tabOpen = function(e) {
+			window.removeEventListener("TabOpen", tabOpen, true);
+			window.clearTimeout(timer);
 			var tab = e.originalTarget || e.target;
-			tab._privateTabIsPrivate = true;
-			window.setTimeout(function() {
-				var ds = tab.linkedBrowser.docShell;
-				tabs.some(function(sourceTab, i) {
-					if(sourceTab.__privateTab_docShell === ds) {
-						this.toggleTabPrivate(tab, true);
-						_log(
-							"Inherit private state from original tab: "
-							+ (tab.getAttribute("label") || "").substr(0, 255)
-						);
-						delete sourceTab.__privateTab_docShell;
-						delete tabs[i];
-						return true;
-					}
-					return false;
-				}, this);
-			}.bind(this), 0);
+			tab._privateTabIgnore = true;
+			_log("Make dragged tab " + (isPrivate ? "private" : "not private"));
+			this.toggleTabPrivate(tab, isPrivate);
 		}.bind(this);
 		window.addEventListener("TabOpen", tabOpen, true);
-		window.setTimeout(function() {
+		var timer = window.setTimeout(function() {
 			window.removeEventListener("TabOpen", tabOpen, true);
 		}, 0);
 	},
@@ -344,8 +398,10 @@ var windowsObserver = {
 		var isPrivate = e.detail == 1;
 		this.setTabState(tab, isPrivate);
 		var gBrowser = tab.ownerDocument.defaultView.gBrowser;
-		if(gBrowser.selectedTab == tab)
+		if(gBrowser.selectedTab == tab) {
+			_log(e.type + " + gBrowser.selectedTab == tab => updateWindowTitle()");
 			this.updateWindowTitle(gBrowser, isPrivate);
+		}
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
@@ -382,10 +438,7 @@ var windowsObserver = {
 		if("tabkit" in window)
 			window.tabkit.addingTabOver();
 
-		var evt = tab.ownerDocument.createEvent("Events");
-		evt.initEvent("PrivateTab:OpenInNewTab", true, false);
-		tab.dispatchEvent(evt);
-
+		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab");
 		return tab;
 	},
 	openNewPrivateTab: function(window) {
@@ -393,10 +446,7 @@ var windowsObserver = {
 		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
 		this.toggleTabPrivate(tab, true);
 
-		var evt = tab.ownerDocument.createEvent("Events");
-		evt.initEvent("PrivateTab:OpenNewTab", true, false);
-		tab.dispatchEvent(evt);
-
+		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 		return tab;
 	},
 	getContextTab: function(window) {
@@ -713,6 +763,18 @@ var windowsObserver = {
 			tab.removeAttribute(this.privateAttr);
 		}
 	},
+	dispatchAPIEvent: function(target, eventType, eventDetail) {
+		var document = target.ownerDocument || target;
+		if(eventDetail === undefined) {
+			var evt = document.createEvent("Events");
+			evt.initEvent(eventType, true, false);
+		}
+		else {
+			var evt = document.createEvent("UIEvent");
+			evt.initUIEvent(eventType, true, false, document.defaultView, +eventDetail);
+		}
+		target.dispatchEvent(evt);
+	},
 	toggleTabPrivate: function(tab, isPrivate) {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
@@ -723,42 +785,25 @@ var windowsObserver = {
 		var document = tab.ownerDocument;
 		var window = document.defaultView;
 
-		if(isPrivate) {
-			// D'oh, tab.linkedBrowser.webNavigation may changed...
-			var browser = tab.linkedBrowser;
-			var setAgain = function() {
-				this.getTabPrivacyContext(tab).usePrivateBrowsing = isPrivate;
-				_log("Set usePrivateBrowsing, again");
-				window.setTimeout(function() {
-					this.getTabPrivacyContext(tab).usePrivateBrowsing = isPrivate;
-					_log("Set usePrivateBrowsing, and again");
-					window.setTimeout(function() {
-						this.setTabState(tab);
-					}.bind(this), 0);
-				}.bind(this), 100);
-			}.bind(this);
-			if(!browser.webProgress.isLoadingDocument)
-				window.setTimeout(setAgain, 10);
-			else {
-				browser.addEventListener("load", function loader() {
-					browser.removeEventListener("load", loader, true);
-					setAgain();
-				}, true);
-			}
-		}
-
-		var evt = document.createEvent("UIEvent");
-		evt.initUIEvent("PrivateTab:PrivateChanged", true, false, window, isPrivate ? 1 : 0);
-		tab.dispatchEvent(evt);
-
+		this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
 	},
 	getTabBrowser: function(tab) {
-		var browser = tab.linkedBrowser;
-		for(var node = browser.parentNode; node; node = node.parentNode)
-			if(node.localName == "tabbrowser")
-				return node;
-		return tab.ownerDocument.defaultView.gBrowser;
+		return this.getTabBrowserFromChild(tab.linkedBrowser);
+	},
+	getTabForBrowser: function(browser) {
+		var gBrowser = this.getTabBrowserFromChild(browser);
+		var browsers = gBrowser.browsers;
+		for(var i = 0, l = browsers.length; i < l; ++i)
+			if(browsers[i] == browser)
+				return gBrowser.tabs[i];
+		return null;
+	},
+	getTabBrowserFromChild: function(node) {
+		for(var tbr = node; tbr; tbr = tbr.parentNode)
+			if(tbr.localName == "tabbrowser")
+				return tbr;
+		return node.ownerDocument.defaultView.gBrowser;
 	},
 	ensureTitleModifier: function(document) {
 		var root = document.documentElement;
