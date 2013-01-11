@@ -217,36 +217,47 @@ var windowsObserver = {
 		const TAB_DROP_TYPE = window.TAB_DROP_TYPE || "application/x-moz-tabbrowser-tab";
 		if(!dt.types.contains(TAB_DROP_TYPE))
 			return;
-
-		var sourceNode = dt.mozSourceNode || dt.sourceNode;
-		if(!sourceNode || sourceNode.ownerDocument.defaultView == window)
-			return;
-		var sourceTab;
-		for(; sourceNode; sourceNode = sourceNode.parentNode) {
+		var tabs = [];
+		for(var i = 0, l = dt.mozItemCount; i < l; ++i) {
+			var tab = dt.mozGetDataAt(TAB_DROP_TYPE, i);
 			if(
-				sourceNode.localName == "tab"
-				&& sourceNode.classList.contains("tabbrowser-tab")
+				tab
+				&& tab.ownerDocument.defaultView != window
+				&& this.isPrivateTab(tab)
 			) {
-				sourceTab = sourceNode;
-				break;
+				tab.__privateTab_docShell = tab.linkedBrowser.docShell;
+				tabs.push(tab);
+				_log(
+					e.type + ": source tab are private: "
+					+ (tab.getAttribute("label") || "").substr(0, 255)
+				);
 			}
 		}
-		if(!sourceTab || !this.isPrivateTab(sourceTab))
+		if(!tabs.length)
 			return;
 
-		_log(e.type + ": source tab are private");
 		var tabOpen = function(e) {
-			window.removeEventListener("TabOpen", tabOpen, true);
-			window.clearTimeout(timer);
 			var tab = e.originalTarget || e.target;
 			tab._privateTabIsPrivate = true;
-			_log("Inherit private state from original tab");
 			window.setTimeout(function() {
-				this.toggleTabPrivate(tab, true);
+				var ds = tab.linkedBrowser.docShell;
+				tabs.some(function(sourceTab, i) {
+					if(sourceTab.__privateTab_docShell === ds) {
+						this.toggleTabPrivate(tab, true);
+						_log(
+							"Inherit private state from original tab: "
+							+ (tab.getAttribute("label") || "").substr(0, 255)
+						);
+						delete sourceTab.__privateTab_docShell;
+						delete tabs[i];
+						return true;
+					}
+					return false;
+				}, this);
 			}.bind(this), 0);
 		}.bind(this);
 		window.addEventListener("TabOpen", tabOpen, true);
-		var timer = window.setTimeout(function() {
+		window.setTimeout(function() {
 			window.removeEventListener("TabOpen", tabOpen, true);
 		}, 0);
 	},
