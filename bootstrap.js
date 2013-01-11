@@ -52,7 +52,7 @@ var windowsObserver = {
 				if(aw && this.isTargetWindow(aw))
 					subject.__privateTabOpener = aw;
 			}
-			subject.addEventListener("DOMContentLoaded", this, false);
+			subject.addEventListener("load", this, false);
 		}
 		else if(topic == "domwindowclosed")
 			this.destroyWindow(subject, WINDOW_CLOSED);
@@ -60,7 +60,7 @@ var windowsObserver = {
 
 	handleEvent: function(e) {
 		switch(e.type) {
-			case "DOMContentLoaded":          this.loadHandler(e);           break;
+			case "load":                      this.loadHandler(e);           break;
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
@@ -74,7 +74,7 @@ var windowsObserver = {
 	},
 	loadHandler: function(e) {
 		var window = e.originalTarget.defaultView;
-		window.removeEventListener("DOMContentLoaded", this, false);
+		window.removeEventListener("load", this, false);
 		this.initWindow(window, WINDOW_LOADED);
 	},
 
@@ -128,7 +128,7 @@ var windowsObserver = {
 		}
 	},
 	destroyWindow: function(window, reason) {
-		window.removeEventListener("DOMContentLoaded", this, false); // Window can be closed before DOMContentLoaded
+		window.removeEventListener("load", this, false); // Window can be closed before "load"
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
