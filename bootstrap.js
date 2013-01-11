@@ -253,7 +253,6 @@ var windowsObserver = {
 		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
 		if(tab.hasAttribute(this.privateAttr)) {
 			_log("Restored tab has " + this.privateAttr + " attribute");
-			this.persistTabAttributeOnce();
 			this.toggleTabPrivate(tab, true);
 			if(tab.hasAttribute("selected")) {
 				_log("Restored selected tab => update window title");
