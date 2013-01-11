@@ -235,10 +235,8 @@ var windowsObserver = {
 		var inheritPrivate = !this.isEmptyTab(tab, gBrowser)
 			&& this.isPrivateTab(gBrowser.selectedTab);
 		_log(
-			"Opened tab: " + (tab.getAttribute("label") || "").substr(0, 256)
-			+ "\nEmpty: " + this.isEmptyTab(tab, gBrowser)
-			+ "\nthis.isPrivateTab(gBrowser.selectedTab): " + this.isPrivateTab(gBrowser.selectedTab)
-			+ "\ninheritPrivate: " + inheritPrivate
+			"Tab opened: " + (tab.getAttribute("label") || "").substr(0, 256)
+			+ "\nInherit private state: " + inheritPrivate
 		);
 		if(inheritPrivate)
 			this.toggleTabPrivate(tab, true);
