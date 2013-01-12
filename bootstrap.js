@@ -120,11 +120,11 @@ var windowsObserver = {
 		if(Services.appinfo.name == "SeaMonkey")
 			window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
-		if(this.hotkeys)
-			window.addEventListener("keypress", this, true);
 		if(!this.isPrivateWindow(window)) {
-			var document = window.document;
+			if(this.hotkeys)
+				window.addEventListener("keypress", this, true);
 			window.setTimeout(function() {
+				var document = window.document;
 				this.initControls(document);
 				this.initHotkeysText(document);
 			}.bind(this), 50);
