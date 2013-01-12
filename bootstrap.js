@@ -1071,33 +1071,6 @@ var prefs = {
 	}
 };
 
-var _timers = { __proto__: null };
-var _timersCounter = 0;
-function timer(callback, context, delay, args) {
-	var id = ++_timersCounter;
-	var timer = _timers[id] = Components.classes["@mozilla.org/timer;1"]
-		.createInstance(Components.interfaces.nsITimer);
-	timer.init({
-		observe: function(subject, topic, data) {
-			delete _timers[id];
-			callback.apply(context, args);
-		}
-	}, delay || 0, timer.TYPE_ONE_SHOT);
-	return id;
-}
-function cancelTimer(id) {
-	if(id in _timers) {
-		_timers[id].cancel();
-		delete _timers[id];
-	}
-}
-function destroyTimers() {
-	for(var id in _timers)
-		_timers[id].cancel();
-	_timers = { __proto__: null };
-	_timersCounter = 0;
-}
-
 // Be careful, loggers always works until prefs aren't initialized
 // (and if "debug" preference has default value)
 function ts() {
