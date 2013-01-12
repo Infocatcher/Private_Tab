@@ -79,8 +79,10 @@ var windowsObserver = {
 	},
 
 	initWindow: function(window, reason) {
-		if(reason == WINDOW_LOADED && !this.isTargetWindow(window))
+		if(reason == WINDOW_LOADED && !this.isTargetWindow(window)) {
+			delete window.__privateTabOpener;
 			return;
+		}
 
 		this.loadStyles(window);
 		var gBrowser = window.gBrowser
