@@ -609,8 +609,8 @@ var windowsObserver = {
 			case ke.DOM_VK_ALT:  accelKey = "altKey";  break;
 			case ke.DOM_VK_META: accelKey = "metaKey";
 		}
-		delete accelKey;
-		return accelKey = accelKey;
+		delete this.accelKey;
+		return this.accelKey = accelKey;
 	},
 	initHotkeys: function() {
 		_log("initHotkeys()");
