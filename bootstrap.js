@@ -836,10 +836,6 @@ var windowsObserver = {
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
 		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255));
-
-		var document = tab.ownerDocument;
-		var window = document.defaultView;
-
 		this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
 	},
