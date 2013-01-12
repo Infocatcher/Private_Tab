@@ -485,7 +485,7 @@ var windowsObserver = {
 			);
 	},
 	initControls: function(document) {
-		var createMenuitem = (function(id, attrs) {
+		var createMenuitem = function(id, attrs) {
 			var mi = document.createElement("menuitem");
 			mi.id = id;
 			for(var name in attrs)
@@ -493,8 +493,8 @@ var windowsObserver = {
 			mi.addEventListener("command", this, false);
 			mi.addEventListener("click", this, false);
 			return mi;
-		}).bind(this);
-		var insertMenuitem = (function(mi, parent, insertAfter) {
+		}.bind(this);
+		var insertMenuitem = function(mi, parent, insertAfter) {
 			if(!parent)
 				return;
 			var insPos;
@@ -509,7 +509,7 @@ var windowsObserver = {
 				}
 			}
 			parent.insertBefore(mi, insPos && insPos.nextSibling);
-		}).bind(this);
+		}.bind(this);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext.addEventListener("popupshowing", this, false);
@@ -680,7 +680,7 @@ var windowsObserver = {
 		root.appendChild(mp);
 
 		var window = document.defaultView;
-		mp._onpopupshown = (function() {
+		mp._onpopupshown = function() {
 			Array.forEach(
 				mp.childNodes,
 				function(mi) {
@@ -695,7 +695,7 @@ var windowsObserver = {
 			keyset.parentNode.removeChild(keyset);
 			window.clearInterval(bak);
 			this.setHotkeysText(document);
-		}).bind(this);
+		}.bind(this);
 		mp.setAttribute("onpopupshown", "this._onpopupshown();");
 		var bak = window.setInterval(function() {
 			_log("initHotkeysText(), next try...");
