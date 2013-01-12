@@ -142,8 +142,10 @@ var windowsObserver = {
 			var makeNotPrivate = disable && !isPrivateWindow;
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
-				if(makeNotPrivate)
+				if(makeNotPrivate) {
 					this.toggleTabPrivate(tab, false);
+					this.fixTabState(tab, false);
+				}
 			}, this);
 			_log("Restore title...");
 			if(!isPrivateWindow)
@@ -466,24 +468,7 @@ var windowsObserver = {
 		var tab = this.getContextTab(window)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
-
-		if(!this.isPendingTab(tab) || !prefs.get("workaroundForPendingTabs"))
-			return;
-		_log("Workaround: manually update session state of pending tab");
-		var ssData = JSON.parse(this.ss.getTabState(tab));
-		//_log("Before:\n" + JSON.stringify(ssData, null, "\t"));
-		var hasAttrs = "attributes" in ssData;
-		if(isPrivate) {
-			if(!hasAttrs)
-				ssData.attributes = {};
-			ssData.attributes[this.privateAttr] = "true";
-		}
-		else if(hasAttrs) {
-			delete ssData.attributes[this.privateAttr];
-		}
-		//_log("After:\n" + JSON.stringify(ssData, null, "\t"));
-		tab._privateTabIgnore = true;
-		this.ss.setTabState(tab, JSON.stringify(ssData));
+		this.fixTabState(tab, isPrivate);
 	},
 
 	cmdAttr: "privateTab-command",
@@ -786,6 +771,32 @@ var windowsObserver = {
 		}
 		else {
 			tab.removeAttribute(this.privateAttr);
+		}
+	},
+	fixTabState: function(tab, isPrivate) {
+		if(!this.isPendingTab(tab) || !prefs.get("workaroundForPendingTabs"))
+			return;
+		if(isPrivate === undefined)
+			isPrivate = this.isPrivateTab(tab);
+		_log("Workaround: manually update session state of pending tab");
+		try {
+			var ssData = JSON.parse(this.ss.getTabState(tab));
+			//_log("Before:\n" + JSON.stringify(ssData, null, "\t"));
+			var hasAttrs = "attributes" in ssData;
+			if(isPrivate) {
+				if(!hasAttrs)
+					ssData.attributes = {};
+				ssData.attributes[this.privateAttr] = "true";
+			}
+			else if(hasAttrs) {
+				delete ssData.attributes[this.privateAttr];
+			}
+			//_log("After:\n" + JSON.stringify(ssData, null, "\t"));
+			tab._privateTabIgnore = true;
+			this.ss.setTabState(tab, JSON.stringify(ssData));
+		}
+		catch(e) {
+			Components.utils.reportError(e);
 		}
 	},
 	dispatchAPIEvent: function(target, eventType, eventDetail) {
