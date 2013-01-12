@@ -138,14 +138,16 @@ var windowsObserver = {
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
 			var gBrowser = window.gBrowser;
-			var makeNotPrivate = disable && !this.isPrivateWindow(window);
+			var isPrivateWindow = this.isPrivateWindow(window);
+			var makeNotPrivate = disable && !isPrivateWindow;
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
 				if(makeNotPrivate)
 					this.toggleTabPrivate(tab, false);
 			}, this);
 			_log("Restore title...");
-			this.updateWindowTitle(gBrowser, false);
+			if(!isPrivateWindow)
+				this.updateWindowTitle(gBrowser, false);
 			this.patchBrowser(gBrowser, false);
 		}
 		window.removeEventListener("TabOpen", this, false);
