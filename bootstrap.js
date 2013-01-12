@@ -173,7 +173,7 @@ var windowsObserver = {
 			return;
 		}
 		var proto = Object.getPrototypeOf(browser);
-		if(!proto || !("swapDocShells")) {
+		if(!proto || !("swapDocShells" in proto)) {
 			_log("Can't patch browser: no swapDocShells() method");
 			return;
 		}
