@@ -389,10 +389,28 @@ var windowsObserver = {
 					|| k.code && e.keyCode == k.code
 				)
 			) {
+				var window = e.currentTarget;
+				if(k.forbidInTextFields) {
+					var fe = window.document.commandDispatcher.focusedElement;
+					if(
+						fe && (
+							fe instanceof window.HTMLInputElement
+							|| fe instanceof window.HTMLTextAreaElement
+						)
+					) {
+						try { // Throws on not-text input elements
+							if(typeof fe.selectionStart == "number") {
+								_log("Don't use single char hotkey in text field");
+								return;
+							}
+						}
+						catch(e) {
+						}
+					}
+				}
 				e.preventDefault();
 				e.stopPropagation();
-				var ct = e.currentTarget;
-				this.doCommand(ct.document || ct.ownerDocument || ct, kId);
+				this.doCommand(window.document, kId);
 			}
 		}
 	},
@@ -640,6 +658,7 @@ var windowsObserver = {
 					case "accel":   k[this.accelKey] = true;
 				}
 			}, this);
+			k.forbidInTextFields = k.char && !k.ctrlKey && !k.altKey && !k.metaKey;
 		}
 		Services.prefs.getBranch(prefs.ns + "key.")
 			.getChildList("", {})
