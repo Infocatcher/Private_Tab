@@ -381,6 +381,10 @@ var windowsObserver = {
 			this.openNewPrivateTab(window);
 		else if(cmd == "toggleTabPrivate")
 			this.toggleContextTabPrivate(window);
+		else {
+			var caller = Components.stack.caller;
+			throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
+		}
 	},
 	keypressHandler: function(e) {
 		var keys = this.hotkeys;
