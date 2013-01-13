@@ -469,6 +469,8 @@ var windowsObserver = {
 		});
 		this.toggleTabPrivate(tab, true);
 		var inBackground = prefs.get("loadInBackground");
+		if(inBackground == -1)
+			inBackground = prefs.getPref("browser.tabs.loadInBackground");
 		if(toggleInBackground)
 			inBackground = !inBackground;
 		if(!inBackground)
