@@ -457,6 +457,7 @@ var windowsObserver = {
 			"getTopWin" in window
 			&& window.getTopWin.length > 0 // Only in Firefox for now
 			&& !window.toolbar.visible // Popup window
+			&& prefs.get("dontUseTabsInPopupWindows")
 		) {
 			window = window.getTopWin(true);
 			openAsChild = false;
