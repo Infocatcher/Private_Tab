@@ -454,15 +454,11 @@ var windowsObserver = {
 
 		var relatedToCurrent;
 		var openAsChild = true;
-		if(
-			"getTopWin" in window
-			&& window.getTopWin.length > 0 // Only in Firefox for now
-			&& !window.toolbar.visible // Popup window
-			&& prefs.get("dontUseTabsInPopupWindows")
-		) {
-			window = window.getTopWin(true);
+		var w = this.getNotPopupWindow(window);
+		if(w) {
 			relatedToCurrent = openAsChild = false;
-			window.setTimeout(window.focus, 0);
+			w.setTimeout(w.focus, 0);
+			window = w;
 		}
 		var gBrowser = window.gBrowser;
 
@@ -499,12 +495,27 @@ var windowsObserver = {
 		return tab;
 	},
 	openNewPrivateTab: function(window) {
+		var w = this.getNotPopupWindow(window);
+		if(w) {
+			w.setTimeout(w.focus, 0);
+			window = w;
+		}
 		var gBrowser = window.gBrowser;
 		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
 		this.toggleTabPrivate(tab, true);
 
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 		return tab;
+	},
+	getNotPopupWindow: function(window) {
+		if(
+			"getTopWin" in window
+			&& window.getTopWin.length > 0 // Only in Firefox for now
+			&& !window.toolbar.visible // Popup window
+			&& prefs.get("dontUseTabsInPopupWindows")
+		)
+			return window.getTopWin(true);
+		return null;
 	},
 	getContextTab: function(window) {
 		if("TabContextMenu" in window)
