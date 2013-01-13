@@ -1037,11 +1037,18 @@ var prefs = {
 
 	loadDefaultPrefs: function() {
 		var defaultBranch = Services.prefs.getDefaultBranch("");
-		var prefsFile = "chrome://privatetab/content/defaults/preferences/prefs.js"
+		var prefsFile = "chrome://privatetab/content/defaults/preferences/prefs.js";
+		var prefs = this;
 		Services.scriptloader.loadSubScript(prefsFile, {
-			prefs: this,
 			pref: function(pName, val) {
-				this.prefs.setPref(pName, val, defaultBranch);
+				if(prefs.getValueType(val) != defaultBranch.getPrefType(pName)) {
+					Components.utils.reportError(
+						LOG_PREFIX + 'Changed preference type for "' + pName
+						+ '", old value will be lost!'
+					);
+					defaultBranch.deleteBranch(pName);
+				}
+				prefs.setPref(pName, val, defaultBranch);
 			}
 		});
 	},
@@ -1059,29 +1066,35 @@ var prefs = {
 	getPref: function(pName, defaultVal, prefBranch) {
 		var ps = prefBranch || Services.prefs;
 		switch(ps.getPrefType(pName)) {
-			case ps.PREF_STRING: return ps.getComplexValue(pName, Components.interfaces.nsISupportsString).data;
-			case ps.PREF_INT:    return ps.getIntPref(pName);
 			case ps.PREF_BOOL:   return ps.getBoolPref(pName);
-			default:             return defaultVal;
+			case ps.PREF_INT:    return ps.getIntPref(pName);
+			case ps.PREF_STRING: return ps.getComplexValue(pName, Components.interfaces.nsISupportsString).data;
 		}
+		return defaultVal;
 	},
 	setPref: function(pName, val, prefBranch) {
 		var ps = prefBranch || Services.prefs;
 		var pType = ps.getPrefType(pName);
-		var isNew = pType == ps.PREF_INVALID;
-		var vType = typeof val;
-		if(pType == ps.PREF_BOOL || isNew && vType == "boolean")
-			ps.setBoolPref(pName, val);
-		else if(pType == ps.PREF_INT || isNew && vType == "number")
-			ps.setIntPref(pName, val);
-		else if(pType == ps.PREF_STRING || isNew) {
-			var ss = Components.interfaces.nsISupportsString;
-			var str = Components.classes["@mozilla.org/supports-string;1"]
-				.createInstance(ss);
-			str.data = val;
-			ps.setComplexValue(pName, ss, str);
+		if(pType == ps.PREF_INVALID)
+			pType = this.getValueType(val);
+		switch(pType) {
+			case ps.PREF_BOOL:   ps.setBoolPref(pName, val); break;
+			case ps.PREF_INT:    ps.setIntPref(pName, val);  break;
+			case ps.PREF_STRING:
+				var ss = Components.interfaces.nsISupportsString;
+				var str = Components.classes["@mozilla.org/supports-string;1"]
+					.createInstance(ss);
+				str.data = val;
+				ps.setComplexValue(pName, ss, str);
 		}
 		return this;
+	},
+	getValueType: function(val) {
+		switch(typeof val) {
+			case "boolean": return Services.prefs.PREF_BOOL;
+			case "number":  return Services.prefs.PREF_INT;
+		}
+		return Services.prefs.PREF_STRING;
 	}
 };
 
