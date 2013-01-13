@@ -1043,7 +1043,8 @@ var prefs = {
 		var prefs = this;
 		Services.scriptloader.loadSubScript(prefsFile, {
 			pref: function(pName, val) {
-				if(prefs.getValueType(val) != defaultBranch.getPrefType(pName)) {
+				var pType = defaultBranch.getPrefType(pName);
+				if(pType != defaultBranch.PREF_INVALID && pType != prefs.getValueType(val)) {
 					Components.utils.reportError(
 						LOG_PREFIX + 'Changed preference type for "' + pName
 						+ '", old value will be lost!'
