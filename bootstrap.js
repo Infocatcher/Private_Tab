@@ -462,6 +462,7 @@ var windowsObserver = {
 		) {
 			window = window.getTopWin(true);
 			relatedToCurrent = openAsChild = false;
+			window.setTimeout(window.focus, 0);
 		}
 		var gBrowser = window.gBrowser;
 
