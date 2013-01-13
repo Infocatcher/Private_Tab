@@ -452,6 +452,7 @@ var windowsObserver = {
 		var doc = gContextMenu.target.ownerDocument;
 		window.urlSecurityCheck(uri, doc.nodePrincipal);
 
+		var relatedToCurrent;
 		var openAsChild = true;
 		if(
 			"getTopWin" in window
@@ -460,7 +461,7 @@ var windowsObserver = {
 			&& prefs.get("dontUseTabsInPopupWindows")
 		) {
 			window = window.getTopWin(true);
-			openAsChild = false;
+			relatedToCurrent = openAsChild = false;
 		}
 		var gBrowser = window.gBrowser;
 
@@ -477,7 +478,8 @@ var windowsObserver = {
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: doc.documentURIObject,
 			charset: doc.characterSet,
-			ownerTab: gBrowser.selectedTab
+			ownerTab: gBrowser.selectedTab,
+			relatedToCurrent: relatedToCurrent
 		});
 		this.toggleTabPrivate(tab, true);
 
