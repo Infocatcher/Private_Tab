@@ -415,6 +415,7 @@ var windowsObserver = {
 				}
 				e.preventDefault();
 				e.stopPropagation();
+				e.stopImmediatePropagation();
 				this.doCommand(window.document, kId);
 			}
 		}
