@@ -262,10 +262,6 @@ var windowsObserver = {
 		if(tab.hasAttribute(this.privateAttr)) {
 			_log("Restored tab has " + this.privateAttr + " attribute");
 			this.toggleTabPrivate(tab, true);
-			if(tab.hasAttribute("selected")) {
-				_log("Restored selected tab => update window title");
-				this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser);
-			}
 		}
 	},
 	tabSelectHandler: function(e) {
