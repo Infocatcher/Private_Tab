@@ -337,21 +337,26 @@ var windowsObserver = {
 				mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
 		}
 		else {
-			var tab = this.getContextTab(window);
-			var hide = !tab || tab.localName != "tab";
-			var mi = document.getElementById(this.tabContextId);
-			mi.hidden = hide;
-			if(!hide) {
-				var check = this.isPrivateTab(tab);
-				if(check)
-					mi.setAttribute("checked", "true");
-				else
-					mi.removeAttribute("checked");
-				var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
-				if(accel)
-					accel.hidden = tab != window.gBrowser.selectedTab;
-				//mi.disabled = this.isPendingTab(tab);
-			}
+			this.updateTabContext(window);
+		}
+	},
+	updateTabContext: function(window) {
+		var document = window.document;
+		_log("updateTabContext()");
+		var tab = this.getContextTab(window);
+		var hide = !tab || tab.localName != "tab";
+		var mi = document.getElementById(this.tabContextId);
+		mi.hidden = hide;
+		if(!hide) {
+			var check = this.isPrivateTab(tab);
+			if(check)
+				mi.setAttribute("checked", "true");
+			else
+				mi.removeAttribute("checked");
+			var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
+			if(accel)
+				accel.hidden = tab != window.gBrowser.selectedTab;
+			//mi.disabled = this.isPendingTab(tab);
 		}
 	},
 	commandHandler: function(e) {
@@ -487,6 +492,8 @@ var windowsObserver = {
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
 		this.fixTabState(tab, isPrivate);
+		if(tab == this.getTabBrowser(tab).selectedTab)
+			this.updateTabContext(window);
 	},
 
 	cmdAttr: "privateTab-command",
