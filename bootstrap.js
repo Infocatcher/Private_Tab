@@ -452,15 +452,26 @@ var windowsObserver = {
 		var doc = gContextMenu.target.ownerDocument;
 		window.urlSecurityCheck(uri, doc.nodePrincipal);
 
+		var openAsChild = true;
+		if(
+			"getTopWin" in window
+			&& window.getTopWin.length > 0 // Only in Firefox for now
+			&& !window.toolbar.visible // Popup window
+		) {
+			window = window.getTopWin(true);
+			openAsChild = false;
+		}
 		var gBrowser = window.gBrowser;
 
-		// http://piro.sakura.ne.jp/xul/_treestyletab.html.en#api
-		if("TreeStyleTabService" in window)
-			window.TreeStyleTabService.readyToOpenChildTab(gBrowser.selectedTab);
-		// Tab Kit https://addons.mozilla.org/firefox/addon/tab-kit/
-		// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
-		if("tabkit" in window)
-			window.tabkit.addingTab("related");
+		if(openAsChild) {
+			// http://piro.sakura.ne.jp/xul/_treestyletab.html.en#api
+			if("TreeStyleTabService" in window)
+				window.TreeStyleTabService.readyToOpenChildTab(gBrowser.selectedTab);
+			// Tab Kit https://addons.mozilla.org/firefox/addon/tab-kit/
+			// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
+			if("tabkit" in window)
+				window.tabkit.addingTab("related");
+		}
 
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: doc.documentURIObject,
@@ -468,6 +479,7 @@ var windowsObserver = {
 			ownerTab: gBrowser.selectedTab
 		});
 		this.toggleTabPrivate(tab, true);
+
 		var inBackground = prefs.get("loadInBackground");
 		if(inBackground == -1)
 			inBackground = prefs.getPref("browser.tabs.loadInBackground");
@@ -476,7 +488,7 @@ var windowsObserver = {
 		if(!inBackground)
 			gBrowser.selectedTab = tab;
 
-		if("tabkit" in window)
+		if(openAsChild && "tabkit" in window)
 			window.tabkit.addingTabOver();
 
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab");
