@@ -360,23 +360,27 @@ var windowsObserver = {
 		}
 	},
 	commandHandler: function(e) {
-		this.handleCommand(e.target, e.shiftKey || e.ctrlKey || e.altKey || e.metaKey);
+		this.handleCommandFromEvent(e, e.shiftKey || e.ctrlKey || e.altKey || e.metaKey);
 	},
 	clickHandler: function(e) {
 		if(e.button == 1 && e.target.getAttribute("disabled") != "true")
-			this.handleCommand(e.target, true, true);
+			this.handleCommandFromEvent(e, true, true);
 	},
-	handleCommand: function(trg, shifted, closeMenus) {
+	handleCommandFromEvent: function(e, shifted, closeMenus) {
+		var trg = e.target;
 		var cmd = trg.getAttribute(this.cmdAttr);
-		_log("handleCommand: " + cmd);
 		var window = trg.ownerDocument.defaultView;
+		this.handleCommand(window, cmd, shifted, closeMenus);
+		closeMenus && window.closeMenus(trg);
+	},
+	handleCommand: function(window, cmd, shifted, closeMenus) {
+		_log("handleCommand: " + cmd);
 		if(cmd == "openInNewPrivateTab")
 			this.openInNewPrivateTab(window, shifted);
 		else if(cmd == "openNewPrivateTab")
 			this.openNewPrivateTab(window);
 		else if(cmd == "toggleTabPrivate")
 			this.toggleContextTabPrivate(window);
-		closeMenus && window.closeMenus(trg);
 	},
 	keypressHandler: function(e) {
 		var keys = this.hotkeys;
@@ -420,15 +424,9 @@ var windowsObserver = {
 				e.preventDefault();
 				e.stopPropagation();
 				e.stopImmediatePropagation();
-				this.doCommand(window.document, kId);
+				this.handleCommand(window, kId);
 			}
 		}
-	},
-	doCommand: function(document, cmd) {
-		var node = document.getElementsByAttribute(this.cmdAttr, cmd)[0]
-			|| this.getTabContextMenu(document)
-				.getElementsByAttribute(this.cmdAttr, cmd)[0];
-		node.click();
 	},
 	privateChangedHandler: function(e) {
 		var tab = e.originalTarget || e.target;
