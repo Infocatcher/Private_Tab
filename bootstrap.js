@@ -360,7 +360,6 @@ var windowsObserver = {
 		}
 	},
 	commandHandler: function(e) {
-		_log(e.type + ": " + e.target.nodeName + " " + e.target.id);
 		this.handleCommand(e.target, e.shiftKey || e.ctrlKey || e.altKey || e.metaKey);
 	},
 	clickHandler: function(e) {
@@ -394,6 +393,11 @@ var windowsObserver = {
 					|| k.code && e.keyCode == k.code
 				)
 			) {
+				_log(e.type + ": matched key: " + kId);
+				if(e.defaultPrevented && !prefs.get("keysIgnoreDefaultPrevented")) {
+					_log(e.type + ": event.defaultPrevented => do nothing");
+					return;
+				}
 				var window = e.currentTarget;
 				if(k.forbidInTextFields) {
 					var fe = window.document.commandDispatcher.focusedElement;
