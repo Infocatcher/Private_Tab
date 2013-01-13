@@ -281,6 +281,11 @@ var windowsObserver = {
 		else {
 			this.updateWindowTitle(window.gBrowser);
 		}
+		window.setTimeout(function() {
+			// Someon may change "usePrivateBrowsing"...
+			// It's good to show real state
+			this.setTabState(tab);
+		}.bind(this), 50);
 	},
 	dropHandler: function(e) {
 		var window = e.currentTarget;
