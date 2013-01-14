@@ -331,7 +331,20 @@ var windowsObserver = {
 		var document = popup.ownerDocument;
 		var window = document.defaultView;
 		if(popup.id == "contentAreaContextMenu") {
-			var hide = !window.gContextMenu || !window.gContextMenu.onSaveableLink;
+			var gContextMenu = window.gContextMenu;
+			var hide = !gContextMenu
+				|| (!gContextMenu.onSaveableLink && !gContextMenu.onPlainTextLink);
+			if(hide && gContextMenu && gContextMenu.onMailtoLink) {
+				// See chrome://browser/content/nsContextMenu.js
+				// Simple way to inherit
+				// var shouldShow = this.onSaveableLink || isMailtoInternal || this.onPlainTextLink;
+				var origOpenIn = document.getElementById("context-openlinkprivate")
+					|| document.getElementById("context-openlinkintab");
+				if(origOpenIn && !origOpenIn.hidden)
+					hide = false;
+			}
+			if(!hide && !gContextMenu.linkURL)
+				hide = true;
 			var mi = document.getElementById(this.contextId);
 			mi.hidden = hide;
 			if(!hide)
