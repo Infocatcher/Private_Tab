@@ -551,8 +551,12 @@ var windowsObserver = {
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
 		this.fixTabState(tab, isPrivate);
-		if(tab == this.getTabBrowser(tab).selectedTab)
+		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
+			this.updateTabTooltip(window);
+			if("TabScope" in window && "_updateTitle" in window.TabScope)
+				 window.TabScope._updateTitle();
+		}
 	},
 
 	cmdAttr: "privateTab-command",
@@ -561,6 +565,7 @@ var windowsObserver = {
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
 	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
+	tabScopeTipId: "privateTab-tabScope-isPrivateTabLabel",
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -580,6 +585,7 @@ var windowsObserver = {
 		return tabTip;
 	},
 	initControls: function(document) {
+		var window = document.defaultView;
 		var createMenuitem = function(id, attrs) {
 			var mi = document.createElement("menuitem");
 			mi.id = id;
@@ -633,7 +639,7 @@ var windowsObserver = {
 			});
 			var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
 			if(newPrivateWin) {
-				var s = document.defaultView.getComputedStyle(newPrivateWin, null);
+				var s = window.getComputedStyle(newPrivateWin, null);
 				var icon = s.listStyleImage;
 				if(icon && icon != "none") {
 					appMenuItem.className = "menuitem-iconic";
@@ -668,6 +674,20 @@ var windowsObserver = {
 				tabTipLabel,
 				tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
 			);
+
+			var tabScope = document.getElementById("tabscope-popup");
+			if(tabScope && "TabScope" in window && "_updateTitle" in window.TabScope) {
+				var tsTipLabel = tabTipLabel.cloneNode(true);
+				tsTipLabel.id = this.tabScopeTipId;
+				tabScope.appendChild(tsTipLabel);
+				var ts = window.TabScope;
+				var privateTab = this;
+				ts._privateTab_updateTitle = ts._updateTitle;
+				ts._updateTitle = function() {
+					tsTipLabel.hidden = !privateTab.isPrivateTab(this._tab);
+					return this._privateTab_updateTitle.apply(this, arguments);
+				};
+			}
 		}
 	},
 	destroyControls: function(window, force) {
@@ -687,6 +707,11 @@ var windowsObserver = {
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
+		if("TabScope" in window && "_privateTab_updateTitle" in window.TabScope) {
+			var ts = window.TabScope;
+			ts._updateTitle = ts._privateTab_updateTitle;
+			delete ts._privateTab_updateTitle;
+		}
 	},
 	destroyNodes: function(parent, force) {
 		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
@@ -1067,6 +1092,11 @@ var windowsObserver = {
 				}\n\
 				#' + this.tabTipId + ' {\n\
 					color: -moz-nativehyperlinktext;\n\
+				}\n\
+				#' + this.tabScopeTipId + '{\n\
+					color: -moz-nativehyperlinktext;\n\
+					text-align: center;\n\
+					margin: 1px;\n\
 				}\n\
 			}';
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
