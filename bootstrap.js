@@ -84,10 +84,11 @@ var windowsObserver = {
 			return;
 		}
 
+		var document = window.document;
 		this.loadStyles(window);
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
-		this.ensureTitleModifier(window.document);
+		this.ensureTitleModifier(document);
 		this.patchBrowser(gBrowser, true);
 
 		if(reason == WINDOW_LOADED) {
@@ -124,9 +125,10 @@ var windowsObserver = {
 			if(this.hotkeys)
 				window.addEventListener("keypress", this, true);
 			window.setTimeout(function() {
-				var document = window.document;
 				this.initControls(document);
-				this.initHotkeysText(document);
+				window.setTimeout(function() {
+					this.initHotkeysText(document);
+				}.bind(this), 10);
 			}.bind(this), 50);
 		}
 	},
