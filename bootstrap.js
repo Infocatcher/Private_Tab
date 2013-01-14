@@ -454,9 +454,7 @@ var windowsObserver = {
 	openInNewPrivateTab: function(window, toggleInBackground) {
 		// Based on nsContextMenu.prototype.openLinkInTab()
 		var gContextMenu = window.gContextMenu;
-		var uri = typeof gContextMenu.linkURL == "function" // SeaMonkey
-			? gContextMenu.linkURL()
-			: gContextMenu.linkURL;
+		var uri = gContextMenu.linkURL;
 		var doc = gContextMenu.target.ownerDocument;
 		window.urlSecurityCheck(uri, doc.nodePrincipal);
 
