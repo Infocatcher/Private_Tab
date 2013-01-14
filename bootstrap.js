@@ -328,38 +328,42 @@ var windowsObserver = {
 		var popup = e.target;
 		if(popup != e.currentTarget)
 			return;
-		var document = popup.ownerDocument;
-		var window = document.defaultView;
-		if(popup.id == "contentAreaContextMenu") {
-			var gContextMenu = window.gContextMenu;
-			var hide = !gContextMenu
-				|| (!gContextMenu.onSaveableLink && !gContextMenu.onPlainTextLink);
-			if(hide && gContextMenu && gContextMenu.onMailtoLink) {
-				// See chrome://browser/content/nsContextMenu.js
-				// Simple way to inherit
-				// var shouldShow = this.onSaveableLink || isMailtoInternal || this.onPlainTextLink;
-				var origOpenIn = document.getElementById("context-openlinkprivate")
-					|| document.getElementById("context-openlinkintab");
-				if(origOpenIn && !origOpenIn.hidden)
-					hide = false;
-			}
-			if(!hide && !gContextMenu.linkURL)
-				hide = true;
-			var mi = document.getElementById(this.contextId);
-			mi.hidden = hide;
-			if(!hide)
-				mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
-		}
-		else if(popup.localName == "tooltip") {
-			var tab = document.tooltipNode;
-			var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
-			var label = document.getElementById(this.tabTipId);
-			if(label)
-				label.hidden = hide;
-		}
-		else {
+		var window = popup.ownerDocument.defaultView;
+		if(popup.id == "contentAreaContextMenu")
+			this.updatePageContext(window);
+		else if(popup.localName == "tooltip")
+			this.updateTabTooltip(window);
+		else
 			this.updateTabContext(window);
+	},
+	updatePageContext: function(window) {
+		var document = window.document;
+		var gContextMenu = window.gContextMenu;
+		var hide = !gContextMenu
+			|| (!gContextMenu.onSaveableLink && !gContextMenu.onPlainTextLink);
+		if(hide && gContextMenu && gContextMenu.onMailtoLink) {
+			// See chrome://browser/content/nsContextMenu.js
+			// Simple way to inherit
+			// var shouldShow = this.onSaveableLink || isMailtoInternal || this.onPlainTextLink;
+			var origOpenIn = document.getElementById("context-openlinkprivate")
+				|| document.getElementById("context-openlinkintab");
+			if(origOpenIn && !origOpenIn.hidden)
+				hide = false;
 		}
+		if(!hide && !gContextMenu.linkURL)
+			hide = true;
+		var mi = document.getElementById(this.contextId);
+		mi.hidden = hide;
+		if(!hide)
+			mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
+	},
+	updateTabTooltip: function(window) {
+		var document = window.document;
+		var tab = document.tooltipNode;
+		var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
+		var label = document.getElementById(this.tabTipId);
+		if(label)
+			label.hidden = hide;
 	},
 	updateTabContext: function(window) {
 		var document = window.document;
