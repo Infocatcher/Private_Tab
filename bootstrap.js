@@ -337,6 +337,13 @@ var windowsObserver = {
 			if(!hide)
 				mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
 		}
+		else if(popup.localName == "tooltip") {
+			var tab = document.tooltipNode;
+			var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
+			var label = document.getElementById(this.tabTipId);
+			if(label)
+				label.hidden = hide;
+		}
 		else {
 			this.updateTabContext(window);
 		}
@@ -538,6 +545,7 @@ var windowsObserver = {
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
+	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -545,6 +553,16 @@ var windowsObserver = {
 				"anonid",
 				"tabContextMenu"
 			);
+	},
+	getTabTooltip: function(document) {
+		var tabTip = document.getElementById("tabbrowser-tab-tooltip");
+		if(!tabTip) { // SeaMonkey
+			var gBrowser = document.defaultView.gBrowser;
+			var tabStrip = document.getAnonymousElementByAttribute(gBrowser, "anonid", "strip");
+			if(tabStrip && tabStrip.firstChild && tabStrip.firstChild.localName == "tooltip")
+				tabTip = tabStrip.firstChild;
+		}
+		return tabTip;
 	},
 	initControls: function(document) {
 		var createMenuitem = function(id, attrs) {
@@ -621,6 +639,21 @@ var windowsObserver = {
 			"privateTab-command": "toggleTabPrivate"
 		});
 		insertMenuitem(tabContextItem, tabContext, ["#context_pinTab", '[tbattr="tabbrowser-undoclosetab"]']);
+
+		var tabTip = this.getTabTooltip(document);
+		if(tabTip) {
+			tabTip.addEventListener("popupshowing", this, false);
+			var tabTipLabel = document.createElement("label");
+			tabTipLabel.id = this.tabTipId;
+			tabTipLabel.className = "tooltip-label";
+			tabTipLabel.setAttribute("value", this.getLocalized("privateTabTip"));
+			tabTipLabel.setAttribute("privateTab-command", "<nothing>");
+			tabTipLabel.hidden = true;
+			tabTip.insertBefore(
+				tabTipLabel,
+				tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
+			);
+		}
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
@@ -633,6 +666,12 @@ var windowsObserver = {
 		tabContext && tabContext.removeEventListener("popupshowing", this, false);
 		if(tabContext && !tabContext.id)
 			this.destroyNodes(tabContext, force);
+
+		var tabTip = this.getTabTooltip(document);
+		tabTip && tabTip.removeEventListener("popupshowing", this, false);
+		var tabTipLabel = document.getElementById(this.tabTipId);
+		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
+			tabTipLabel.parentNode.removeChild(tabTipLabel);
 	},
 	destroyNodes: function(parent, force) {
 		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
@@ -1010,6 +1049,9 @@ var windowsObserver = {
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
 					' + prefix + 'text-decoration-style: dashed !important;\n\
+				}\n\
+				#' + this.tabTipId + ' {\n\
+					color: -moz-nativehyperlinktext;\n\
 				}\n\
 			}';
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
