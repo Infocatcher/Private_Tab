@@ -6,6 +6,12 @@ const LOG_PREFIX = "[Private Tab] ";
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 function install(params, reason) {
+	try {
+		Services.strings.flushBundles(); // https://bugzilla.mozilla.org/show_bug.cgi?id=719376
+	}
+	catch(e) {
+		Components.utils.reportError(e);
+	}
 }
 function uninstall(params, reason) {
 }
