@@ -181,7 +181,7 @@ var windowsObserver = {
 	patchBrowser: function(gBrowser, applyPatch) {
 		var browser = gBrowser.browsers && gBrowser.browsers[0];
 		if(!browser) {
-			Components.utils.reportError(LOG_PREFIX + "!!! Can't patch browser.swapDocShells() !!!");
+			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.swapDocShells()");
 			return;
 		}
 		var proto = Object.getPrototypeOf(browser);
@@ -189,52 +189,41 @@ var windowsObserver = {
 			_log("Can't patch browser: no swapDocShells() method");
 			return;
 		}
-		if(!applyPatch ^ "__privateTab_swapDocShells" in proto)
-			return;
 		if(applyPatch) {
 			_log("Patch browser.__proto__.swapDocShells() method");
-			proto.__privateTab_swapDocShells = proto.swapDocShells;
-			proto.__privateTab_swapDocShellsDesc = Object.getOwnPropertyDescriptor(proto, "swapDocShells");
 			var _this = this;
-			proto.swapDocShells = function(otherBrowser) {
-				try {
-					var isPrivate = otherBrowser.webNavigation
-						.QueryInterface(Components.interfaces.nsILoadContext)
-						.usePrivateBrowsing;
-					_log("swapDocShells(): usePrivateBrowsing: " + isPrivate);
+			patcher.wrapFunction(
+				browser.__proto__, "swapDocShells", "browser.swapDocShells",
+				function before(otherBrowser) {
+					try {
+						before.isPrivate = otherBrowser.webNavigation
+							.QueryInterface(Components.interfaces.nsILoadContext)
+							.usePrivateBrowsing;
+						_log("swapDocShells(): usePrivateBrowsing: " + before.isPrivate);
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+					}
+				},
+				function after(ret, otherBrowser) {
+					var isPrivate = after.before.isPrivate;
+					if(isPrivate !== undefined) try {
+						this.webNavigation
+							.QueryInterface(Components.interfaces.nsILoadContext)
+							.usePrivateBrowsing = isPrivate;
+						_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
+						var tab = _this.getTabForBrowser(this);
+						tab && _this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+					}
 				}
-				catch(e) {
-					Components.utils.reportError(e);
-				}
-				try {
-					var ret = this.__privateTab_swapDocShells.apply(this, arguments);
-				}
-				catch(e) {
-					Components.utils.reportError(e);
-				}
-				if(isPrivate !== undefined) try {
-					this.webNavigation
-						.QueryInterface(Components.interfaces.nsILoadContext)
-						.usePrivateBrowsing = isPrivate;
-					_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
-					var tab = _this.getTabForBrowser(this);
-					tab && _this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
-				}
-				catch(e) {
-					Components.utils.reportError(e);
-				}
-				return ret;
-			};
+			);
 		}
 		else {
-			_log("Restore browser.__proto__.swapDocShells method");
-			var desc = proto.__privateTab_swapDocShellsDesc;
-			if(desc)
-				Object.defineProperty(proto, "swapDocShells", desc);
-			else
-				delete proto.swapDocShells;
-			delete proto.__privateTab_swapDocShells;
-			delete proto.__privateTab_swapDocShellsDesc;
+			_log("Restore browser.__proto__.swapDocShells() method");
+			patcher.unwrapFunction(browser.__proto__, "swapDocShells", "browser.swapDocShells");
 		}
 	},
 
@@ -562,7 +551,7 @@ var windowsObserver = {
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
-			if("TabScope" in window && "_updateTitle" in window.TabScope)
+			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
 				 window.TabScope._updateTitle();
 		}
 	},
@@ -688,13 +677,13 @@ var windowsObserver = {
 				var tsTipLabel = tabTipLabel.cloneNode(true);
 				tsTipLabel.id = this.tabScopeTipId;
 				tabScope.appendChild(tsTipLabel);
-				var ts = window.TabScope;
-				var privateTab = this;
-				ts._privateTab_updateTitle = ts._updateTitle;
-				ts._updateTitle = function() {
-					tsTipLabel.hidden = !privateTab.isPrivateTab(this._tab);
-					return this._privateTab_updateTitle.apply(this, arguments);
-				};
+				var _this = this;
+				patcher.wrapFunction(
+					window.TabScope, "_updateTitle", "TabScope._updateTitle",
+					function before() {
+						tsTipLabel.hidden = !_this.isPrivateTab(this._tab);
+					}
+				);
 			}
 		}
 	},
@@ -715,11 +704,8 @@ var windowsObserver = {
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
-		if("TabScope" in window && "_privateTab_updateTitle" in window.TabScope) {
-			var ts = window.TabScope;
-			ts._updateTitle = ts._privateTab_updateTitle;
-			delete ts._privateTab_updateTitle;
-		}
+		if("TabScope" in window && "_updateTitle" in window.TabScope)
+			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle");
 	},
 	destroyNodes: function(parent, force) {
 		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
@@ -1221,6 +1207,99 @@ var prefs = {
 			case "number":  return Services.prefs.PREF_INT;
 		}
 		return Services.prefs.PREF_STRING;
+	}
+};
+
+var patcher = {
+	// Do some magic to restore third party wrappers from other extensions
+	wrapNS: "privateTabMod::",
+	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
+		var win = Components.utils.getGlobalForObject(obj);
+		key = this.wrapNS + key;
+		var orig, wrapped;
+		if(!(key in win)) {
+			_log("[patcher] Patch " + key);
+			orig = obj[meth];
+			wrapped = obj[meth] = callAfter
+				? function wrapper() {
+					if(win[key].before.apply(this, arguments))
+						return undefined;
+					try {
+						var ret = orig.apply(this, arguments);
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+					}
+					win[key].after.apply(this, [ret].concat(Array.slice(arguments)));
+					return ret;
+				}
+				: function wrapper() {
+					if(win[key].before.apply(this, arguments))
+						return undefined;
+					return orig.apply(this, arguments);
+				};
+			// Someone may want to do eval() patch...
+			var patch = callAfter
+				? function(s) {
+					var ret = "_ret_" + Math.random().toFixed(14).substr(2);
+					return s
+						.replace(
+							"{",
+							'{\n\tif(window["' + key + '"].before.apply(this, arguments)) return;\n'
+							+ "\tvar " + ret + " = (function() {\n"
+						)
+						.replace(
+							/\}$/,
+							"}).apply(this, arguments);\n"
+							+ '\twindow["' + key + '"].after.apply(this, [' + ret + "].concat(Array.slice(arguments)));\n"
+							+ "\treturn " + ret + ";\n"
+							+ "}"
+						);
+				}
+				: function(s) {
+					return s.replace(
+						"{",
+						'{\n\tif(window["' + key + '"].before.apply(this, arguments)) return;\n'
+					);
+				};
+			wrapped.toString = function() {
+				return patch(orig.toString());
+			};
+			wrapped.toSource = function() {
+				return patch(orig.toSource());
+			};
+		}
+		else {
+			_log("[patcher] Will use previous patch for " + key);
+		}
+		win[key] = {
+			before:  callBefore,
+			after:   callAfter,
+			orig:    orig,
+			wrapped: wrapped
+		};
+		if(callAfter)
+			callAfter.before = callBefore;
+	},
+	unwrapFunction: function(obj, meth, key) {
+		var win = Components.utils.getGlobalForObject(obj);
+		key = this.wrapNS + key;
+		if(!(key in win))
+			return;
+		var wrapper = win[key];
+		if(obj[meth] != wrapper.wrapped) {
+			_log("[patcher] Can't completely restore " + key + ": detected third-party wrapper!");
+			var dummy = function() {};
+			win[key] = {
+				before: dummy,
+				after: wrapper.after && dummy
+			};
+		}
+		else {
+			_log("[patcher] Restore " + key);
+			delete win[key];
+			obj[meth] = wrapper.orig;
+		}
 	}
 };
 
