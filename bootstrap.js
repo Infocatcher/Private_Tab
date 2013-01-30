@@ -1084,6 +1084,10 @@ var windowsObserver = {
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
 					' + prefix + 'text-decoration-style: dashed !important;\n\
 				}\n\
+				.tabbrowser-tab[' + this.privateAttr + '][pinned] .tab-icon-image,\n\
+				.tabbrowser-tab[' + this.privateAttr + '][pinned] .tab-throbber {\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
+				}\n\
 				#' + this.tabTipId + ' {\n\
 					color: -moz-nativehyperlinktext;\n\
 				}\n\
