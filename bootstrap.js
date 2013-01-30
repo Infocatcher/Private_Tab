@@ -656,7 +656,7 @@ var windowsObserver = {
 			type: "checkbox",
 			"privateTab-command": "toggleTabPrivate"
 		});
-		insertMenuitem(tabContextItem, tabContext, ["#context_pinTab", '[tbattr="tabbrowser-undoclosetab"]']);
+		insertMenuitem(tabContextItem, tabContext, ["#context_unpinTab", '[tbattr="tabbrowser-undoclosetab"]']);
 
 		var tabTip = this.getTabTooltip(document);
 		if(tabTip) {
