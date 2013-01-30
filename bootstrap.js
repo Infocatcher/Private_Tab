@@ -4,6 +4,7 @@ const WINDOW_CLOSED = -2;
 const LOG_PREFIX = "[Private Tab] ";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 
 function install(params, reason) {
 	try {
@@ -1015,13 +1016,10 @@ var windowsObserver = {
 	},
 
 	getPrivacyContext: function(window) {
-		return window
-			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIWebNavigation)
-			.QueryInterface(Components.interfaces.nsILoadContext);
+		return PrivateBrowsingUtils.privacyContextFromWindow(window);
 	},
 	isPrivateWindow: function(window) {
-		return window && this.getPrivacyContext(window).usePrivateBrowsing;
+		return window && PrivateBrowsingUtils.isWindowPrivate(window);
 	},
 	getTabPrivacyContext: function(tab) {
 		return this.getPrivacyContext(tab.linkedBrowser.contentWindow);
