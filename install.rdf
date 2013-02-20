@@ -7,7 +7,7 @@
 		<em:type>2</em:type>
 		<em:bootstrap>true</em:bootstrap>
 		<em:name>Private Tab</em:name>
-		<em:version>0.1.0a3pre3</em:version>
+		<em:version>0.1.0a3</em:version>
 		<em:description>Adds private tabs</em:description>
 		<em:creator>Infocatcher</em:creator>
 		<em:updateURL>http://infocatcher.ucoz.net/ext/fx/private_tab/update.rdf</em:updateURL>
