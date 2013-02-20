@@ -352,8 +352,17 @@ var windowsObserver = {
 			hide = true;
 		var mi = document.getElementById(this.contextId);
 		mi.hidden = hide;
-		if(!hide)
-			mi.disabled = this.isPrivateTab(window.gBrowser.selectedTab);
+
+		var hideNotPrivate = this.isPrivateTab(window.gBrowser.selectedTab);
+		// Hide "Open Link in New Tab/Window" from page context menu on private tabs:
+		// we inherit private state, so here should be only "Open Link in New Private Tab/Window"
+		var inNewTab = document.getElementById("context-openlinkintab");
+		var inNewWin = document.getElementById("context-openlink");
+		var inNewPrivateWin = document.getElementById("context-openlinkprivate");
+		if(inNewTab)
+			inNewTab.hidden = hideNotPrivate;
+		if(inNewWin && inNewPrivateWin)
+			inNewWin.hidden = hideNotPrivate;
 	},
 	updateTabTooltip: function(window) {
 		var document = window.document;
