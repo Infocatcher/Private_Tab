@@ -151,7 +151,7 @@ var windowsObserver = {
 			var makeNotPrivate = disable && !isPrivateWindow;
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
-				if(makeNotPrivate) {
+				if(makeNotPrivate && this.isPrivateTab(tab)) {
 					this.toggleTabPrivate(tab, false);
 					this.fixTabState(tab, false);
 				}
