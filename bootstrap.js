@@ -289,14 +289,13 @@ var windowsObserver = {
 	dragTypeIsPrivate: "text/x-moz-extension-isprivatetab",
 	dragStartHandler: function(e) {
 		var window = e.currentTarget;
+		for(var trg = e.originalTarget || e.target; trg; trg = trg.parentNode)
+			if(trg.localName == "splitter") // Wrong things happens...
+				return;
 		if(this.isPrivateTab(window.gBrowser.selectedTab)) {
 			var dt = e.dataTransfer;
-			if(dt.types.length || this.getTabFromChild(e.originalTarget || e.target)) {
-				dt.setData(this.dragTypeIsPrivate, "true");
-				_log(e.type + ": add " + this.dragTypeIsPrivate + " type");
-			}
-			else
-				_log(e.type + ": ignore");
+			dt.setData(this.dragTypeIsPrivate, "true");
+			_log(e.type + ": add " + this.dragTypeIsPrivate + " type");
 		}
 	},
 	dropHandler: function(e) {
