@@ -1,7 +1,7 @@
 ﻿Works only in Gecko 20.0 and higher because used API doesn't exist in older versions!
 
 ##### Known issues:
-We just inherit private state from selected tab (always!), this is simple to implement, but may confuse a bit…
+We just inherit private state from selected tab and tries preserve private state of dropped link-like things, this is simple to implement, but may confuse a bit…
 
 ##### API for other extensions:
 You can listen for following events:
