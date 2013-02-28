@@ -71,6 +71,7 @@ var windowsObserver = {
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
+			case "dragstart":                 this.dragStartHandler(e);      break;
 			case "drop":                      this.dropHandler(e);           break;
 			case "popupshowing":              this.popupShowingHandler(e);   break;
 			case "command":                   this.commandHandler(e);        break;
@@ -125,8 +126,8 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
-		if(Services.appinfo.name == "SeaMonkey")
-			window.addEventListener("drop", this, true);
+		window.addEventListener("dragstart", this, true);
+		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		if(!this.isPrivateWindow(window)) {
 			if(this.hotkeys)
@@ -164,8 +165,8 @@ var windowsObserver = {
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
-		if(Services.appinfo.name == "SeaMonkey")
-			window.removeEventListener("drop", this, true);
+		window.removeEventListener("dragstart", this, true);
+		window.removeEventListener("drop", this, true);
 		window.removeEventListener("keypress", this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		this.destroyControls(window, force);
@@ -285,41 +286,75 @@ var windowsObserver = {
 			this.setTabState(tab);
 		}.bind(this), 50);
 	},
+	dragTypeIsPrivate: "text/x-moz-extension-isprivatetab",
+	dragStartHandler: function(e) {
+		var window = e.currentTarget;
+		if(this.isPrivateTab(window.gBrowser.selectedTab)) {
+			var dt = e.dataTransfer;
+			if(dt.types.length || this.getTabFromChild(e.originalTarget || e.target)) {
+				dt.setData(this.dragTypeIsPrivate, "true");
+				_log(e.type + ": add " + this.dragTypeIsPrivate + " type");
+			}
+			else
+				_log(e.type + ": ignore");
+		}
+	},
 	dropHandler: function(e) {
 		var window = e.currentTarget;
 		var dt = e.dataTransfer;
 
-		var sourceNode = dt.mozSourceNode || dt.sourceNode;
-		_log(e.type + ": " + (sourceNode && sourceNode.nodeName));
-		if(
-			!sourceNode
-			|| !(sourceNode instanceof window.XULElement)
-			|| sourceNode.ownerDocument.defaultView == window
-		)
-			return;
-		var draggedTab;
-		for(; sourceNode; sourceNode = sourceNode.parentNode) {
-			if(sourceNode.classList.contains("tabbrowser-tab")) {
-				draggedTab = sourceNode;
-				break;
+		var isPrivate = dt.types.contains(this.dragTypeIsPrivate);
+		_log(e.type + ": from " + (isPrivate ? "private" : "not private") + " tab");
+
+		var targetTab;
+		if(e.view.top == window) {
+			var trg = e.originalTarget || e.target;
+			targetTab = this.getTabFromChild(trg);
+			var sourceNode = dt.mozSourceNode || dt.sourceNode;
+			if(
+				sourceNode
+				&& sourceNode instanceof window.XULElement
+				&& this.getTabFromChild(sourceNode)
+				&& sourceNode.ownerDocument.defaultView == window
+				&& (targetTab || this.getTabBarFromChild(trg))
+			) {
+				_log(e.type + ": tab was dragged into tab or tab bar in the same window, ignore");
+				return;
 			}
 		}
-		if(!draggedTab)
-			return;
-		var isPrivate = this.isPrivateTab(draggedTab);
-		_log(e.type + ": Tab: " + (draggedTab.getAttribute("label") || "").substr(0, 255));
+		else if(e.view.top == window.content) {
+			var trg = e.target;
+			var cs = trg.ownerDocument.defaultView.getComputedStyle(trg, null);
+			var userModify = "userModify" in cs ? cs.userModify : cs.MozUserModify;
+			if(userModify == "read-write") {
+				_log("Dropped into editable node, ignore");
+				return;
+			}
+			targetTab = window.gBrowser.selectedTab;
+		}
 
+		var inheritPrivateState = function(tab) {
+			tab._privateTabIgnore = true; // We should always set this flag!
+			_log("drop: make opened tab " + (isPrivate ? "private" : "not private"));
+			if(this.isPrivateTab(tab) != isPrivate)
+				this.toggleTabPrivate(tab, isPrivate);
+			else
+				_log("Already correct private state, ignore");
+		}.bind(this);
 		var tabOpen = function(e) {
 			window.removeEventListener("TabOpen", tabOpen, true);
 			window.clearTimeout(timer);
 			var tab = e.originalTarget || e.target;
-			tab._privateTabIgnore = true;
-			_log("Make dragged tab " + (isPrivate ? "private" : "not private"));
-			this.toggleTabPrivate(tab, isPrivate);
+			_log("drop: update new tab");
+			inheritPrivateState(tab);
 		}.bind(this);
 		window.addEventListener("TabOpen", tabOpen, true);
 		var timer = window.setTimeout(function() {
 			window.removeEventListener("TabOpen", tabOpen, true);
+			if(targetTab) {
+				_log("drop: update current tab");
+				inheritPrivateState(targetTab);
+			}
 		}, 0);
 	},
 	popupShowingHandler: function(e) {
@@ -982,6 +1017,18 @@ var windowsObserver = {
 			if(tbr.localName == "tabbrowser")
 				return tbr;
 		return node.ownerDocument.defaultView.gBrowser;
+	},
+	getTabBarFromChild: function(node) {
+		for(; node && "classList" in node; node = node.parentNode)
+			if(node.classList.contains("tabbrowser-tabs"))
+				return node;
+		return null;
+	},
+	getTabFromChild: function(node) {
+		for(; node && "classList" in node; node = node.parentNode)
+			if(node.classList.contains("tabbrowser-tab"))
+				return node;
+		return null;
 	},
 	ensureTitleModifier: function(document) {
 		var root = document.documentElement;
