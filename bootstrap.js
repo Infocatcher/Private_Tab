@@ -283,7 +283,8 @@ var windowsObserver = {
 		window.setTimeout(function() {
 			// Someon may change "usePrivateBrowsing"...
 			// It's good to show real state
-			this.setTabState(tab);
+			if(tab.parentNode) // Ignore removed tabs
+				this.setTabState(tab);
 		}.bind(this), 50);
 	},
 	dragTypeIsPrivate: "text/x-moz-extension-isprivatetab",
