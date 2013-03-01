@@ -347,7 +347,10 @@ var windowsObserver = {
 
 		var inheritPrivateState = function(tab) {
 			tab._privateTabIgnore = true; // We should always set this flag!
-			_log("drop: make opened tab " + (isPrivate ? "private" : "not private"));
+			_log(
+				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
+				+ (isPrivate ? "private" : "not private")
+			);
 			if(this.isPrivateTab(tab) != isPrivate)
 				this.toggleTabPrivate(tab, isPrivate);
 			else
