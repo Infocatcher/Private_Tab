@@ -311,6 +311,10 @@ var windowsObserver = {
 		var dt = e.dataTransfer;
 
 		var sourceNode = dt.mozSourceNode || dt.sourceNode;
+		if(!sourceNode) {
+			_log(e.type + ": missing source node, ignore");
+			return;
+		}
 		var isPrivate = sourceNode == this._dndPrivateNode;
 		this._dndPrivateNode = null;
 		_log(e.type + ": from " + (isPrivate ? "private" : "not private") + " tab");
