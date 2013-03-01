@@ -106,7 +106,14 @@ var windowsObserver = {
 			);
 			var opener = window.opener || window.__privateTabOpener || null;
 			delete window.__privateTabOpener;
-			if(opener && opener.gBrowser && this.isPrivateTab(opener.gBrowser.selectedTab)) {
+			if(
+				opener
+				// Windows from private window should be handled automatically.
+				// Also allow open new not private window from private window.
+				&& !this.isPrivateWindow(opener)
+				&& opener.gBrowser
+				&& this.isPrivateTab(opener.gBrowser.selectedTab)
+			) {
 				_log("Inherit private state from current tab of the opener window");
 				//~ todo: add pref for this?
 				//this.getPrivacyContext(window).usePrivateBrowsing = true;
