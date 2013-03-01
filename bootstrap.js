@@ -243,14 +243,19 @@ var windowsObserver = {
 		}
 		var gBrowser = this.getTabBrowser(tab);
 		//~ todo: try get real tab owner!
-		var inheritPrivate = !this.isEmptyTab(tab, gBrowser)
-			&& this.isPrivateTab(gBrowser.selectedTab);
+		var isPrivate;
+		if(!this.isEmptyTab(tab, gBrowser)) {
+			if(this.isPrivateTab(gBrowser.selectedTab))
+				isPrivate = true;
+			else if(this.isPrivateWindow(tab.ownerDocument.defaultView))
+				isPrivate = false; // Override browser behavior!
+		}
 		_log(
 			"Tab opened: " + (tab.getAttribute("label") || "").substr(0, 256)
-			+ "\nInherit private state: " + inheritPrivate
+			+ "\nInherit private state: " + isPrivate
 		);
-		if(inheritPrivate)
-			this.toggleTabPrivate(tab, true);
+		if(isPrivate != undefined)
+			this.toggleTabPrivate(tab, isPrivate);
 		else {
 			tab.ownerDocument.defaultView.setTimeout(function() {
 				this.setTabState(tab);
