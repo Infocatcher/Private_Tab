@@ -137,16 +137,14 @@ var windowsObserver = {
 		window.addEventListener("dragstart", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
-		if(!this.isPrivateWindow(window)) {
-			if(this.hotkeys)
-				window.addEventListener("keypress", this, true);
+		if(this.hotkeys)
+			window.addEventListener("keypress", this, true);
+		window.setTimeout(function() {
+			this.initControls(document);
 			window.setTimeout(function() {
-				this.initControls(document);
-				window.setTimeout(function() {
-					this.initHotkeysText(document);
-				}.bind(this), 10);
-			}.bind(this), 50);
-		}
+				this.initHotkeysText(document);
+			}.bind(this), 10);
+		}.bind(this), 50);
 	},
 	destroyWindow: function(window, reason) {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
