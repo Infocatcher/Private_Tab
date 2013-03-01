@@ -50,6 +50,7 @@ var windowsObserver = {
 
 		this.unloadStyles();
 		prefs.destroy();
+		this._dndPrivateNode = null;
 	},
 
 	observe: function(subject, topic, data) {
@@ -294,30 +295,27 @@ var windowsObserver = {
 				this.setTabState(tab);
 		}.bind(this), 50);
 	},
-	dragTypeIsPrivate: "text/x-moz-extension-isprivatetab",
+	_dndPrivateNode: null,
 	dragStartHandler: function(e) {
 		var window = e.currentTarget;
-		for(var trg = e.originalTarget || e.target; trg; trg = trg.parentNode)
-			if(trg.localName == "splitter") // Wrong things happens...
-				return;
-		if(this.isPrivateTab(window.gBrowser.selectedTab)) {
-			var dt = e.dataTransfer;
-			dt.setData(this.dragTypeIsPrivate, "true");
-			_log(e.type + ": add " + this.dragTypeIsPrivate + " type");
-		}
+		var sourceNode = this._dndPrivateNode = this.isPrivateTab(window.gBrowser.selectedTab)
+			? e.originalTarget || e.target
+			: null;
+		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> node as private");
 	},
 	dropHandler: function(e) {
 		var window = e.currentTarget;
 		var dt = e.dataTransfer;
 
-		var isPrivate = dt.types.contains(this.dragTypeIsPrivate);
+		var sourceNode = dt.mozSourceNode || dt.sourceNode;
+		var isPrivate = sourceNode == this._dndPrivateNode;
+		this._dndPrivateNode = null;
 		_log(e.type + ": from " + (isPrivate ? "private" : "not private") + " tab");
 
 		var targetTab;
 		if(e.view.top == window) {
 			var trg = e.originalTarget || e.target;
 			targetTab = this.getTabFromChild(trg);
-			var sourceNode = dt.mozSourceNode || dt.sourceNode;
 			if(
 				sourceNode
 				&& sourceNode instanceof window.XULElement
