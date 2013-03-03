@@ -108,7 +108,7 @@ var windowsObserver = {
 			var opener = window.opener || window.__privateTabOpener || null;
 			delete window.__privateTabOpener;
 			if(
-				opener
+				opener && !opener.closed
 				// Windows from private window should be handled automatically.
 				// Also allow open new not private window from private window.
 				&& !this.isPrivateWindow(opener)
