@@ -412,7 +412,7 @@ var windowsObserver = {
 		if(inNewTab)
 			inNewTab.hidden = hideNotPrivate;
 		if(inNewWin && inNewPrivateWin)
-			inNewWin.hidden = hideNotPrivate;
+			inNewWin.hidden = hideNotPrivate || this.isPrivateWindow(window);
 	},
 	updateTabTooltip: function(window) {
 		var document = window.document;
