@@ -131,6 +131,7 @@ var windowsObserver = {
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
+			this.destroyTitleModifier(window.document);
 			var gBrowser = window.gBrowser;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
@@ -1069,6 +1070,13 @@ var windowsObserver = {
 			"privateTab_titlemodifier_privatebrowsing",
 			tm + this.getLocalized("privateBrowsingTitleModifier")
 		);
+	},
+	destroyTitleModifier: function(document) {
+		var root = document.documentElement;
+		if(!root.hasAttribute("privateTab_titlemodifier_normal"))
+			return;
+		root.removeAttribute("privateTab_titlemodifier_normal");
+		root.removeAttribute("privateTab_titlemodifier_privatebrowsing");
 	},
 	updateWindowTitle: function(gBrowser, isPrivate) {
 		var document = gBrowser.ownerDocument;
