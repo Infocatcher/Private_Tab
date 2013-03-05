@@ -100,30 +100,8 @@ var windowsObserver = {
 		this.ensureTitleModifier(document);
 		this.patchBrowser(gBrowser, true);
 
-		if(reason == WINDOW_LOADED) {
-			_log(
-				"window.opener: " + window.opener
-				+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
-			);
-			var opener = window.opener || window.__privateTabOpener || null;
-			delete window.__privateTabOpener;
-			if(
-				opener && !opener.closed
-				// Windows from private window should be handled automatically.
-				// Also allow open new not private window from private window.
-				&& !this.isPrivateWindow(opener)
-				&& opener.gBrowser
-				&& this.isPrivateTab(opener.gBrowser.selectedTab)
-			) {
-				_log("Inherit private state from current tab of the opener window");
-				//~ todo: add pref for this?
-				//this.getPrivacyContext(window).usePrivateBrowsing = true;
-				Array.forEach(gBrowser.tabs, function(tab) {
-					this.toggleTabPrivate(tab, true);
-				}, this);
-			}
-		}
-
+		if(reason == WINDOW_LOADED)
+			this.inheritWindowState(window);
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
@@ -179,6 +157,33 @@ var windowsObserver = {
 	},
 	isTargetWindow: function(window) {
 		return window.document.documentElement.getAttribute("windowtype") == "navigator:browser";
+	},
+	inheritWindowState: function(window) {
+		_log(
+			"inheritWindowState():\nwindow.opener: " + window.opener
+			+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
+			+ "\nwindow.arguments:\n" + Array.map(window.arguments || [], String).join("\n")
+		);
+		var opener = window.opener || window.__privateTabOpener || null;
+		delete window.__privateTabOpener;
+		if(!opener || opener.closed || !this.isTargetWindow(opener) || !opener.gBrowser)
+			return;
+		if(!("arguments" in window) || !(3 in window.arguments)) {
+			_log("inheritWindowState(): Looks like new empty window, ignore");
+			return;
+		}
+		if(this.isPrivateWindow(window)) {
+			_log("inheritWindowState(): Ignore already private window");
+			return;
+		}
+		if(!this.isPrivateTab(opener.gBrowser.selectedTab))
+			return;
+		_log("Inherit private state from current tab of the opener window");
+		//~ todo: add pref for this?
+		//this.getPrivacyContext(window).usePrivateBrowsing = true;
+		Array.forEach(window.gBrowser.tabs, function(tab) {
+			this.toggleTabPrivate(tab, true);
+		}, this);
 	},
 
 	prefChanged: function(pName, pVal) {
