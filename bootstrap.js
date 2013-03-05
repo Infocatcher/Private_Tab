@@ -133,12 +133,11 @@ var windowsObserver = {
 		if(force) {
 			var gBrowser = window.gBrowser;
 			var isPrivateWindow = this.isPrivateWindow(window);
-			var makeNotPrivate = disable && !isPrivateWindow;
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
-				if(makeNotPrivate && this.isPrivateTab(tab)) {
-					this.toggleTabPrivate(tab, false);
-					this.fixTabState(tab, false);
+				if(disable && isPrivateWindow ^ this.isPrivateTab(tab)) {
+					this.toggleTabPrivate(tab, isPrivateWindow);
+					this.fixTabState(tab, false); // Always remove this.privateAttr
 				}
 			}, this);
 			_log("Restore title...");
