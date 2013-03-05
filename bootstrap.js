@@ -1098,10 +1098,15 @@ var windowsObserver = {
 				? root.getAttribute("title_privatebrowsing")
 				: root.getAttribute("title_normal")
 		);
-		if(isPrivate)
-			root.setAttribute("privatebrowsingmode", "temporary");
-		else
+		if(isPrivate) {
+			root.setAttribute(
+				"privatebrowsingmode",
+				PrivateBrowsingUtils.permanentPrivateBrowsing ? "permanent" : "temporary"
+			);
+		}
+		else {
 			root.removeAttribute("privatebrowsingmode");
+		}
 		gBrowser.updateTitlebar();
 	},
 
