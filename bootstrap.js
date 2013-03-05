@@ -106,6 +106,7 @@ var windowsObserver = {
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
+		this.appButtonNA = false;
 		this.fixAppButtonWidth(document);
 		window.setTimeout(function() {
 			this.updateWindowTitle(gBrowser);
@@ -148,6 +149,7 @@ var windowsObserver = {
 				this.updateWindowTitle(gBrowser, false);
 			this.patchBrowser(gBrowser, false);
 		}
+		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
@@ -1095,8 +1097,11 @@ var windowsObserver = {
 		}
 		var bo = appBtn.boxObject;
 		var iconWidth = bo.width;
-		if(!iconWidth) // App button are hidden?
+		if(!iconWidth) { // App button are hidden?
+			this.watchAppButton(document.defaultView);
+			this.appButtonNA = true; // Don't check and don't call watchAppButton() again
 			return;
+		}
 		root.removeAttribute("privatebrowsingmode");
 		iconWidth -= bo.width;
 		root.setAttribute("privatebrowsingmode", "temporary");
@@ -1112,6 +1117,7 @@ var windowsObserver = {
 			this.appButtonNA = true;
 			return;
 		}
+		_log("Fix App button width:\npadding-left: " + pl + "px\npadding-right: " + pr + "px");
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("chrome://browser/content/browser.xul"),\n\
@@ -1128,13 +1134,39 @@ var windowsObserver = {
 		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
 	},
-	restoreAppButtonWidth: function(document) {
+	restoreAppButtonWidth: function() {
 		var cssURI = this.appButtonCssURI;
 		if(!cssURI)
 			return;
 		var sss = this.sss;
 		if(sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.unregisterSheet(cssURI, sss.USER_SHEET);
+	},
+	watchAppButton: function(window) {
+		var titlebar = window.document.getElementById("titlebar");
+		if(!titlebar)
+			return;
+		_log("Watch for #titlebar changes");
+		var mo = window._privateTabAppButtonWatcher = new window.MutationObserver(function(mutations) {
+			mutations.some(function(mutation) {
+				if(mutation.attributeName == "hidden" && !titlebar.hidden) {
+					_log("#titlebar is now visible!");
+					mo.disconnect();
+					delete window._privateTabAppButtonWatcher;
+					this.appButtonNA = false;
+					this.fixAppButtonWidth(window.document);
+					return true;
+				}
+				return false;
+			}, this);
+		}.bind(this));
+		mo.observe(titlebar, { attributes: true });
+	},
+	unwatchAppButton: function(window) {
+		if("_privateTabAppButtonWatcher" in window) {
+			window._privateTabAppButtonWatcher.disconnect();
+			delete window._privateTabAppButtonWatcher;
+		}
 	},
 	updateWindowTitle: function(gBrowser, isPrivate) {
 		var document = gBrowser.ownerDocument;
