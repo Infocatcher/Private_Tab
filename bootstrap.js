@@ -32,6 +32,7 @@ var windowsObserver = {
 
 		prefs.init();
 		this.initHotkeys();
+		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
 		var ws = Services.wm.getEnumerator("navigator:browser");
 		while(ws.hasMoreElements())
@@ -193,6 +194,20 @@ var windowsObserver = {
 	prefChanged: function(pName, pVal) {
 		if(pName.substr(0, 4) == "key.")
 			this.updateHotkeys();
+		else if(pName == "fixAppButtonWidth") {
+			this.appButtonDontChange = !pVal;
+			this.restoreAppButtonWidth();
+			if(pVal) {
+				var ws = Services.wm.getEnumerator("navigator:browser");
+				while(ws.hasMoreElements()) {
+					var window = ws.getNext();
+					this.appButtonNA = false;
+					this.fixAppButtonWidth(window.document);
+					if(this.appButtonCssURI)
+						break;
+				}
+			}
+		}
 	},
 
 	patchBrowser: function(gBrowser, applyPatch) {
@@ -1084,8 +1099,9 @@ var windowsObserver = {
 	},
 	appButtonCssURI: null,
 	appButtonNA: false,
+	appButtonDontChange: false,
 	fixAppButtonWidth: function(document) {
-		if(this.appButtonCssURI || this.appButtonNA)
+		if(this.appButtonCssURI || this.appButtonNA || this.appButtonDontChange)
 			return;
 		var root = document.documentElement;
 		if(root.getAttribute("privatebrowsingmode") != "temporary")
@@ -1138,6 +1154,7 @@ var windowsObserver = {
 		var cssURI = this.appButtonCssURI;
 		if(!cssURI)
 			return;
+		this.appButtonCssURI = null;
 		var sss = this.sss;
 		if(sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.unregisterSheet(cssURI, sss.USER_SHEET);

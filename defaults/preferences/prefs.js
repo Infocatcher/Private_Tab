@@ -11,5 +11,6 @@ pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
+pref("extensions.privateTab.fixAppButtonWidth", true);
 
 pref("extensions.privateTab.debug", false);
