@@ -893,14 +893,19 @@ var windowsObserver = {
 			_log("=> setHotkeysText()");
 			mp.parentNode.removeChild(mp);
 			keyset.parentNode.removeChild(keyset);
-			window.clearInterval(bak);
+			window.clearInterval(tryAgain);
+			window.clearTimeout(tryAgainLimit);
 			this.setHotkeysText(document);
 		}.bind(this);
 		mp.setAttribute("onpopupshown", "this._onpopupshown();");
-		var bak = window.setInterval(function() {
+		var tryAgain = window.setInterval(function() {
 			_log("initHotkeysText(), next try...");
+			mp.hidePopup();
 			mp.openPopup();
-		}, 1000);
+		}, 1e3);
+		var tryAgainLimit = window.setTimeout(function() {
+			window.clearInterval(tryAgain);
+		}, 15e3);
 		mp.openPopup();
 	},
 	getHotkeysNodes: function(document, attr) {
