@@ -686,9 +686,10 @@ var windowsObserver = {
 
 		var menuItemParent = document.getElementById("menu_NewPopup") // SeaMonkey
 			|| document.getElementById("menu_FilePopup");
+		var shortLabel = menuItemParent.id == "menu_NewPopup" ? "Short" : "";
 		var menuItem = createMenuitem(this.newTabMenuId, {
-			label:     this.getLocalized("openNewPrivateTab"),
-			accesskey: this.getLocalized("openNewPrivateTabAccesskey"),
+			label:     this.getLocalized("openNewPrivateTab" + shortLabel),
+			accesskey: this.getLocalized("openNewPrivateTab" + shortLabel + "Accesskey"),
 			"privateTab-command": "openNewPrivateTab"
 		});
 		insertMenuitem(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
