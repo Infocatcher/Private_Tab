@@ -412,7 +412,8 @@ var windowsObserver = {
 		// we inherit private state, so here should be only "Open Link in New Private Tab/Window"
 		var inNewTab = document.getElementById("context-openlinkintab");
 		var inNewWin = document.getElementById("context-openlink");
-		var inNewPrivateWin = document.getElementById("context-openlinkprivate");
+		var inNewPrivateWin = document.getElementById("context-openlinkprivate")
+			|| document.getElementById("context-openlinkinprivatewindow"); // SeaMonkey 2.19a1
 		if(inNewTab)
 			inNewTab.hidden = hideNotPrivate;
 		if(inNewWin && inNewPrivateWin)
