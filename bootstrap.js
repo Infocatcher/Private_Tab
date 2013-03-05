@@ -49,6 +49,7 @@ var windowsObserver = {
 		Services.ww.unregisterNotification(this);
 
 		this.unloadStyles();
+		this.restoreAppButtonWidth();
 		prefs.destroy();
 		this._dndPrivateNode = null;
 	},
@@ -105,6 +106,7 @@ var windowsObserver = {
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
+		this.fixAppButtonWidth(document);
 		window.setTimeout(function() {
 			this.updateWindowTitle(gBrowser);
 		}.bind(this), 0);
@@ -297,7 +299,7 @@ var windowsObserver = {
 			this.updateWindowTitle(window.gBrowser);
 		}
 		window.setTimeout(function() {
-			// Someon may change "usePrivateBrowsing"...
+			// Someone may change "usePrivateBrowsing"...
 			// It's good to show real state
 			if(tab.parentNode) // Ignore removed tabs
 				this.setTabState(tab);
@@ -1078,6 +1080,62 @@ var windowsObserver = {
 		root.removeAttribute("privateTab_titlemodifier_normal");
 		root.removeAttribute("privateTab_titlemodifier_privatebrowsing");
 	},
+	appButtonCssURI: null,
+	appButtonNA: false,
+	fixAppButtonWidth: function(document) {
+		if(this.appButtonCssURI || this.appButtonNA)
+			return;
+		var root = document.documentElement;
+		if(root.getAttribute("privatebrowsingmode") != "temporary")
+			return;
+		var appBtn = document.getElementById("appmenu-button");
+		if(!appBtn) {
+			this.appButtonNA = true;
+			return;
+		}
+		var bo = appBtn.boxObject;
+		var iconWidth = bo.width;
+		if(!iconWidth) // App button are hidden?
+			return;
+		root.removeAttribute("privatebrowsingmode");
+		iconWidth -= bo.width;
+		root.setAttribute("privatebrowsingmode", "temporary");
+		if(iconWidth <= 0) {
+			this.appButtonNA = true;
+			return;
+		}
+		var half = iconWidth/2;
+		var s = document.defaultView.getComputedStyle(appBtn, null);
+		var pl = parseFloat(s.paddingLeft) - half;
+		var pr = parseFloat(s.paddingRight) - half;
+		if(pl < 0 || pr < 0) { // Can't correct...
+			this.appButtonNA = true;
+			return;
+		}
+		var cssStr = '\
+			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
+			@-moz-document url("chrome://browser/content/browser.xul"),\n\
+				url("chrome://navigator/content/navigator.xul") {\n\
+				#main-window[privatebrowsingmode="temporary"] #appmenu-button {\n\
+					padding-left: ' + pl + 'px !important;\n\
+					padding-right: ' + pr + 'px !important;\n\
+				}\n\
+			}';
+		var cssURI = this.appButtonCssURI = Services.io.newURI(
+			"data:text/css," + encodeURIComponent(cssStr), null, null
+		);
+		var sss = this.sss;
+		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
+			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
+	},
+	restoreAppButtonWidth: function(document) {
+		var cssURI = this.appButtonCssURI;
+		if(!cssURI)
+			return;
+		var sss = this.sss;
+		if(sss.sheetRegistered(cssURI, sss.USER_SHEET))
+			sss.unregisterSheet(cssURI, sss.USER_SHEET);
+	},
 	updateWindowTitle: function(gBrowser, isPrivate) {
 		var document = gBrowser.ownerDocument;
 		if(isPrivate === undefined)
@@ -1099,10 +1157,9 @@ var windowsObserver = {
 				: root.getAttribute("title_normal")
 		);
 		if(isPrivate) {
-			root.setAttribute(
-				"privatebrowsingmode",
-				PrivateBrowsingUtils.permanentPrivateBrowsing ? "permanent" : "temporary"
-			);
+			var pbTemp = !PrivateBrowsingUtils.permanentPrivateBrowsing;
+			root.setAttribute("privatebrowsingmode", pbTemp ? "temporary" : "permanent");
+			pbTemp && this.fixAppButtonWidth(document);
 		}
 		else {
 			root.removeAttribute("privatebrowsingmode");
