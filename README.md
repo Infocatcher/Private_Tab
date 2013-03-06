@@ -19,11 +19,13 @@ You can listen for following events:
 So if you want change private state of tab, use something like following:
 ```javascript
 var tab = gBrowser.selectedTab;
-var privacyContext = tab.linkedBrowser
-	.contentWindow
-	.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-	.getInterface(Components.interfaces.nsIWebNavigation)
-	.QueryInterface(Components.interfaces.nsILoadContext);
+//var privacyContext = tab.linkedBrowser
+//	.contentWindow
+//	.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+//	.getInterface(Components.interfaces.nsIWebNavigation)
+//	.QueryInterface(Components.interfaces.nsILoadContext);
+Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
+var privacyContext = PrivateBrowsingUtils.privacyContextFromWindow(tab.linkedBrowser.contentWindow);
 var isPrivate = privacyContext.usePrivateBrowsing = !privacyContext.usePrivateBrowsing;
 // https://github.com/Infocatcher/Private_Tab#api-for-other-extensions
 var evt = document.createEvent("UIEvent");
