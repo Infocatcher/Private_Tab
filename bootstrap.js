@@ -75,6 +75,7 @@ var windowsObserver = {
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
 			case "dragstart":                 this.dragStartHandler(e);      break;
+			case "dragend":                   this.dragEndHandler(e);        break;
 			case "drop":                      this.dropHandler(e);           break;
 			case "popupshowing":              this.popupShowingHandler(e);   break;
 			case "command":                   this.commandHandler(e);        break;
@@ -117,6 +118,7 @@ var windowsObserver = {
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
 		window.addEventListener("dragstart", this, true);
+		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		if(this.hotkeys)
@@ -155,6 +157,7 @@ var windowsObserver = {
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
 		window.removeEventListener("dragstart", this, true);
+		window.removeEventListener("dragend", this, true);
 		window.removeEventListener("drop", this, true);
 		window.removeEventListener("keypress", this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
@@ -323,12 +326,26 @@ var windowsObserver = {
 		}.bind(this), 50);
 	},
 	_dndPrivateNode: null,
+	get dndPrivateNode() {
+		try { // We can get "can't access dead object" error here
+			var node = this._dndPrivateNode;
+			if(node.parentNode && node.ownerDocument)
+				return node;
+		}
+		catch(e) {
+		}
+		return null;
+	},
 	dragStartHandler: function(e) {
 		var window = e.currentTarget;
 		var sourceNode = this._dndPrivateNode = this.isPrivateTab(window.gBrowser.selectedTab)
 			? e.originalTarget || e.target
 			: null;
-		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> node as private");
+		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> " + sourceNode + " node as private");
+	},
+	dragEndHandler: function(e) {
+		this._dndPrivateNode && _log(e.type + " => this._dndPrivateNode = null");
+		this._dndPrivateNode = null;
 	},
 	dropHandler: function(e) {
 		var window = e.currentTarget;
@@ -339,7 +356,7 @@ var windowsObserver = {
 			_log(e.type + ": missing source node, ignore");
 			return;
 		}
-		var isPrivate = sourceNode == this._dndPrivateNode;
+		var isPrivate = sourceNode == this.dndPrivateNode;
 		this._dndPrivateNode = null;
 		_log(e.type + ": from " + (isPrivate ? "private" : "not private") + " tab");
 
