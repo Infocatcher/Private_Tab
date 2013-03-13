@@ -1183,17 +1183,18 @@ var windowsObserver = {
 			return;
 		_log("Watch for #titlebar changes");
 		var mo = window._privateTabAppButtonWatcher = new window.MutationObserver(function(mutations) {
-			mutations.some(function(mutation) {
-				if(mutation.attributeName == "hidden" && !titlebar.hidden) {
-					_log("#titlebar is now visible!");
-					mo.disconnect();
-					delete window._privateTabAppButtonWatcher;
-					this.appButtonNA = false;
-					this.fixAppButtonWidth(window.document);
-					return true;
-				}
-				return false;
-			}, this);
+			if(
+				!mutations.some(function(mutation) {
+					return mutation.attributeName == "hidden";
+				})
+				|| titlebar.hidden
+			)
+				return;
+			_log("#titlebar is now visible!");
+			mo.disconnect();
+			delete window._privateTabAppButtonWatcher;
+			this.appButtonNA = false;
+			this.fixAppButtonWidth(window.document);
 		}.bind(this));
 		mo.observe(titlebar, { attributes: true });
 	},
