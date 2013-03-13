@@ -626,6 +626,10 @@ var windowsObserver = {
 		var gBrowser = window.gBrowser;
 		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
 		this.toggleTabPrivate(tab, true);
+		if("focusAndSelectUrlBar" in window)
+			window.focusAndSelectUrlBar();
+		else if("WindowFocusTimerCallback" in window) // SeaMonkey
+			window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
 
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 		return tab;
