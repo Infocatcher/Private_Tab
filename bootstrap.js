@@ -200,15 +200,14 @@ var windowsObserver = {
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
 			this.restoreAppButtonWidth();
-			if(pVal) {
-				var ws = Services.wm.getEnumerator("navigator:browser");
-				while(ws.hasMoreElements()) {
-					var window = ws.getNext();
-					this.appButtonNA = false;
-					this.fixAppButtonWidth(window.document);
-					if(this.appButtonCssURI)
-						break;
-				}
+			var ws = Services.wm.getEnumerator("navigator:browser");
+			while(ws.hasMoreElements()) {
+				var window = ws.getNext();
+				var document = window.document;
+				this.appButtonNA = false;
+				if(pVal && !this.appButtonCssURI)
+					this.fixAppButtonWidth(document);
+				this.updateAppButtonWidth(document, true);
 			}
 		}
 	},
@@ -1236,6 +1235,27 @@ var windowsObserver = {
 			root.removeAttribute("privatebrowsingmode");
 		}
 		gBrowser.updateTitlebar();
+		this.updateAppButtonWidth(document);
+	},
+	updateAppButtonWidth: function(document, force) {
+		var window = document.defaultView;
+		if(
+			"TabsInTitlebar" in window
+			&& "_sizePlaceholder" in window.TabsInTitlebar
+			&& (force || !this.appButtonCssURI)
+		) {
+			window.setTimeout(function() { // Pseudo async
+				// Based on code from chrome://browser/content/browser.js
+				var appBtnBox = document.getElementById("appmenu-button-container");
+				if(appBtnBox) {
+					var rect = appBtnBox.getBoundingClientRect();
+					if(rect.width) {
+						_log("Update size placeholder for App button");
+						window.TabsInTitlebar._sizePlaceholder("appmenu-button", rect.width);
+					}
+				}
+			}, 0);
+		}
 	},
 
 	getPrivacyContext: function(window) {
