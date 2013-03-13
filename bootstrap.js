@@ -428,26 +428,27 @@ var windowsObserver = {
 	updatePageContext: function(window) {
 		var document = window.document;
 		var gContextMenu = window.gContextMenu;
-		var hide = !gContextMenu
+		var noLink = !gContextMenu
 			|| (!gContextMenu.onSaveableLink && !gContextMenu.onPlainTextLink);
-		if(hide && gContextMenu && gContextMenu.onMailtoLink) {
+		var inNewTab = document.getElementById("context-openlinkintab");
+		if(
+			noLink
+			&& gContextMenu && gContextMenu.onMailtoLink
+			&& inNewTab && !inNewTab.hidden
+		) {
 			// See chrome://browser/content/nsContextMenu.js
 			// Simple way to inherit
 			// var shouldShow = this.onSaveableLink || isMailtoInternal || this.onPlainTextLink;
-			var origOpenIn = document.getElementById("context-openlinkprivate")
-				|| document.getElementById("context-openlinkintab");
-			if(origOpenIn && !origOpenIn.hidden)
-				hide = false;
+			noLink = false;
 		}
-		if(!hide && !gContextMenu.linkURL)
-			hide = true;
+		if(!noLink && !gContextMenu.linkURL)
+			noLink = true;
 		var mi = document.getElementById(this.contextId);
-		mi.hidden = hide;
+		mi.hidden = noLink;
 
 		var hideNotPrivate = this.isPrivateTab(window.gBrowser.selectedTab);
 		// Hide "Open Link in New Tab/Window" from page context menu on private tabs:
 		// we inherit private state, so here should be only "Open Link in New Private Tab/Window"
-		var inNewTab = document.getElementById("context-openlinkintab");
 		var inNewWin = document.getElementById("context-openlink");
 		var inNewPrivateWin = document.getElementById("context-openlinkprivate")
 			|| document.getElementById("context-openlinkinprivatewindow"); // SeaMonkey 2.19a1
