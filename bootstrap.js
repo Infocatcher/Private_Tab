@@ -108,6 +108,10 @@ var windowsObserver = {
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
+		// We handle window before gBrowserInit.onLoad(), so set "privatebrowsingmode"
+		// for fixAppButtonWidth() manually
+		if(this.isPrivateWindow(window) && !PrivateBrowsingUtils.permanentPrivateBrowsing)
+			document.documentElement.setAttribute("privatebrowsingmode", "temporary");
 		this.appButtonNA = false;
 		this.fixAppButtonWidth(document);
 		window.setTimeout(function() {
