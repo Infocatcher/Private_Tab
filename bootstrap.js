@@ -1154,8 +1154,7 @@ var windowsObserver = {
 		_log("Fix App button width:\npadding-left: " + pl + "px\npadding-right: " + pr + "px");
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
-			@-moz-document url("chrome://browser/content/browser.xul"),\n\
-				url("chrome://navigator/content/navigator.xul") {\n\
+			@-moz-document url("' + document.documentURI + '") {\n\
 				#main-window[privatebrowsingmode="temporary"] #appmenu-button {\n\
 					padding-left: ' + pl + 'px !important;\n\
 					padding-right: ' + pr + 'px !important;\n\
@@ -1295,8 +1294,7 @@ var windowsObserver = {
 			: "-moz-";
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
-			@-moz-document url("chrome://browser/content/browser.xul"),\n\
-				url("chrome://navigator/content/navigator.xul") {\n\
+			@-moz-document url("' + window.document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '] {\n\
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
