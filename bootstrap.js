@@ -452,9 +452,9 @@ var windowsObserver = {
 		var inNewWin = document.getElementById("context-openlink");
 		var inNewPrivateWin = document.getElementById("context-openlinkprivate")
 			|| document.getElementById("context-openlinkinprivatewindow"); // SeaMonkey 2.19a1
-		if(inNewTab)
+		if(inNewTab && !noLink)
 			inNewTab.hidden = hideNotPrivate;
-		if(inNewWin && inNewPrivateWin)
+		if(inNewWin && inNewPrivateWin && !noLink)
 			inNewWin.hidden = hideNotPrivate || this.isPrivateWindow(window);
 	},
 	updateTabTooltip: function(window) {
