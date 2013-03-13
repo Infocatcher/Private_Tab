@@ -1137,36 +1137,50 @@ var windowsObserver = {
 			return;
 		}
 		var bo = appBtn.boxObject;
-		var iconWidth = bo.width;
-		if(!iconWidth) { // App button are hidden?
+		var pbWidth = bo.width;
+		if(!pbWidth) { // App button are hidden?
 			this.watchAppButton(document.defaultView);
 			this.appButtonNA = true; // Don't check and don't call watchAppButton() again
 			return;
 		}
 		root.removeAttribute("privatebrowsingmode");
-		iconWidth -= bo.width;
+		var npbWidth = bo.width;
+		var iconWidth = pbWidth - npbWidth;
 		root.setAttribute("privatebrowsingmode", "temporary");
-		if(iconWidth <= 0) {
+		if(iconWidth == 0) {
+			_log("Fix App button width: nothing to do, width are the same");
 			this.appButtonNA = true;
 			return;
 		}
-		var half = iconWidth/2;
-		var s = document.defaultView.getComputedStyle(appBtn, null);
-		var pl = parseFloat(s.paddingLeft) - half;
-		var pr = parseFloat(s.paddingRight) - half;
-		if(pl < 0 || pr < 0) { // Can't correct...
-			this.appButtonNA = true;
-			return;
+		var cssStr;
+		if(iconWidth > 0) {
+			var half = iconWidth/2;
+			var s = document.defaultView.getComputedStyle(appBtn, null);
+			var pl = parseFloat(s.paddingLeft) - half;
+			var pr = parseFloat(s.paddingRight) - half;
+			if(pl >= 0 && pr >= 0) {
+				_log("Fix App button width:\npadding-left: " + pl + "px\npadding-right: " + pr + "px");
+				cssStr = '\
+					@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
+					@-moz-document url("' + document.documentURI + '") {\n\
+						#main-window[privatebrowsingmode="temporary"] #appmenu-button {\n\
+							padding-left: ' + pl + 'px !important;\n\
+							padding-right: ' + pr + 'px !important;\n\
+						}\n\
+					}';
+			}
 		}
-		_log("Fix App button width:\npadding-left: " + pl + "px\npadding-right: " + pr + "px");
-		var cssStr = '\
-			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
-			@-moz-document url("' + document.documentURI + '") {\n\
-				#main-window[privatebrowsingmode="temporary"] #appmenu-button {\n\
-					padding-left: ' + pl + 'px !important;\n\
-					padding-right: ' + pr + 'px !important;\n\
-				}\n\
-			}';
+		if(!cssStr) { // Better than nothing :)
+			var maxWidth = Math.max(pbWidth, npbWidth);
+			_log("Fix App button width:\nmin-width: " + maxWidth + "px");
+			cssStr = '\
+				@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
+				@-moz-document url("' + document.documentURI + '") {\n\
+					#appmenu-button {\n\
+						min-width: ' + maxWidth + 'px !important;\n\
+					}\n\
+				}';
+		}
 		var cssURI = this.appButtonCssURI = Services.io.newURI(
 			"data:text/css," + encodeURIComponent(cssStr), null, null
 		);
