@@ -655,7 +655,7 @@ var windowsObserver = {
 		if(openAsChild && "tabkit" in window)
 			window.tabkit.addingTabOver();
 
-		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab");
+		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab", openAsChild);
 		return tab;
 	},
 	openNewPrivateTab: function(window) {
