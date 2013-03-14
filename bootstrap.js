@@ -829,7 +829,7 @@ var windowsObserver = {
 
 		var document = mp.ownerDocument;
 		placesItem = this.createMenuitem(document, this.placesContextId, {
-			label:     this.getLocalized("openPlacesInNewPrivateTab"), //~ todo: use own label and accesskey
+			label:     this.getLocalized("openPlacesInNewPrivateTab"),
 			accesskey: this.getLocalized("openPlacesInNewPrivateTabAccesskey"),
 			selection: "link",
 			selectiontype: "single",
