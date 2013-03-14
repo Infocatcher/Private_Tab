@@ -598,18 +598,19 @@ var windowsObserver = {
 		var placesContext = mi.parentNode;
 		var view = placesContext._view;
 		var node = view.selectedNode;
+		var top = this.getTopWindow(window.top);
 		try {
-			if(!window.PlacesUIUtils.checkURLSecurity(node, window.top))
+			if(!window.PlacesUIUtils.checkURLSecurity(node, top))
 				return;
 		}
 		catch(e) {
 			Components.utils.reportError(e);
 		}
 		var loadInBackgroundPref = "browser.tabs.loadBookmarksInBackground";
-		this.openURIInNewPrivateTab(window.top, node.uri, null, {
+		this.openURIInNewPrivateTab(top, node.uri, null, {
 			toggleInBackground: toggleInBackground,
 			loadInBackgroundPref: prefs.getPref(loadInBackgroundPref) != undefined && loadInBackgroundPref,
-			openAsChild: false
+			openAsChild: window.top == top.content
 		});
 	},
 	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
@@ -1182,6 +1183,20 @@ var windowsObserver = {
 			if(node.classList.contains("tabbrowser-tab"))
 				return node;
 		return null;
+	},
+	get dwu() {
+		delete this.dwu;
+		return this.dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+			.getService(Components.interfaces.inIDOMUtils);
+	},
+	getTopWindow: function(window) {
+		for(;;) {
+			var browser = this.dwu.getParentForNode(window.document, true);
+			if(!browser)
+				break;
+			window = browser.ownerDocument.defaultView.top;
+		}
+		return window;
 	},
 	ensureTitleModifier: function(document) {
 		var root = document.documentElement;
