@@ -693,55 +693,30 @@ var windowsObserver = {
 	},
 	initControls: function(document) {
 		var window = document.defaultView;
-		var createMenuitem = function(id, attrs) {
-			var mi = document.createElement("menuitem");
-			mi.id = id;
-			for(var name in attrs)
-				mi.setAttribute(name, attrs[name]);
-			mi.addEventListener("command", this, false);
-			mi.addEventListener("click", this, false);
-			return mi;
-		}.bind(this);
-		var insertMenuitem = function(mi, parent, insertAfter) {
-			if(!parent)
-				return;
-			var insPos;
-			for(var i = 0, l = insertAfter.length; i < l; ++i) {
-				var id = insertAfter[i];
-				var node = typeof id == "string"
-					? parent.querySelector(insertAfter[i])
-					: id;
-				if(node && node.parentNode == parent) {
-					insPos = node;
-					break;
-				}
-			}
-			parent.insertBefore(mi, insPos && insPos.nextSibling);
-		}.bind(this);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext.addEventListener("popupshowing", this, false);
 
-		var contextItem = createMenuitem(this.contextId, {
+		var contextItem = this.createMenuitem(document, this.contextId, {
 			label:     this.getLocalized("openInNewPrivateTab"),
 			accesskey: this.getLocalized("openInNewPrivateTabAccesskey"),
 			"privateTab-command": "openInNewPrivateTab"
 		});
-		insertMenuitem(contextItem, contentContext, ["#context-openlinkintab"]);
+		this.insertNode(contextItem, contentContext, ["#context-openlinkintab"]);
 
 		var menuItemParent = document.getElementById("menu_NewPopup") // SeaMonkey
 			|| document.getElementById("menu_FilePopup");
 		var shortLabel = menuItemParent.id == "menu_NewPopup" ? "Short" : "";
-		var menuItem = createMenuitem(this.newTabMenuId, {
+		var menuItem = this.createMenuitem(document, this.newTabMenuId, {
 			label:     this.getLocalized("openNewPrivateTab" + shortLabel),
 			accesskey: this.getLocalized("openNewPrivateTab" + shortLabel + "Accesskey"),
 			"privateTab-command": "openNewPrivateTab"
 		});
-		insertMenuitem(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
+		this.insertNode(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
 
 		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
 		if(appMenuItemParent) {
-			var appMenuItem = createMenuitem(this.newTabAppMenuId, {
+			var appMenuItem = this.createMenuitem(document, this.newTabAppMenuId, {
 				label:     this.getLocalized("openNewPrivateTab"),
 				"privateTab-command": "openNewPrivateTab"
 			});
@@ -755,19 +730,19 @@ var windowsObserver = {
 					appMenuItem.style.MozImageRegion = s.MozImageRegion;
 				}
 			}
-			insertMenuitem(appMenuItem, appMenuItemParent, [newPrivateWin]);
+			this.insertNode(appMenuItem, appMenuItemParent, [newPrivateWin]);
 		}
 
 		var tabContext = this.getTabContextMenu(document);
 		_log("tabContext: " + tabContext);
 		tabContext.addEventListener("popupshowing", this, false);
-		var tabContextItem = createMenuitem(this.tabContextId, {
+		var tabContextItem = this.createMenuitem(document, this.tabContextId, {
 			label:     this.getLocalized("privateTab"),
 			accesskey: this.getLocalized("privateTabAccesskey"),
 			type: "checkbox",
 			"privateTab-command": "toggleTabPrivate"
 		});
-		insertMenuitem(tabContextItem, tabContext, ["#context_unpinTab", '[tbattr="tabbrowser-undoclosetab"]']);
+		this.insertNode(tabContextItem, tabContext, ["#context_unpinTab", '[tbattr="tabbrowser-undoclosetab"]']);
 
 		var tabTip = this.getTabTooltip(document);
 		if(tabTip) {
@@ -817,6 +792,35 @@ var windowsObserver = {
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
 		if("TabScope" in window && "_updateTitle" in window.TabScope)
 			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle");
+	},
+	get createMenuitem() {
+		delete this.createMenuitem;
+		return this.createMenuitem = this._createMenuitem.bind(this);
+	},
+	_createMenuitem: function(document, id, attrs) {
+		var mi = document.createElement("menuitem");
+		mi.id = id;
+		for(var name in attrs)
+			mi.setAttribute(name, attrs[name]);
+		mi.addEventListener("command", this, false);
+		mi.addEventListener("click", this, false);
+		return mi;
+	},
+	insertNode: function(node, parent, insertAfter) {
+		if(!parent)
+			return;
+		var insPos;
+		for(var i = 0, l = insertAfter.length; i < l; ++i) {
+			var id = insertAfter[i];
+			var sibling = typeof id == "string"
+				? parent.querySelector(insertAfter[i])
+				: id;
+			if(sibling && sibling.parentNode == parent) {
+				insPos = sibling;
+				break;
+			}
+		}
+		parent.insertBefore(node, insPos && insPos.nextSibling);
 	},
 	destroyNodes: function(parent, force) {
 		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
