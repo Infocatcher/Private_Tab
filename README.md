@@ -11,7 +11,7 @@ You can listen for following events:
 </thead>
 <tbody>
 <tr><td>PrivateTab:PrivateChanged</td><td>tab         </td><td>1 – private tab<br>0 – not private</td><td>Changed private state of the tab  </td></tr>
-<tr><td>PrivateTab:OpenInNewTab  </td><td>tab         </td><td align="center">–                  </td><td>Link was opened in new private tab</td></tr>
+<tr><td>PrivateTab:OpenInNewTab  </td><td>tab         </td><td>1 – may be opened as child tab    </td><td>Link was opened in new private tab</td></tr>
 <tr><td>PrivateTab:OpenNewTab    </td><td>tab         </td><td align="center">–                  </td><td>Opened new (empty) private tab    </td></tr>
 </tbody>
 </table>
