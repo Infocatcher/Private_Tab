@@ -676,6 +676,22 @@ var windowsObserver = {
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 		return tab;
 	},
+	waitForTab: function(window, callback) {
+		_log("waitForTab()");
+		function tabOpen(e) {
+			window.removeEventListener("TabOpen", tabOpen, true);
+			window.clearTimeout(timer);
+			var tab = e.originalTarget || e.target;
+			_log("waitForTab(): opened tab");
+			callback(tab);
+		};
+		window.addEventListener("TabOpen", tabOpen, true);
+		var timer = window.setTimeout(function() {
+			window.removeEventListener("TabOpen", tabOpen, true);
+			_log("waitForTab(): nothing");
+			callback(null);
+		}, 0);
+	},
 	getNotPopupWindow: function(window) {
 		if(
 			"getTopWin" in window
@@ -836,14 +852,37 @@ var windowsObserver = {
 			selectiontype: "single",
 			"privateTab-command": "openPlacesInNewPrivateTab"
 		});
-		this.insertNode(placesItem, mp, ["#placesContext_open\\:newtab"]);
+		var inNewTab = mp.getElementsByAttribute("id", "placesContext_open:newtab")[0];
+		this.insertNode(placesItem, mp, [inNewTab]);
+
+		var waitForTab = function(e) {
+			var trg = e.target;
+			_log(e.type + ": " + trg.nodeName + "#" + trg.id);
+			if(trg != inNewTab && (!trg.id || trg.id != inNewTab.getAttribute("command")))
+				return;
+			var top = this.getTopWindow(window.top);
+			this.waitForTab(top, function(tab) {
+				if(!tab)
+					return;
+				_log("Wait for tab -> set ignore flag");
+				tab._privateTabIgnore = true;
+				if(this.isPrivateWindow(top)) {
+					_log("Wait for tab -> make tab not private");
+					this.toggleTabPrivate(tab, false);
+				}
+			}.bind(this));
+		}.bind(this);
+		var window = document.defaultView;
+		window.addEventListener("command", waitForTab, true);
+
 		// Easy way to remove added items from all documents :)
 		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode are already null
 		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
 			if(e.originalTarget != mp)
 				return;
 			mp.removeEventListener(e.type, destroyPlacesContext, true);
-			mp.ownerDocument.defaultView.setTimeout(function() {
+			window.removeEventListener("command", waitForTab, true);
+			window.setTimeout(function() {
 				mp.removeChild(placesItem);
 				delete mp._privateTabTriggerNode;
 				_log("Remove item from places context: " + document.documentURI);
