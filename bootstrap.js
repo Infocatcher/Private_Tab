@@ -199,7 +199,7 @@ var windowsObserver = {
 	},
 
 	prefChanged: function(pName, pVal) {
-		if(pName.substr(0, 4) == "key.")
+		if(pName.startsWith("key."))
 			this.updateHotkeys();
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
