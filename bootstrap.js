@@ -389,7 +389,12 @@ var windowsObserver = {
 			targetTab = window.gBrowser.selectedTab;
 		}
 
-		var inheritPrivateState = function(tab) {
+		this.waitForTab(window, function(tab) {
+			if(!tab) {
+				if(!targetTab)
+					return;
+				tab = targetTab;
+			}
 			tab._privateTabIgnore = true; // We should always set this flag!
 			_log(
 				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
@@ -399,22 +404,7 @@ var windowsObserver = {
 				this.toggleTabPrivate(tab, isPrivate);
 			else
 				_log("Already correct private state, ignore");
-		}.bind(this);
-		var tabOpen = function(e) {
-			window.removeEventListener("TabOpen", tabOpen, true);
-			window.clearTimeout(timer);
-			var tab = e.originalTarget || e.target;
-			_log("drop: update new tab");
-			inheritPrivateState(tab);
-		}.bind(this);
-		window.addEventListener("TabOpen", tabOpen, true);
-		var timer = window.setTimeout(function() {
-			window.removeEventListener("TabOpen", tabOpen, true);
-			if(targetTab) {
-				_log("drop: update current tab");
-				inheritPrivateState(targetTab);
-			}
-		}, 0);
+		}.bind(this));
 	},
 	popupShowingHandler: function(e) {
 		var popup = e.target;
