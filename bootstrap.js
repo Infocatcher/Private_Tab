@@ -498,10 +498,17 @@ var windowsObserver = {
 		var trg = e.target;
 		var cmd = trg.getAttribute(this.cmdAttr);
 		var window = trg.ownerDocument.defaultView;
-		this.handleCommand(window, cmd, shifted, closeMenus);
-		closeMenus && window.closeMenus(trg);
+		this.handleCommand(window, cmd, shifted, closeMenus, e);
+		if(closeMenus) {
+			window.closeMenus(trg);
+			var mp = trg.parentNode;
+			if("triggerNode" in mp) {
+				var tn = mp._privateTabTriggerNode || mp.triggerNode;
+				tn && window.closeMenus(tn);
+			}
+		}
 	},
-	handleCommand: function(window, cmd, shifted, closeMenus) {
+	handleCommand: function(window, cmd, shifted, closeMenus, e) {
 		_log("handleCommand: " + cmd);
 		if(cmd == "openInNewPrivateTab")
 			this.openInNewPrivateTab(window, shifted);
@@ -509,6 +516,8 @@ var windowsObserver = {
 			this.openNewPrivateTab(window);
 		else if(cmd == "toggleTabPrivate")
 			this.toggleContextTabPrivate(window);
+		else if(cmd == "openPlacesInNewPrivateTab")
+			this.openPlaceInNewPrivateTab(window, shifted, e);
 		else {
 			var caller = Components.stack.caller;
 			throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
@@ -577,9 +586,38 @@ var windowsObserver = {
 		var uri = gContextMenu.linkURL;
 		var doc = gContextMenu.target.ownerDocument;
 		window.urlSecurityCheck(uri, doc.nodePrincipal);
+		this.openURIInNewPrivateTab(window, uri, doc, {
+			toggleInBackground: toggleInBackground
+		});
+	},
+	openPlaceInNewPrivateTab: function(window, toggleInBackground, e) {
+		var mi = e && e.target;
+		if(!mi)
+			return;
+		_log("openPlaceInNewPrivateTab(): " + mi.nodeName + " " + mi.getAttribute("label"));
+		var placesContext = mi.parentNode;
+		var view = placesContext._view;
+		var node = view.selectedNode;
+		try {
+			if(!window.PlacesUIUtils.checkURLSecurity(node, window.top))
+				return;
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
+		var loadInBackgroundPref = "browser.tabs.loadBookmarksInBackground";
+		this.openURIInNewPrivateTab(window.top, node.uri, null, {
+			toggleInBackground: toggleInBackground,
+			loadInBackgroundPref: prefs.getPref(loadInBackgroundPref) != undefined && loadInBackgroundPref,
+			openAsChild: false
+		});
+	},
+	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
+		var toggleInBackground = "toggleInBackground" in options && options.toggleInBackground;
+		var loadInBackgroundPref = options.loadInBackgroundPref || "browser.tabs.loadInBackground";
+		var openAsChild = "openAsChild" in options ? options.openAsChild : true;
 
 		var relatedToCurrent;
-		var openAsChild = true;
 		var w = this.getNotPopupWindow(window);
 		if(w) {
 			relatedToCurrent = openAsChild = false;
@@ -599,8 +637,8 @@ var windowsObserver = {
 		}
 
 		var tab = gBrowser.addTab(uri, {
-			referrerURI: doc.documentURIObject,
-			charset: doc.characterSet,
+			referrerURI: sourceDocument ? sourceDocument.documentURIObject : null,
+			charset: sourceDocument ? sourceDocument.characterSet : null,
 			ownerTab: gBrowser.selectedTab,
 			relatedToCurrent: relatedToCurrent
 		});
@@ -608,7 +646,7 @@ var windowsObserver = {
 
 		var inBackground = prefs.get("loadInBackground");
 		if(inBackground == -1)
-			inBackground = prefs.getPref("browser.tabs.loadInBackground");
+			inBackground = prefs.getPref(loadInBackgroundPref);
 		if(toggleInBackground)
 			inBackground = !inBackground;
 		if(!inBackground)
@@ -673,6 +711,7 @@ var windowsObserver = {
 	newTabAppMenuId: "privateTab-appMenu-openNewPrivateTab",
 	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
 	tabScopeTipId: "privateTab-tabScope-isPrivateTabLabel",
+	placesContextId: "privateTab-places-openInNewPrivateTab",
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -772,6 +811,43 @@ var windowsObserver = {
 				);
 			}
 		}
+
+		window.addEventListener("popupshowing", this.initPlacesContext, true);
+	},
+	get initPlacesContext() {
+		delete this.initPlacesContext;
+		return this.initPlacesContext = this._initPlacesContext.bind(this);
+	},
+	_initPlacesContext: function(e) {
+		var mp = e.originalTarget || e.target;
+		if(mp.id != "placesContext")
+			return;
+
+		var nodes = mp.getElementsByAttribute("id", this.placesContextId);
+		var placesItem = nodes.length && nodes[0];
+		placesItem && placesItem.parentNode.removeChild(placesItem);
+
+		var document = mp.ownerDocument;
+		placesItem = this.createMenuitem(document, this.placesContextId, {
+			label:     this.getLocalized("openPlacesInNewPrivateTab"), //~ todo: use own label and accesskey
+			accesskey: this.getLocalized("openPlacesInNewPrivateTabAccesskey"),
+			selection: "link",
+			selectiontype: "single",
+			"privateTab-command": "openPlacesInNewPrivateTab"
+		});
+		this.insertNode(placesItem, mp, ["#placesContext_open\\:newtab"]);
+		// Easy way to remove added items from all documents :)
+		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode are already null
+		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
+			if(e.originalTarget != mp)
+				return;
+			mp.removeEventListener(e.type, destroyPlacesContext, true);
+			mp.ownerDocument.defaultView.setTimeout(function() {
+				mp.removeChild(placesItem);
+				delete mp._privateTabTriggerNode;
+				_log("Remove item from places context: " + document.documentURI);
+			}, 0);
+		}, true);
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
@@ -792,6 +868,8 @@ var windowsObserver = {
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
 		if("TabScope" in window && "_updateTitle" in window.TabScope)
 			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle");
+
+		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
 	get createMenuitem() {
 		delete this.createMenuitem;
