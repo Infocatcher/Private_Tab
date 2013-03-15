@@ -1103,7 +1103,11 @@ var windowsObserver = {
 			var keyText = keys[kId]._keyText;
 			_log("Set " + keyText + " for " + kId);
 			this.getHotkeysNodes(document, kId).forEach(function(node) {
-				node.setAttribute("acceltext", keyText);
+				var cl = node.classList;
+				if(cl.contains("menuitem-tooltip") || cl.contains("menuitem-iconic-tooltip"))
+					node.setAttribute("tooltiptext", keyText);
+				else
+					node.setAttribute("acceltext", keyText);
 			});
 		}
 	},
@@ -1118,7 +1122,10 @@ var windowsObserver = {
 			hasHotkeys && window.addEventListener("keypress", this, true);
 			var document = window.document;
 			this.getHotkeysNodes(document, "*").forEach(function(node) {
-				node.removeAttribute("acceltext");
+				var cl = node.classList;
+				if(cl.contains("menuitem-tooltip") || cl.contains("menuitem-iconic-tooltip"))
+					node.removeAttribute("tooltiptext");
+				node.setAttribute("acceltext", "");
 			});
 			// May fail without setTimeout(), if other popup not yet hidden
 			hasHotkeys && window.setTimeout(function() {
