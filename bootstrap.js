@@ -1128,9 +1128,9 @@ var windowsObserver = {
 				node.setAttribute("acceltext", "");
 			});
 			// May fail without setTimeout(), if other popup not yet hidden
-			hasHotkeys && window.setTimeout(function() {
+			hasHotkeys && window.setTimeout(function(document) {
 				this.initHotkeysText(document);
-			}.bind(this), 0);
+			}.bind(this), 0, document);
 		}
 	},
 
