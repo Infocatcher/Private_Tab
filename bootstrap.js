@@ -411,7 +411,9 @@ var windowsObserver = {
 		if(popup != e.currentTarget)
 			return;
 		var window = popup.ownerDocument.defaultView;
-		if(popup.id == "contentAreaContextMenu")
+		if(popup.id == "appmenu-popup")
+			this.initAppMenu(window, popup);
+		else if(popup.id == "contentAreaContextMenu")
 			this.updatePageContext(window);
 		else if(popup.localName == "tooltip")
 			this.updateTabTooltip(window);
@@ -760,24 +762,10 @@ var windowsObserver = {
 		});
 		this.insertNode(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
 
-		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
-		if(appMenuItemParent) {
-			var appMenuItem = this.createMenuitem(document, this.newTabAppMenuId, {
-				label:     this.getLocalized("openNewPrivateTab"),
-				"privateTab-command": "openNewPrivateTab"
-			});
-			var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
-			if(newPrivateWin) {
-				var s = window.getComputedStyle(newPrivateWin, null);
-				var icon = s.listStyleImage;
-				if(icon && icon != "none") {
-					appMenuItem.className = "menuitem-iconic";
-					appMenuItem.style.listStyleImage = icon;
-					appMenuItem.style.MozImageRegion = s.MozImageRegion;
-				}
-			}
-			this.insertNode(appMenuItem, appMenuItemParent, [newPrivateWin]);
-		}
+		// We can't do 'document.getElementById("appmenu_newPrivateWindow")' while App menu was never open:
+		// this (somehow) breaks binding for .menuitem-iconic-tooltip class
+		var appMenuPopup = document.getElementById("appmenu-popup");
+		appMenuPopup && appMenuPopup.addEventListener("popupshowing", this, false);
 
 		var tabContext = this.getTabContextMenu(document);
 		_log("tabContext: " + tabContext);
@@ -820,6 +808,37 @@ var windowsObserver = {
 		}
 
 		window.addEventListener("popupshowing", this.initPlacesContext, true);
+	},
+	initAppMenu: function(window, popup) {
+		_log("initAppMenu()");
+		popup.removeEventListener("popupshowing", this, false);
+
+		var document = window.document;
+		if(document.getElementById(this.newTabAppMenuId)) {
+			Components.utils.reportError(LOG_PREFIX + "#" + this.newTabAppMenuId + " already created");
+			return;
+		}
+		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
+		if(!appMenuItemParent)
+			return;
+		var appMenuItem = this.createMenuitem(document, this.newTabAppMenuId, {
+			label: this.getLocalized("openNewPrivateTab"),
+			acceltext: this.hotkeys
+				&& this.hotkeys.openNewPrivateTab
+				&& this.hotkeys.openNewPrivateTab._keyText || "",
+			"privateTab-command": "openNewPrivateTab"
+		});
+		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
+		if(newPrivateWin) {
+			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
+			var s = window.getComputedStyle(newPrivateWin, null);
+			var icon = s.listStyleImage;
+			if(icon && icon != "none") {
+				appMenuItem.style.listStyleImage = icon;
+				appMenuItem.style.MozImageRegion = s.MozImageRegion;
+			}
+		}
+		this.insertNode(appMenuItem, appMenuItemParent, [newPrivateWin]);
 	},
 	get initPlacesContext() {
 		delete this.initPlacesContext;
@@ -882,10 +901,14 @@ var windowsObserver = {
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
 		var document = window.document;
+		this.destroyNodes(document, force);
+
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
 
-		this.destroyNodes(document, force);
+		var appMenuPopup = document.getElementById("appmenu-popup");
+		appMenuPopup && appMenuPopup.removeEventListener("popupshowing", this, false);
+
 		var tabContext = this.getTabContextMenu(document);
 		tabContext && tabContext.removeEventListener("popupshowing", this, false);
 		if(tabContext && !tabContext.id)
