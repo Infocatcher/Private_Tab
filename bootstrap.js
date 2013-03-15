@@ -1029,6 +1029,7 @@ var windowsObserver = {
 		this.hotkeys = hasKeys ? keys : null;
 		_log("Keys:\n" + JSON.stringify(keys, null, "\t"));
 	},
+	_hotkeysDocuments: null,
 	initHotkeysText: function(document) {
 		var keys = this.hotkeys;
 		if(!keys)
@@ -1036,6 +1037,12 @@ var windowsObserver = {
 		if(this._hotkeysHasText) {
 			_log("setHotkeysText()");
 			this.setHotkeysText(document);
+			return;
+		}
+		if(!this._hotkeysDocuments)
+			this._hotkeysDocuments = [];
+		if(this._hotkeysDocuments.push(document) > 1) {
+			_log("initHotkeysText(): already called and not yet finished");
 			return;
 		}
 		_log("initHotkeysText()");
@@ -1068,7 +1075,7 @@ var windowsObserver = {
 				function(mi) {
 					var k = keys[mi._id];
 					k._keyText = mi.getAttribute("acceltext") || "";
-					_log("Key text: " + mi.getAttribute("acceltext"));
+					_log('Key text for "' + mi._id + '": ' + k._keyText);
 				}
 			);
 			this._hotkeysHasText = true;
@@ -1077,7 +1084,8 @@ var windowsObserver = {
 			keyset.parentNode.removeChild(keyset);
 			window.clearInterval(tryAgain);
 			window.clearTimeout(tryAgainLimit);
-			this.setHotkeysText(document);
+			this._hotkeysDocuments.forEach(this.setHotkeysText, this);
+			this._hotkeysDocuments = null;
 		}.bind(this);
 		mp.setAttribute("onpopupshown", "this._onpopupshown();");
 		var tryAgain = window.setInterval(function() {
@@ -1098,6 +1106,7 @@ var windowsObserver = {
 		return nodes;
 	},
 	setHotkeysText: function(document) {
+		_log("setHotkeysText(): " + document.title);
 		var keys = this.hotkeys;
 		for(var kId in keys) {
 			var keyText = keys[kId]._keyText;
