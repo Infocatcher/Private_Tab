@@ -400,7 +400,8 @@ var windowsObserver = {
 				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
 				+ (isPrivate ? "private" : "not private")
 			);
-			if(this.isPrivateTab(tab) != isPrivate)
+			// Strange things happens in private windows, so we force set private flag
+			if(this.isPrivateTab(tab) != isPrivate || isPrivate)
 				this.toggleTabPrivate(tab, isPrivate);
 			else
 				_log("Already correct private state, ignore");
