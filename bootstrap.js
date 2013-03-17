@@ -396,6 +396,12 @@ var windowsObserver = {
 				tab = targetTab;
 			}
 			tab._privateTabIgnore = true; // We should always set this flag!
+			if(prefs.get("dragAndDropUseTargetPrivateState")) {
+				isPrivate = targetTab
+					? this.isPrivateTab(targetTab)
+					: this.isPrivateWindow(window);
+				_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
+			}
 			_log(
 				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
 				+ (isPrivate ? "private" : "not private")

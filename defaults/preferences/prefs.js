@@ -9,6 +9,7 @@ pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if s
 pref("extensions.privateTab.key.openNewPrivateTab", "control alt p");
 pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 
+pref("extensions.privateTab.dragAndDropUseTargetPrivateState", false);
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.fixAppButtonWidth", true);
