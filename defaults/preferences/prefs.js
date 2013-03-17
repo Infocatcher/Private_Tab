@@ -1,5 +1,5 @@
 pref("extensions.privateTab.loadInBackground", -1);
-// -1 - use built-in browser.tabs.loadInBackground
+// -1 - use built-in browser.tabs.loadInBackground or browser.tabs.loadBookmarksInBackground
 // 0  - load in foreground
 // 1  - load in background
 
