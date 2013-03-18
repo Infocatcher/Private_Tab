@@ -222,8 +222,8 @@ var windowsObserver = {
 			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.swapDocShells()");
 			return;
 		}
-		var proto = Object.getPrototypeOf(browser);
-		if(!proto || !("swapDocShells" in proto)) {
+		var browserProto = Object.getPrototypeOf(browser);
+		if(!browserProto || !("swapDocShells" in browserProto)) {
 			_log("Can't patch browser: no swapDocShells() method");
 			return;
 		}
@@ -231,7 +231,7 @@ var windowsObserver = {
 			_log("Patch browser.__proto__.swapDocShells() method");
 			var _this = this;
 			patcher.wrapFunction(
-				browser.__proto__, "swapDocShells", "browser.swapDocShells",
+				browserProto, "swapDocShells", "browser.swapDocShells",
 				function before(otherBrowser) {
 					try {
 						before.isPrivate = otherBrowser.webNavigation
@@ -261,7 +261,7 @@ var windowsObserver = {
 		}
 		else {
 			_log("Restore browser.__proto__.swapDocShells() method");
-			patcher.unwrapFunction(browser.__proto__, "swapDocShells", "browser.swapDocShells");
+			patcher.unwrapFunction(browserProto, "swapDocShells", "browser.swapDocShells");
 		}
 	},
 
