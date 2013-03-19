@@ -1732,10 +1732,11 @@ var patcher = {
 	wrapNS: "privateTabMod::",
 	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
 		var win = Components.utils.getGlobalForObject(obj);
+		var name = key;
 		key = this.wrapNS + key;
 		var orig, wrapped;
 		if(!(key in win)) {
-			_log("[patcher] Patch " + key);
+			_log("[patcher] Patch " + name);
 			orig = obj[meth];
 			wrapped = obj[meth] = callAfter
 				? function wrapper() {
@@ -1787,7 +1788,7 @@ var patcher = {
 			};
 		}
 		else {
-			_log("[patcher] Will use previous patch for " + key);
+			_log("[patcher] Will use previous patch for " + name);
 		}
 		win[key] = {
 			before:  callBefore,
@@ -1800,12 +1801,13 @@ var patcher = {
 	},
 	unwrapFunction: function(obj, meth, key) {
 		var win = Components.utils.getGlobalForObject(obj);
+		var name = key;
 		key = this.wrapNS + key;
 		if(!(key in win))
 			return;
 		var wrapper = win[key];
 		if(obj[meth] != wrapper.wrapped) {
-			_log("[patcher] Can't completely restore " + key + ": detected third-party wrapper!");
+			_log("[patcher] Can't completely restore " + name + ": detected third-party wrapper!");
 			var dummy = function() {};
 			win[key] = {
 				before: dummy,
@@ -1813,7 +1815,7 @@ var patcher = {
 			};
 		}
 		else {
-			_log("[patcher] Restore " + key);
+			_log("[patcher] Restore " + name);
 			delete win[key];
 			obj[meth] = wrapper.orig;
 		}
