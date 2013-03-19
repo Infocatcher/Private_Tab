@@ -101,7 +101,12 @@ var windowsObserver = {
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		this.ensureTitleModifier(document);
-		this.patchTabBrowser(window, gBrowser, true);
+		this.patchBrowsers(gBrowser, true);
+		window.setTimeout(function() {
+			// We don't need patched functions right after window "load", so it's better to
+			// apply patches after any other extensions
+			this.patchTabBrowserDND(window, gBrowser, true);
+		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
 			this.inheritWindowState(window);
@@ -154,7 +159,8 @@ var windowsObserver = {
 			_log("Restore title...");
 			if(!isPrivateWindow)
 				this.updateWindowTitle(gBrowser, false);
-			this.patchTabBrowser(window, gBrowser, false);
+			this.patchBrowsers(gBrowser, false);
+			this.patchTabBrowserDND(window, gBrowser, false);
 		}
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
@@ -234,10 +240,6 @@ var windowsObserver = {
 				enumerable: true
 			}
 		});
-	},
-	patchTabBrowser: function(window, gBrowser, applyPatch) {
-		this.patchBrowsers(gBrowser, applyPatch);
-		this.patchTabBrowserDND(window, gBrowser, applyPatch);
 	},
 	patchTabBrowserDND: function(window, gBrowser, applyPatch) {
 		if(
