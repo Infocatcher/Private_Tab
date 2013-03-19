@@ -719,13 +719,13 @@ var windowsObserver = {
 				window.tabkit.addingTab("related");
 		}
 
+		this.readyToOpenPrivateTab(window);
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: sourceDocument ? sourceDocument.documentURIObject : null,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
 			ownerTab: gBrowser.selectedTab,
 			relatedToCurrent: relatedToCurrent
 		});
-		this.toggleTabPrivate(tab, true);
 
 		var inBackground = prefs.get("loadInBackground");
 		if(inBackground == -1)
@@ -748,8 +748,8 @@ var windowsObserver = {
 			window = w;
 		}
 		var gBrowser = window.gBrowser;
+		this.readyToOpenPrivateTab(window);
 		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
-		this.toggleTabPrivate(tab, true);
 		if("focusAndSelectUrlBar" in window)
 			window.setTimeout(window.focusAndSelectUrlBar, 0);
 		else if("WindowFocusTimerCallback" in window) // SeaMonkey
@@ -757,6 +757,14 @@ var windowsObserver = {
 
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 		return tab;
+	},
+	readyToOpenPrivateTab: function(window) {
+		this.waitForTab(window, function(tab) {
+			if(!tab)
+				return;
+			tab._privateTabIgnore = true;
+			this.toggleTabPrivate(tab, true);
+		}.bind(this));
 	},
 	waitForTab: function(window, callback) {
 		_log("waitForTab()");
