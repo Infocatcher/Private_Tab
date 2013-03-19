@@ -1645,6 +1645,13 @@ var prefs = {
 
 		//~ todo: add condition when https://bugzilla.mozilla.org/show_bug.cgi?id=564675 will be fixed
 		this.loadDefaultPrefs();
+		if(Services.appinfo.name == "SeaMonkey") {
+			this.setPref(
+				this.ns + "dragAndDropTabsBetweenDifferentWindows",
+				false,
+				Services.prefs.getDefaultBranch("")
+			);
+		}
 		Services.prefs.addObserver(this.ns, this, false);
 	},
 	destroy: function() {
