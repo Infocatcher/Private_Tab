@@ -101,7 +101,7 @@ var windowsObserver = {
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		this.ensureTitleModifier(document);
-		this.patchBrowser(gBrowser, true);
+		this.patchTabBrowser(window, gBrowser, true);
 
 		if(reason == WINDOW_LOADED)
 			this.inheritWindowState(window);
@@ -154,7 +154,7 @@ var windowsObserver = {
 			_log("Restore title...");
 			if(!isPrivateWindow)
 				this.updateWindowTitle(gBrowser, false);
-			this.patchBrowser(gBrowser, false);
+			this.patchTabBrowser(window, gBrowser, false);
 		}
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
@@ -216,7 +216,47 @@ var windowsObserver = {
 		}
 	},
 
-	patchBrowser: function(gBrowser, applyPatch) {
+	get pbuFake() {
+		delete this.pbuFake;
+		return this.pbuFake = Object.create(PrivateBrowsingUtils, {
+			isWindowPrivate: {
+				value: function privateTabWrapper(window) {
+					return true; //~ todo: check call stack?
+				},
+				configurable: true,
+				enumerable: true
+			}
+		});
+	},
+	patchTabBrowser: function(window, gBrowser, applyPatch) {
+		this.patchBrowsers(gBrowser, applyPatch);
+
+		//~ todo: following may break other extensions, so we should add a preference
+		if(applyPatch)
+			window._privateTabPrivateBrowsingUtils = PrivateBrowsingUtils;
+		else {
+			delete window._privateTabPrivateBrowsingUtils;
+			delete window.PrivateBrowsingUtils;
+			window.PrivateBrowsingUtils = PrivateBrowsingUtils;
+		}
+		// Note: we can't patch gBrowser.tabContainer.__proto__ nor gBrowser.__proto__:
+		// someone may patch instance instead of prototype...
+		this.overridePrivateBrowsingUtils(
+			window,
+			gBrowser.tabContainer,
+			"_setEffectAllowedForDataTransfer",
+			"gBrowser.tabContainer._setEffectAllowedForDataTransfer",
+			applyPatch
+		);
+		this.overridePrivateBrowsingUtils(
+			window,
+			gBrowser,
+			"swapBrowsersAndCloseOther",
+			"gBrowser.swapBrowsersAndCloseOther",
+			applyPatch
+		);
+	},
+	patchBrowsers: function(gBrowser, applyPatch) {
 		var browser = gBrowser.browsers && gBrowser.browsers[0];
 		if(!browser) {
 			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.swapDocShells()");
@@ -262,6 +302,33 @@ var windowsObserver = {
 		else {
 			_log("Restore browser.__proto__.swapDocShells() method");
 			patcher.unwrapFunction(browserProto, "swapDocShells", "browser.swapDocShells");
+		}
+	},
+	overridePrivateBrowsingUtils: function(window, obj, meth, key, applyPatch) {
+		if(!obj || !(meth in obj)) {
+			Components.utils.reportError(LOG_PREFIX + "!!! Can't find " + key + "()");
+			return;
+		}
+		if(applyPatch) {
+			var pbuOrig = PrivateBrowsingUtils;
+			var pbuFake = this.pbuFake;
+			patcher.wrapFunction(
+				obj, meth, key,
+				function before(event) {
+					//_log("[patcher] Override PrivateBrowsingUtils.isWindowPrivate()");
+					window.PrivateBrowsingUtils = pbuFake;
+					window.setTimeout(function() { // Restore anyway
+						if(window.PrivateBrowsingUtils != pbuOrig)
+							window.PrivateBrowsingUtils = pbuOrig;
+					}, 0);
+				},
+				function after(ret, event) {
+					window.PrivateBrowsingUtils = pbuOrig;
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(obj, meth, key);
 		}
 	},
 
