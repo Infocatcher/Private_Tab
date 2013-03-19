@@ -214,6 +214,13 @@ var windowsObserver = {
 				this.updateAppButtonWidth(document, true);
 			}
 		}
+		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
+			var ws = Services.wm.getEnumerator("navigator:browser");
+			while(ws.hasMoreElements()) {
+				var window = ws.getNext();
+				this.patchTabBrowserDND(window, window.gBrowser, pVal);
+			}
+		}
 	},
 
 	get pbuFake() {
@@ -230,7 +237,9 @@ var windowsObserver = {
 	},
 	patchTabBrowser: function(window, gBrowser, applyPatch) {
 		this.patchBrowsers(gBrowser, applyPatch);
-
+		this.patchTabBrowserDND(window, gBrowser, applyPatch);
+	},
+	patchTabBrowserDND: function(window, gBrowser, applyPatch) {
 		if(
 			!prefs.get("dragAndDropTabsBetweenDifferentWindows")
 			&& (applyPatch || !("_privateTabPrivateBrowsingUtils" in window))
