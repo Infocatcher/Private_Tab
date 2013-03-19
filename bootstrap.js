@@ -328,12 +328,14 @@ var windowsObserver = {
 		if(applyPatch) {
 			var pbuOrig = PrivateBrowsingUtils;
 			var pbuFake = this.pbuFake;
+			var restoreTimer = 0;
 			patcher.wrapFunction(
 				obj, meth, key,
 				function before(event) {
 					//_log("[patcher] Override PrivateBrowsingUtils.isWindowPrivate()");
 					window.PrivateBrowsingUtils = pbuFake;
-					window.setTimeout(function() { // Restore anyway
+					window.clearTimeout(restoreTimer);
+					restoreTimer = window.setTimeout(function() { // Restore anyway
 						if(window.PrivateBrowsingUtils != pbuOrig)
 							window.PrivateBrowsingUtils = pbuOrig;
 					}, 0);
