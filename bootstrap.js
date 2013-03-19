@@ -231,7 +231,12 @@ var windowsObserver = {
 	patchTabBrowser: function(window, gBrowser, applyPatch) {
 		this.patchBrowsers(gBrowser, applyPatch);
 
-		//~ todo: following may break other extensions, so we should add a preference
+		if(
+			!prefs.get("dragAndDropTabsBetweenDifferentWindows")
+			&& (applyPatch || !("_privateTabPrivateBrowsingUtils" in window))
+		)
+			return;
+
 		if(applyPatch)
 			window._privateTabPrivateBrowsingUtils = PrivateBrowsingUtils;
 		else {
