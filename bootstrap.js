@@ -711,7 +711,7 @@ var windowsObserver = {
 
 		var relatedToCurrent;
 		var w = this.getNotPopupWindow(window);
-		if(w) {
+		if(w && w != window) {
 			relatedToCurrent = openAsChild = false;
 			w.setTimeout(w.focus, 0);
 			window = w;
@@ -752,7 +752,7 @@ var windowsObserver = {
 	},
 	openNewPrivateTab: function(window) {
 		var w = this.getNotPopupWindow(window);
-		if(w) {
+		if(w && w != window) {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
@@ -792,13 +792,16 @@ var windowsObserver = {
 		}, 0);
 	},
 	getNotPopupWindow: function(window) {
-		if(
-			"getTopWin" in window
-			&& window.getTopWin.length > 0 // Only in Firefox for now
-			&& !window.toolbar.visible // Popup window
-			&& prefs.get("dontUseTabsInPopupWindows")
-		)
-			return window.getTopWin(true);
+		if(window.toolbar.visible)
+			return window;
+		if(prefs.get("dontUseTabsInPopupWindows")) try {
+			Components.utils.import("resource:///modules/RecentWindow.jsm");
+			return RecentWindow.getMostRecentBrowserWindow({
+				allowPopups: false
+			});
+		}
+		catch(e) {
+		}
 		return null;
 	},
 	getContextTab: function(window) {
