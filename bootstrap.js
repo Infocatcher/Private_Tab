@@ -113,10 +113,15 @@ var windowsObserver = {
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.setTabState(tab);
 		}, this);
-		// We handle window before gBrowserInit.onLoad(), so set "privatebrowsingmode"
-		// for fixAppButtonWidth() manually
-		if(this.isPrivateWindow(window) && !PrivateBrowsingUtils.permanentPrivateBrowsing)
-			document.documentElement.setAttribute("privatebrowsingmode", "temporary");
+
+		if(this.isPrivateWindow(window)) {
+			var root = document.documentElement;
+			// We handle window before gBrowserInit.onLoad(), so set "privatebrowsingmode"
+			// for fixAppButtonWidth() manually
+			if(!PrivateBrowsingUtils.permanentPrivateBrowsing)
+				root.setAttribute("privatebrowsingmode", "temporary");
+			root.setAttribute(this.privateAttr, "true");
+		}
 		this.appButtonNA = false;
 		this.fixAppButtonWidth(document);
 		window.setTimeout(function() {
@@ -146,7 +151,8 @@ var windowsObserver = {
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
-			this.destroyTitleModifier(window.document);
+			var document = window.document;
+			this.destroyTitleModifier(document);
 			var gBrowser = window.gBrowser;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
@@ -156,6 +162,7 @@ var windowsObserver = {
 					this.fixTabState(tab, false); // Always remove this.privateAttr
 				}
 			}, this);
+			document.documentElement.removeAttribute(this.privateAttr);
 			_log("Restore title...");
 			if(!isPrivateWindow)
 				this.updateWindowTitle(gBrowser, false);
