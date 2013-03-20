@@ -931,6 +931,8 @@ var windowsObserver = {
 		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
 		if(newPrivateWin) {
 			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
+			if(newPrivateWin.hidden) // Permanent private browsing?
+				appMenuItem.hidden = true;
 			var s = window.getComputedStyle(newPrivateWin, null);
 			var icon = s.listStyleImage;
 			if(icon && icon != "none") {
