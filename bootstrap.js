@@ -1246,7 +1246,13 @@ var windowsObserver = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
-		if(!tabLabel || tabLabel == "undefined" || tabLabel == "about:blank")
+		if(
+			!tabLabel
+			|| tabLabel == "undefined"
+			|| tabLabel == "about:blank"
+			|| tabLabel == "chrome://fvd.speeddial/content/fvd_about_blank.html"
+			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
+		)
 			return true;
 		if(/^\w+:\S*$/.test(tabLabel))
 			return false;
