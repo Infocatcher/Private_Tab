@@ -868,7 +868,6 @@ var windowsObserver = {
 			removable: "true",
 			label: this.getLocalized("openNewPrivateTab"),
 			tooltiptext: this.getLocalized("openNewPrivateTabTip"),
-			image: "chrome://browser/skin/Privacy-16.png", //~ todo
 			"privateTab-command": "openNewPrivateTab"
 		});
 
@@ -1718,6 +1717,16 @@ var windowsObserver = {
 					color: -moz-nativehyperlinktext;\n\
 					text-align: center;\n\
 					margin: 1px;\n\
+				}\n\
+			}\n\
+			@-moz-document url("' + window.document.documentURI + '"),\n\
+				url("chrome://global/content/customizeToolbar.xul") {\n\
+				#' + this.toolbarButtonId + ' {\n\
+					list-style-image: url("chrome://privatetab/content/privacy-24.png") !important;\n\
+					-moz-image-region: auto !important;\n\
+				}\n\
+				toolbar[iconsize="small"] #' + this.toolbarButtonId + ' {\n\
+					list-style-image: url("chrome://privatetab/content/privacy-16.png") !important;\n\
 				}\n\
 			}';
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
