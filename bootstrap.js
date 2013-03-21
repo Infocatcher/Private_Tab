@@ -867,7 +867,7 @@ var windowsObserver = {
 			"class": "toolbarbutton-1 chromeclass-toolbar-additional",
 			removable: "true",
 			label: this.getLocalized("openNewPrivateTab"),
-			tooltiptext: this.getLocalized("openNewPrivateTab"), //~ todo
+			tooltiptext: this.getLocalized("openNewPrivateTabTip"),
 			image: "chrome://browser/skin/Privacy-16.png", //~ todo
 			"privateTab-command": "openNewPrivateTab"
 		});
