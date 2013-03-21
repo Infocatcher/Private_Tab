@@ -143,6 +143,7 @@ var windowsObserver = {
 				this.initHotkeysText(document);
 			}.bind(this), 10);
 		}.bind(this), 50);
+		this.initToolbarButton(document);
 	},
 	destroyWindow: function(window, reason) {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
@@ -824,6 +825,7 @@ var windowsObserver = {
 	},
 
 	cmdAttr: "privateTab-command",
+	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
@@ -831,6 +833,15 @@ var windowsObserver = {
 	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
 	tabScopeTipId: "privateTab-tabScope-isPrivateTabLabel",
 	placesContextId: "privateTab-places-openInNewPrivateTab",
+	getToolbox: function(window) {
+		return window.gNavToolbox || window.getNavToolbox();
+	},
+	getPaletteButton: function(window) {
+		var btns = this.getToolbox(window)
+			.palette
+			.getElementsByAttribute("id", this.toolbarButtonId);
+		return btns.length && btns[0];
+	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -849,13 +860,80 @@ var windowsObserver = {
 		}
 		return tabTip;
 	},
+	initToolbarButton: function(document) {
+		var tbId = this.toolbarButtonId;
+		var tb = this.createNode(document, "toolbarbutton", tbId, {
+			id: tbId,
+			"class": "toolbarbutton-1 chromeclass-toolbar-additional",
+			removable: "true",
+			label: this.getLocalized("openNewPrivateTab"),
+			tooltiptext: this.getLocalized("openNewPrivateTab"), //~ todo
+			image: "chrome://browser/skin/Privacy-16.png", //~ todo
+			"privateTab-command": "openNewPrivateTab"
+		});
+
+		var toolbars = document.getElementsByTagName("toolbar");
+		function isSep(id) {
+			return id == "separator" || id == "spring" || id == "spacer";
+		}
+		for(var i = 0, l = toolbars.length; i < l; ++i) {
+			var toolbar = toolbars[i];
+			var ids = (toolbar.getAttribute("currentset") || "").split(",");
+			var pos = ids.indexOf(tbId);
+			if(pos == -1)
+				continue;
+			_log(
+				'Found toolbar with "' + tbId + '" in currentset, toolbar: '
+				+ "#" + toolbar.id + ", name: " + toolbar.getAttribute("toolbarname")
+			);
+
+			var insPos = null;
+			var hasSeps = false;
+			for(var j = pos + 1, idsCount = ids.length; j < idsCount; ++j) {
+				var id = ids[j];
+				if(isSep(id)) {
+					hasSeps = true;
+					continue;
+				}
+				var nodes = toolbar.getElementsByAttribute("id", id);
+				var node = nodes.length && nodes[0];
+				if(!node)
+					continue;
+				insPos = node;
+				_log("Found existing node on toolbar: #" + id);
+				if(hasSeps) for(var k = j - 1; k > pos; --k) {
+					var id = ids[k];
+					if(!isSep(id)) // This node doesn't exist on toolbar: we checked it early
+						continue;
+					for(var prev = insPos.previousSibling; prev; prev = prev.previousSibling) {
+						var ln = prev.localName || "";
+						if(ln.startsWith("toolbar") && isSep(ln.substr(7))) {
+							if(ln == "toolbar" + id)
+								insPos = prev;
+							break;
+						}
+						if(prev.id && prev.getAttribute("skipintoolbarset") != "true")
+							break;
+					}
+				}
+				break;
+			}
+			toolbar.insertBefore(tb, insPos);
+			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
+			return;
+		}
+
+		this.getToolbox(document.defaultView)
+			.palette
+			.appendChild(tb);
+	},
 	initControls: function(document) {
 		var window = document.defaultView;
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext.addEventListener("popupshowing", this, false);
 
-		var contextItem = this.createMenuitem(document, this.contextId, {
+		var contextItem = this.createNode(document, "menuitem", this.contextId, {
 			label:     this.getLocalized("openInNewPrivateTab"),
 			accesskey: this.getLocalized("openInNewPrivateTabAccesskey"),
 			"privateTab-command": "openInNewPrivateTab"
@@ -865,7 +943,7 @@ var windowsObserver = {
 		var menuItemParent = document.getElementById("menu_NewPopup") // SeaMonkey
 			|| document.getElementById("menu_FilePopup");
 		var shortLabel = menuItemParent.id == "menu_NewPopup" ? "Short" : "";
-		var menuItem = this.createMenuitem(document, this.newTabMenuId, {
+		var menuItem = this.createNode(document, "menuitem", this.newTabMenuId, {
 			label:     this.getLocalized("openNewPrivateTab" + shortLabel),
 			accesskey: this.getLocalized("openNewPrivateTab" + shortLabel + "Accesskey"),
 			"privateTab-command": "openNewPrivateTab"
@@ -880,7 +958,7 @@ var windowsObserver = {
 		var tabContext = this.getTabContextMenu(document);
 		_log("tabContext: " + tabContext);
 		tabContext.addEventListener("popupshowing", this, false);
-		var tabContextItem = this.createMenuitem(document, this.tabContextId, {
+		var tabContextItem = this.createNode(document, "menuitem", this.tabContextId, {
 			label:     this.getLocalized("privateTab"),
 			accesskey: this.getLocalized("privateTabAccesskey"),
 			type: "checkbox",
@@ -931,7 +1009,7 @@ var windowsObserver = {
 		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
 		if(!appMenuItemParent)
 			return;
-		var appMenuItem = this.createMenuitem(document, this.newTabAppMenuId, {
+		var appMenuItem = this.createNode(document, "menuitem", this.newTabAppMenuId, {
 			label: this.getLocalized("openNewPrivateTab"),
 			acceltext: this.hotkeys
 				&& this.hotkeys.openNewPrivateTab
@@ -966,7 +1044,7 @@ var windowsObserver = {
 		placesItem && placesItem.parentNode.removeChild(placesItem);
 
 		var document = mp.ownerDocument;
-		placesItem = this.createMenuitem(document, this.placesContextId, {
+		placesItem = this.createNode(document, "menuitem", this.placesContextId, {
 			label:     this.getLocalized("openPlacesInNewPrivateTab"),
 			accesskey: this.getLocalized("openPlacesInNewPrivateTabAccesskey"),
 			selection: "link",
@@ -1014,6 +1092,7 @@ var windowsObserver = {
 		_log("destroyControls(), force: " + force);
 		var document = window.document;
 		this.destroyNodes(document, force);
+		this.destroyNode(this.getPaletteButton(window), force);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
@@ -1036,12 +1115,12 @@ var windowsObserver = {
 
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
-	get createMenuitem() {
-		delete this.createMenuitem;
-		return this.createMenuitem = this._createMenuitem.bind(this);
+	get createNode() {
+		delete this.createNode;
+		return this.createNode = this._createNode.bind(this);
 	},
-	_createMenuitem: function(document, id, attrs) {
-		var mi = document.createElement("menuitem");
+	_createNode: function(document, nodeName, id, attrs) {
+		var mi = document.createElement(nodeName);
 		mi.id = id;
 		for(var name in attrs)
 			mi.setAttribute(name, attrs[name]);
@@ -1067,12 +1146,15 @@ var windowsObserver = {
 	},
 	destroyNodes: function(parent, force) {
 		var nodes = parent.getElementsByAttribute(this.cmdAttr, "*");
-		for(var i = nodes.length - 1; i >= 0; --i) {
-			var node = nodes[i];
-			node.removeEventListener("command", this, false);
-			node.removeEventListener("click", this, false);
-			force && node.parentNode.removeChild(node);
-		}
+		for(var i = nodes.length - 1; i >= 0; --i)
+			this.destroyNode(nodes[i], force);
+	},
+	destroyNode: function(node, force) {
+		if(!node)
+			return;
+		node.removeEventListener("command", this, false);
+		node.removeEventListener("click", this, false);
+		force && node.parentNode.removeChild(node);
 	},
 
 	hotkeys: null,
