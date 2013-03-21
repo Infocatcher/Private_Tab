@@ -19,7 +19,7 @@ if not exist %_7zip% (
 
 cd /d "%~dp0"
 
-set _files=install.rdf *.manifest *.js *.xul *.xml license* changelog* icon*.png defaults modules components locale chrome idl
+set _files=install.rdf *.manifest *.js *.xul *.xml license* changelog* *.png defaults modules components locale chrome idl
 if exist %_7zip% (
 	echo =^> %_7zip%
 	%_7zip% a -tzip -mx9 -mfb=258 -mpass=15 -- %_out_tmp% %_files%
