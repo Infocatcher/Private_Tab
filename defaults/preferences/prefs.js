@@ -12,6 +12,10 @@ pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 pref("extensions.privateTab.dragAndDropUseTargetPrivateState", false);
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
+pref("extensions.privateTab.sendRefererHeader", 2);
+// 0 - don't send
+// 1 - only if private tab opened from private tab
+// 2 - always send (as Firefox itself do for "Open Link in New Private Window")
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.fixAppButtonWidth", true);

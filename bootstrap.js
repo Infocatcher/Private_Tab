@@ -758,9 +758,19 @@ var windowsObserver = {
 				window.tabkit.addingTab("related");
 		}
 
+		var referer = null;
+		if(sourceDocument) {
+			var sendReferer = prefs.get("sendRefererHeader");
+			if(
+				sendReferer > 0
+				&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
+			)
+				referer = sourceDocument.documentURIObject;
+		}
+
 		this.readyToOpenPrivateTab(window);
 		var tab = gBrowser.addTab(uri, {
-			referrerURI: sourceDocument ? sourceDocument.documentURIObject : null,
+			referrerURI: referer,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
 			ownerTab: gBrowser.selectedTab,
 			relatedToCurrent: relatedToCurrent
