@@ -414,6 +414,12 @@ var windowsObserver = {
 		var window = tab.ownerDocument.defaultView;
 		var tabState = this.ss.getTabState(tab);
 		//_log("Closed tab state:\n" + state);
+		if(Services.appinfo.name == "SeaMonkey")
+			window.setTimeout(this.forgetClosedTab.bind(this, window, tabState), 0);
+		else
+			this.forgetClosedTab(window, tabState);
+	},
+	forgetClosedTab: function(window, tabState) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
