@@ -74,6 +74,7 @@ var windowsObserver = {
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
+			case "TabClose":                  this.tabCloseHandler(e);       break;
 			case "dragstart":                 this.dragStartHandler(e);      break;
 			case "dragend":                   this.dragEndHandler(e);        break;
 			case "drop":                      this.dropHandler(e);           break;
@@ -131,6 +132,7 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
+		window.addEventListener("TabClose", this, false);
 		window.addEventListener("dragstart", this, true);
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
@@ -174,6 +176,7 @@ var windowsObserver = {
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
+		window.removeEventListener("TabClose", this, false);
 		window.removeEventListener("dragstart", this, true);
 		window.removeEventListener("dragend", this, true);
 		window.removeEventListener("drop", this, true);
@@ -396,6 +399,29 @@ var windowsObserver = {
 		if(this.isPrivateTab(tab) != isPrivate) {
 			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
 			this.toggleTabPrivate(tab, isPrivate);
+		}
+	},
+	tabCloseHandler: function(e) {
+		var tab = e.originalTarget || e.target;
+		if(!this.isPrivateTab(tab))
+			return;
+		_log(
+			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
+			+ "\nTry don't save it in undo close history"
+		);
+		var window = tab.ownerDocument.defaultView;
+		var tabState = this.ss.getTabState(tab);
+		//_log("Closed tab state:\n" + state);
+		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
+		for(var i = 0, l = closedTabs.length; i < l; ++i) {
+			var closedTab = closedTabs[i];
+			var state = closedTab.state;
+			//_log("Found closed tab:\n" + JSON.stringify(state));
+			if(JSON.stringify(state) == tabState) {
+				this.ss.forgetClosedTab(window, i);
+				_log("Forget about closed tab #" + i);
+				break;
+			}
 		}
 	},
 	tabSelectHandler: function(e) {
