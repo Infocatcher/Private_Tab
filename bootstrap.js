@@ -392,9 +392,10 @@ var windowsObserver = {
 			return;
 		}
 		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
-		if(tab.hasAttribute(this.privateAttr)) {
-			_log("Restored tab has " + this.privateAttr + " attribute");
-			this.toggleTabPrivate(tab, true);
+		var isPrivate = tab.hasAttribute(this.privateAttr);
+		if(this.isPrivateTab(tab) != isPrivate) {
+			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
+			this.toggleTabPrivate(tab, isPrivate);
 		}
 	},
 	tabSelectHandler: function(e) {
