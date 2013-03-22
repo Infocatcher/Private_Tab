@@ -11,6 +11,7 @@ pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 
 pref("extensions.privateTab.dragAndDropUseTargetPrivateState", false);
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
+pref("extensions.privateTab.rememberClosedPrivateTabs", false);
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.fixAppButtonWidth", true);

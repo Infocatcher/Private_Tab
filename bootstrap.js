@@ -402,6 +402,8 @@ var windowsObserver = {
 		}
 	},
 	tabCloseHandler: function(e) {
+		if(prefs.get("rememberClosedPrivateTabs"))
+			return;
 		var tab = e.originalTarget || e.target;
 		if(!this.isPrivateTab(tab))
 			return;
