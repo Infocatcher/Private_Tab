@@ -1858,7 +1858,9 @@ API.prototype = {
 		return privateTabInternal.isPrivateTab(tab);
 	},
 	toggleTabPrivate: function privateTab_toggleTabPrivate(tab, isPrivate) {
-		return privateTabInternal.toggleTabPrivate(tab, isPrivate);
+		isPrivate = privateTabInternal.toggleTabPrivate(tab, isPrivate);
+		privateTabInternal.fixTabState(tab, isPrivate);
+		return isPrivate;
 	},
 	readyToOpenTab: function privateTab_readyToOpenTab(isPrivate) {
 		privateTabInternal.waitForTab(this.window, function(tab) {
