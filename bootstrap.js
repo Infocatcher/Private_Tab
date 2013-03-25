@@ -517,19 +517,39 @@ var windowsObserver = {
 			targetTab = window.gBrowser.selectedTab;
 		}
 
+		var origIsPrivate;
+		if(prefs.get("dragAndDropUseTargetPrivateState")) {
+			isPrivate = targetTab
+				? this.isPrivateTab(targetTab)
+				: this.isPrivateWindow(window);
+			_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
+		}
+		else if(targetTab) {
+			origIsPrivate = this.isPrivateTab(targetTab);
+			_log(
+				"Dropped link may be opened in already existing tab, so make it "
+				+ (isPrivate ? "private" : "not private")
+			);
+			this.toggleTabPrivate(targetTab, isPrivate, true);
+		}
+
 		this.waitForTab(window, function(tab) {
 			if(!tab) {
 				if(!targetTab)
 					return;
 				tab = targetTab;
 			}
-			tab._privateTabIgnore = true; // We should always set this flag!
-			if(prefs.get("dragAndDropUseTargetPrivateState")) {
-				isPrivate = targetTab
-					? this.isPrivateTab(targetTab)
-					: this.isPrivateWindow(window);
-				_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
+			if(origIsPrivate != undefined) {
+				if(tab == targetTab) {
+					_log("Highlight target tab as " + (isPrivate ? "private" : "not private"));
+					this.dispatchAPIEvent(targetTab, "PrivateTab:PrivateChanged", isPrivate);
+				}
+				else {
+					_log("Restore private state of target tab");
+					this.toggleTabPrivate(targetTab, origIsPrivate, true);
+				}
 			}
+			tab._privateTabIgnore = true; // We should always set this flag!
 			_log(
 				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
 				+ (isPrivate ? "private" : "not private")
@@ -1458,13 +1478,14 @@ var windowsObserver = {
 		}
 		target.dispatchEvent(evt);
 	},
-	toggleTabPrivate: function(tab, isPrivate) {
+	toggleTabPrivate: function(tab, isPrivate, _silent) {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
 		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255));
-		this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+		if(!_silent)
+			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
 	},
 	getTabBrowser: function(tab) {
