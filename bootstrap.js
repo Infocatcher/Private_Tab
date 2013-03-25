@@ -524,8 +524,8 @@ var windowsObserver = {
 				: this.isPrivateWindow(window);
 			_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
 		}
-		else if(targetTab) {
-			origIsPrivate = this.isPrivateTab(targetTab);
+		else if(targetTab && isPrivate != this.isPrivateTab(targetTab)) {
+			origIsPrivate = !isPrivate;
 			_log(
 				"Dropped link may be opened in already existing tab, so make it "
 				+ (isPrivate ? "private" : "not private")
