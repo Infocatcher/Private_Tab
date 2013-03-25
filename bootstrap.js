@@ -895,7 +895,10 @@ var windowsObserver = {
 		var tab = this.getContextTab(window)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
-		this.fixTabState(tab, isPrivate);
+		if(this.isPendingTab(tab))
+			this.fixTabState(tab, isPrivate);
+		else if(prefs.get("toggleTabPrivateAutoReload"))
+			tab.linkedBrowser.reload();
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
