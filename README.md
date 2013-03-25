@@ -1,9 +1,10 @@
 ﻿Works only in Gecko 20.0 and higher because used API doesn't exist in older versions!
 
-##### Known issues:
+#### Known issues:
 We just inherit private state from selected tab and tries preserve private state of dropped link-like things, this is simple to implement, but may confuse a bit…
 
-##### API for other extensions:
+#### API for other extensions:
+##### Events:
 You can listen for following events:
 <table>
 <thead>
@@ -16,20 +17,63 @@ You can listen for following events:
 </tbody>
 </table>
 
-So if you want change private state of tab, use something like following:
+##### API functions:
+boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
+<br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
+<br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
+<br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
+
+###### privateTab.isTabPrivate()
+Investigates that the tab are private (`true`) or not (`false`), example:
 ```javascript
-var tab = gBrowser.selectedTab;
-//var privacyContext = tab.linkedBrowser
-//	.contentWindow
-//	.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-//	.getInterface(Components.interfaces.nsIWebNavigation)
-//	.QueryInterface(Components.interfaces.nsILoadContext);
-Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
-var privacyContext = PrivateBrowsingUtils.privacyContextFromWindow(tab.linkedBrowser.contentWindow);
-var isPrivate = privacyContext.usePrivateBrowsing = !privacyContext.usePrivateBrowsing;
-// https://github.com/Infocatcher/Private_Tab#api-for-other-extensions
-var evt = document.createEvent("UIEvent");
-evt.initUIEvent("PrivateTab:PrivateChanged", true, false, window, +isPrivate);
-tab.dispatchEvent(evt);
+// Close all (visible) private tabs:
+Array.slice(gBrowser.visibleTabs || gBrowser.tabs).forEach(function(tab) {
+	if(privateTab.isTabPrivate(tab))
+		gBrowser.removeTab(tab);
+});
 ```
-(new opened private tabs should be detected automatically)
+###### privateTab.toggleTabPrivate()
+Changes tab private state:
+<br>Toggle: `privateTab.toggleTabPrivate(tab)`
+<br>Make private: `privateTab.toggleTabPrivate(tab, true)`
+<br>Make not private: `privateTab.toggleTabPrivate(tab, false)`
+```javascript
+// Make all (visible) tabs private:
+Array.forEach(
+	gBrowser.visibleTabs || gBrowser.tabs,
+	function(tab) {
+		if(!privateTab.isTabPrivate(tab))
+			privateTab.toggleTabPrivate(tab, true);
+	}
+);
+```
+###### privateTab.readyToOpenTab()
+Allows to open private or not private tab (independent of any inheritance mechanism), example:
+```javascript
+// Open in private tab:
+privateTab.readyToOpenTab(true);
+gBrowser.addTab("https://mozilla.org/");
+```
+```javascript
+// Open in not private tab:
+privateTab.readyToOpenTab(false);
+gBrowser.addTab("https://mozilla.org/");
+```
+###### privateTab.readyToOpenTabs()
+Allows to open many private or not private tabs (independent of any inheritance mechanism), example:
+```javascript
+// Open in private tabs:
+privateTab.readyToOpenTabs(true);
+gBrowser.addTab("https://mozilla.org/");
+gBrowser.addTab("https://addons.mozilla.org/");
+// ...
+privateTab.stopToOpenTabs();
+```
+
+##### Backward compatibility:
+Check for Private Tab installed (and enabled):
+```javascript
+if("privateTab" in window) {
+	// Do something with "privateTab" object
+}
+```
