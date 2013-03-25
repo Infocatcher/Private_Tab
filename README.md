@@ -3,6 +3,10 @@
 #### Known issues:
 We just inherit private state from selected tab and tries preserve private state of dropped link-like things, this is simple to implement, but may confuse a bit…
 
+#### Styles:
+You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab) and `#main-window[privateTab-isPrivate]` (built-in private window) selectors in styles for <a href="http://kb.mozillazine.org/UserChrome.css">userChrome.css</a>/<a href="https://addons.mozilla.org/addon/stylish/">Stylish</a>.
+<br>Example style to change icon of private tabs: <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon/privateTabIcon.css">for Firefox</a>, <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon/privateTabIcon-SeaMonkey.css">for SeaMonkey</a>.
+
 #### API for other extensions:
 ##### Events:
 You can listen for following events:
