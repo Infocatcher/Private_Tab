@@ -9,7 +9,10 @@ pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if s
 pref("extensions.privateTab.key.openNewPrivateTab", "control alt p");
 pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 
-pref("extensions.privateTab.dragAndDropUseTargetPrivateState", false);
+pref("extensions.privateTab.dragAndDropBehavior", 0);
+// 0 - make new (or target) tab private, if source or target are private
+// 1 - use source private state
+// 2 - use target private state
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
 pref("extensions.privateTab.sendRefererHeader", 2);

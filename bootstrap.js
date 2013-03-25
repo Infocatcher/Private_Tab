@@ -487,9 +487,9 @@ var windowsObserver = {
 			_log(e.type + ": missing source node, ignore");
 			return;
 		}
-		var isPrivate = sourceNode == this.dndPrivateNode;
+		var isPrivateSource = sourceNode == this.dndPrivateNode;
 		this._dndPrivateNode = null;
-		_log(e.type + ": from " + (isPrivate ? "private" : "not private") + " tab");
+		_log(e.type + ": from " + (isPrivateSource ? "private" : "not private") + " tab");
 
 		var targetTab;
 		if(e.view.top == window) {
@@ -517,14 +517,28 @@ var windowsObserver = {
 			targetTab = window.gBrowser.selectedTab;
 		}
 
-		var origIsPrivate;
-		if(prefs.get("dragAndDropUseTargetPrivateState")) {
-			isPrivate = targetTab
-				? this.isPrivateTab(targetTab)
-				: this.isPrivateWindow(window);
-			_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
+		var isPrivateTarget = targetTab
+			? this.isPrivateTab(targetTab)
+			: this.isPrivateWindow(window);
+		_log("Will use target private state (from " + (targetTab ? "tab" : "window") + ")");
+
+		var isPrivate;
+		var dndBehavior = prefs.get("dragAndDropBehavior", 0);
+		if(dndBehavior == 1) {
+			isPrivate = isPrivateSource;
+			_log("Will use source private state: " + isPrivateSource);
 		}
-		else if(targetTab && isPrivate != this.isPrivateTab(targetTab)) {
+		else if(dndBehavior == 2) {
+			isPrivate = isPrivateTarget;
+			_log("Will use target private state: " + isPrivateTarget);
+		}
+		else {
+			isPrivate = isPrivateSource || isPrivateTarget;
+			_log("Will use source or target private state: " + isPrivateSource + " || " + isPrivateTarget);
+		}
+
+		var origIsPrivate;
+		if(targetTab && dndBehavior != 2 && isPrivate != this.isPrivateTab(targetTab)) {
 			origIsPrivate = !isPrivate;
 			_log(
 				"Dropped link may be opened in already existing tab, so make it "
