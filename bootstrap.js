@@ -146,6 +146,7 @@ var windowsObserver = {
 			}.bind(this), 10);
 		}.bind(this), 50);
 		this.initToolbarButton(document);
+		window.privateTab = new API(window);
 	},
 	destroyWindow: function(window, reason) {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
@@ -1831,6 +1832,46 @@ var windowsObserver = {
 			Components.utils.reportError(e);
 		}
 		return sid;
+	}
+};
+
+var privateTabInternal = windowsObserver;
+function API(window) {
+	this.window = window;
+}
+API.prototype = {
+	_openNewTabsPrivate: undefined,
+	_destroy: function() {
+		if(this._openNewTabsPrivate !== undefined)
+			this.stopToOpenTabs();
+		this.window = null;
+	},
+	handleEvent: function(e) {
+		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined)
+			privateTabInternal.toggleTabPrivate(e.originalTarget || e.target, this._openNewTabsPrivate);
+	},
+	// Public API:
+	isTabPrivate: function privateTab_isTabPrivate(tab) {
+		return privateTabInternal.isPrivateTab(tab);
+	},
+	toggleTabPrivate: function privateTab_toggleTabPrivate(tab, isPrivate) {
+		return privateTabInternal.toggleTabPrivate(tab, isPrivate);
+	},
+	readyToOpenTab: function privateTab_readyToOpenTab(isPrivate) {
+		privateTabInternal.waitForTab(this.window, function(tab) {
+			if(!tab)
+				return;
+			tab._privateTabIgnore = true;
+			privateTabInternal.toggleTabPrivate(tab, isPrivate);
+		}.bind(this));
+	},
+	readyToOpenTabs: function privateTab_readyToOpenTabs(isPrivate) {
+		this._openNewTabsPrivate = isPrivate;
+		this.window.addEventListener("TabOpen", this, true);
+	},
+	stopToOpenTabs: function  privateTab_stopToOpenTabs() {
+		this._openNewTabsPrivate = undefined;
+		this.window.removeEventListener("TabOpen", this, true);
 	}
 };
 
