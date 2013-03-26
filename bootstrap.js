@@ -897,8 +897,11 @@ var windowsObserver = {
 		var isPrivate = this.toggleTabPrivate(tab);
 		if(this.isPendingTab(tab))
 			this.fixTabState(tab, isPrivate);
-		else if(prefs.get("toggleTabPrivateAutoReload"))
-			tab.linkedBrowser.reload();
+		else if(prefs.get("toggleTabPrivateAutoReload")) {
+			var browser = tab.linkedBrowser;
+			if(!browser.webProgress.isLoadingDocument)
+				tab.linkedBrowser.reload();
+		}
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
