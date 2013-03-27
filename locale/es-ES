@@ -1,0 +1,21 @@
+openInNewPrivateTab=Abrir Enlace en Nueva Pestaña Privada
+openInNewPrivateTabAccesskey=v
+
+openPlacesInNewPrivateTab=Abrir Enlace en Nueva Pestaña Privada
+openPlacesInNewPrivateTabAccesskey=v
+
+privateTab=Pestaña Privada
+privateTabAccesskey=v
+
+openNewPrivateTab=Nueva Pestaña Privada
+openNewPrivateTabTip=Abrir una nueva pestaña privada
+openNewPrivateTabAccesskey=v
+# For SeaMonkey
+openNewPrivateTabShort=Pestaña Privada
+openNewPrivateTabShortAccesskey=v
+
+privateTabTip=(pestaña privada)
+
+# For SeaMonkey, you can just copy Firefox translation
+privateBrowsingTitleModifier=\ (Private Browsing)
+
