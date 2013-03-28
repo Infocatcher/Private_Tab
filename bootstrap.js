@@ -34,9 +34,9 @@ var windowsObserver = {
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
-		var ws = Services.wm.getEnumerator("navigator:browser");
-		while(ws.hasMoreElements())
-			this.initWindow(ws.getNext(), reason);
+		this.windows.forEach(function(window) {
+			this.initWindow(window, reason);
+		}, this);
 		Services.ww.registerNotification(this);
 	},
 	destroy: function(reason) {
@@ -44,9 +44,9 @@ var windowsObserver = {
 			return;
 		this.initialized = false;
 
-		var ws = Services.wm.getEnumerator("navigator:browser");
-		while(ws.hasMoreElements())
-			this.destroyWindow(ws.getNext(), reason);
+		this.windows.forEach(function(window) {
+			this.destroyWindow(window, reason);
+		}, this);
 		Services.ww.unregisterNotification(this);
 
 		this.unloadStyles();
@@ -185,8 +185,21 @@ var windowsObserver = {
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		this.destroyControls(window, force);
 	},
+	get windows() {
+		var windows = [];
+		var isSeaMonkey = Services.appinfo.name == "SeaMonkey";
+		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
+		while(ws.hasMoreElements()) {
+			var window = ws.getNext();
+			if(this.isTargetWindow(window))
+				windows.push(window);
+		}
+		return windows;
+	},
 	isTargetWindow: function(window) {
-		return window.document.documentElement.getAttribute("windowtype") == "navigator:browser";
+		var winType = window.document.documentElement.getAttribute("windowtype");
+		return winType == "navigator:browser"
+			|| winType == "navigator:private"; // SeaMonkey >= 2.19a1 (2013-03-27)
 	},
 	inheritWindowState: function(window) {
 		_log(
@@ -222,22 +235,18 @@ var windowsObserver = {
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
 			this.restoreAppButtonWidth();
-			var ws = Services.wm.getEnumerator("navigator:browser");
-			while(ws.hasMoreElements()) {
-				var window = ws.getNext();
+			this.windows.forEach(function(window) {
 				var document = window.document;
 				this.appButtonNA = false;
 				if(pVal && !this.appButtonCssURI)
 					this.fixAppButtonWidth(document);
 				this.updateAppButtonWidth(document, true);
-			}
+			}, this);
 		}
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
-			var ws = Services.wm.getEnumerator("navigator:browser");
-			while(ws.hasMoreElements()) {
-				var window = ws.getNext();
+			this.windows.forEach(function(window) {
 				this.patchTabBrowserDND(window, window.gBrowser, pVal);
-			}
+			}, this);
 		}
 	},
 
@@ -1403,9 +1412,7 @@ var windowsObserver = {
 		_log("updateHotkeys()");
 		this.initHotkeys();
 		var hasHotkeys = !!this.hotkeys;
-		var ws = Services.wm.getEnumerator("navigator:browser");
-		while(ws.hasMoreElements()) {
-			var window = ws.getNext();
+		this.windows.forEach(function(window) {
 			window.removeEventListener("keypress", this, true);
 			hasHotkeys && window.addEventListener("keypress", this, true);
 			var document = window.document;
@@ -1416,10 +1423,8 @@ var windowsObserver = {
 				node.setAttribute("acceltext", "");
 			});
 			// May fail without setTimeout(), if other popup not yet hidden
-			hasHotkeys && window.setTimeout(function(document) {
-				this.initHotkeysText(document);
-			}.bind(this), 0, document);
-		}
+			this.initHotkeysText(document);
+		}, this);
 	},
 
 	isEmptyTab: function(tab, gBrowser) {
