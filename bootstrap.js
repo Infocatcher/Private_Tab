@@ -156,7 +156,6 @@ var windowsObserver = {
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
 			var document = window.document;
-			this.destroyTitleModifier(document);
 			var gBrowser = window.gBrowser;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
@@ -170,6 +169,7 @@ var windowsObserver = {
 			_log("Restore title...");
 			if(!isPrivateWindow)
 				this.updateWindowTitle(gBrowser, false);
+			this.destroyTitleModifier(document);
 			this.patchBrowsers(gBrowser, false);
 			this.patchTabBrowserDND(window, gBrowser, false);
 		}
