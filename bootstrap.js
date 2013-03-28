@@ -1559,12 +1559,16 @@ var windowsObserver = {
 			&& root.hasAttribute("titlemodifier_privatebrowsing")
 		)
 			return;
-		var tm = root.getAttribute("titlemodifier");
+		var tm = root.getAttribute("titlemodifier") || "";
+		var tmPrivate = root.getAttribute("titleprivate") || "";
+		// SeaMonkey >= 2.19a1 (2013-03-27)
+		// See chrome://navigator/content/navigator.js, function Startup()
+		if(tmPrivate)
+			tmPrivate = (tm ? tm + " " : "") + tmPrivate;
+		else
+			tmPrivate = tm + this.getLocalized("privateBrowsingTitleModifier");
 		root.setAttribute("privateTab_titlemodifier_normal", tm);
-		root.setAttribute(
-			"privateTab_titlemodifier_privatebrowsing",
-			tm + this.getLocalized("privateBrowsingTitleModifier")
-		);
+		root.setAttribute("privateTab_titlemodifier_privatebrowsing", tmPrivate);
 	},
 	destroyTitleModifier: function(document) {
 		var root = document.documentElement;
