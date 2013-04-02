@@ -1076,6 +1076,8 @@ var windowsObserver = {
 		});
 		if(prefs.get("makeNewEmptyTabsPrivate"))
 			menuItem.hidden = true;
+		if(PrivateBrowsingUtils.permanentPrivateBrowsing)
+			menuItem.collapsed = true;
 		this.insertNode(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
 
 		// We can't do 'document.getElementById("appmenu_newPrivateWindow")' while App menu was never open:
