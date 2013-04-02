@@ -256,6 +256,17 @@ var windowsObserver = {
 				this.patchTabBrowserDND(window, window.gBrowser, pVal);
 			}, this);
 		}
+		else if(pName == "makeNewEmptyTabsPrivate") {
+			this.windows.forEach(function(window) {
+				var document = window.document;
+				var menuItem = document.getElementById(this.newTabMenuId);
+				if(menuItem)
+					menuItem.hidden = pVal;
+				var appMenuItem = document.getElementById(this.newTabAppMenuId);
+				if(appMenuItem)
+					appMenuItem.hidden = pVal;
+			}, this);
+		}
 	},
 
 	get pbuFake() {
@@ -1063,6 +1074,8 @@ var windowsObserver = {
 			accesskey: this.getLocalized("openNewPrivateTab" + shortLabel + "Accesskey"),
 			"privateTab-command": "openNewPrivateTab"
 		});
+		if(prefs.get("makeNewEmptyTabsPrivate"))
+			menuItem.hidden = true;
 		this.insertNode(menuItem, menuItemParent, ["#menu_newNavigatorTab"]);
 
 		// We can't do 'document.getElementById("appmenu_newPrivateWindow")' while App menu was never open:
@@ -1131,11 +1144,13 @@ var windowsObserver = {
 				&& this.hotkeys.openNewPrivateTab._keyText || "",
 			"privateTab-command": "openNewPrivateTab"
 		});
+		if(prefs.get("makeNewEmptyTabsPrivate"))
+			appMenuItem.hidden = true;
 		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
 		if(newPrivateWin) {
 			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
 			if(newPrivateWin.hidden) // Permanent private browsing?
-				appMenuItem.hidden = true;
+				appMenuItem.collapsed = true;
 			var s = window.getComputedStyle(newPrivateWin, null);
 			var icon = s.listStyleImage;
 			if(icon && icon != "none") {
