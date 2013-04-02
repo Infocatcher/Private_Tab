@@ -15,6 +15,8 @@ pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 2 - use target private state
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
+pref("extensions.privateTab.makeNewEmptyTabsPrivate", false);
+pref("extensions.privateTab.makeNewEmptyWindowsPrivate", false);
 pref("extensions.privateTab.sendRefererHeader", 2);
 // 0 - don't send
 // 1 - only if private tab opened from private tab

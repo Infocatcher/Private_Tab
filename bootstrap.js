@@ -82,7 +82,9 @@ var windowsObserver = {
 			case "command":                   this.commandHandler(e);        break;
 			case "click":                     this.clickHandler(e);          break;
 			case "keypress":                  this.keypressHandler(e);       break;
-			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e);
+			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e); break;
+			case "SSWindowStateBusy":         this.setWindowBusy(e, true);   break;
+			case "SSWindowStateReady":        this.setWindowBusy(e, false);
 		}
 	},
 	loadHandler: function(e) {
@@ -137,6 +139,8 @@ var windowsObserver = {
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
+		window.addEventListener("SSWindowStateBusy", this, true);
+		window.addEventListener("SSWindowStateReady", this, true);
 		if(this.hotkeys)
 			window.addEventListener("keypress", this, true);
 		window.setTimeout(function() {
@@ -183,6 +187,8 @@ var windowsObserver = {
 		window.removeEventListener("drop", this, true);
 		window.removeEventListener("keypress", this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
+		window.removeEventListener("SSWindowStateBusy", this, true);
+		window.removeEventListener("SSWindowStateReady", this, true);
 		this.destroyControls(window, force);
 	},
 	get windows() {
@@ -209,9 +215,15 @@ var windowsObserver = {
 		);
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
+		var isEmptyWindow = !("arguments" in window) || !(3 in window.arguments);
+		if((!opener || isEmptyWindow) && prefs.get("makeNewEmptyWindowsPrivate")) {
+			_log("Make new empty window private");
+			this.toggleWindowPrivate(window, true);
+			return;
+		}
 		if(!opener || opener.closed || !this.isTargetWindow(opener) || !opener.gBrowser)
 			return;
-		if(!("arguments" in window) || !(3 in window.arguments)) {
+		if(isEmptyWindow) {
 			_log("inheritWindowState(): Looks like new empty window, ignore");
 			return;
 		}
@@ -222,11 +234,7 @@ var windowsObserver = {
 		if(!this.isPrivateTab(opener.gBrowser.selectedTab))
 			return;
 		_log("Inherit private state from current tab of the opener window");
-		//~ todo: add pref for this?
-		//this.getPrivacyContext(window).usePrivateBrowsing = true;
-		Array.forEach(window.gBrowser.tabs, function(tab) {
-			this.toggleTabPrivate(tab, true);
-		}, this);
+		this.toggleWindowPrivate(window, true);
 	},
 
 	prefChanged: function(pName, pVal) {
@@ -378,13 +386,22 @@ var windowsObserver = {
 			return;
 		}
 		var gBrowser = this.getTabBrowser(tab);
+		var window = tab.ownerDocument.defaultView;
 		//~ todo: try get real tab owner!
 		var isPrivate;
 		if(!this.isEmptyTab(tab, gBrowser)) {
 			if(this.isPrivateTab(gBrowser.selectedTab))
 				isPrivate = true;
-			else if(this.isPrivateWindow(tab.ownerDocument.defaultView))
+			else if(this.isPrivateWindow(window))
 				isPrivate = false; // Override browser behavior!
+		}
+		else if(
+			window.privateTab
+			&& !window.privateTab._ssWindowBusy
+			&& prefs.get("makeNewEmptyTabsPrivate")
+		) {
+			_log("Make new empty tab private");
+			isPrivate = true;
 		}
 		_log(
 			"Tab opened: " + (tab.getAttribute("label") || "").substr(0, 256)
@@ -393,7 +410,7 @@ var windowsObserver = {
 		if(isPrivate != undefined)
 			this.toggleTabPrivate(tab, isPrivate);
 		else {
-			tab.ownerDocument.defaultView.setTimeout(function() {
+			window.setTimeout(function() {
 				this.setTabState(tab);
 			}.bind(this), 0);
 		}
@@ -749,6 +766,10 @@ var windowsObserver = {
 			_log(e.type + " + gBrowser.selectedTab == tab => updateWindowTitle()");
 			this.updateWindowTitle(gBrowser, isPrivate);
 		}
+	},
+	setWindowBusy: function(e, busy) {
+		_log("setWindowBusy(): " + busy);
+		e.currentTarget.privateTab._ssWindowBusy = busy;
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
@@ -1514,6 +1535,17 @@ var windowsObserver = {
 			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
 	},
+	toggleWindowPrivate: function(window, isPrivate) {
+		var gBrowser = window.gBrowser;
+		if(isPrivate === undefined)
+			this.isPrivateTab(gBrowser.selectedTab);
+		//~ todo: add pref for this?
+		//this.getPrivacyContext(window).usePrivateBrowsing = true;
+		_log("Make all tabs in window private");
+		Array.forEach(gBrowser.tabs, function(tab) {
+			this.toggleTabPrivate(tab, isPrivate);
+		}, this);
+	},
 	getTabBrowser: function(tab) {
 		return this.getTabBrowserFromChild(tab.linkedBrowser);
 	},
@@ -1856,6 +1888,7 @@ function API(window) {
 }
 API.prototype = {
 	_openNewTabsPrivate: undefined,
+	_ssWindowBusy: false,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
