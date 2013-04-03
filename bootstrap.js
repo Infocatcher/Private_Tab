@@ -780,7 +780,18 @@ var windowsObserver = {
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
-		e.currentTarget.privateTab._ssWindowBusy = busy;
+		var window = e.currentTarget;
+		var privateTab = window.privateTab;
+		privateTab._ssWindowBusy = busy;
+		if(Services.appinfo.name == "SeaMonkey") {
+			window.clearTimeout(privateTab._ssWindowBusyRestoreTimer);
+			if(busy) {
+				privateTab._ssWindowBusyRestoreTimer = window.setTimeout(function() {
+					_log("setWindowBusy(): false (workaround for SeaMonkey)");
+					privateTab._ssWindowBusy = false;
+				}, 0);
+			}
+		}
 	},
 
 	openInNewPrivateTab: function(window, toggleInBackground) {
@@ -1906,6 +1917,7 @@ function API(window) {
 API.prototype = {
 	_openNewTabsPrivate: undefined,
 	_ssWindowBusy: false,
+	_ssWindowBusyRestoreTimer: 0,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
