@@ -191,10 +191,13 @@ var windowsObserver = {
 		window.removeEventListener("SSWindowStateReady", this, true);
 		this.destroyControls(window, force);
 	},
+	get isSeaMonkey() {
+		delete this.isSeaMonkey;
+		return this.isSeaMonkey = Services.appinfo.name == "SeaMonkey";
+	},
 	get windows() {
 		var windows = [];
-		var isSeaMonkey = Services.appinfo.name == "SeaMonkey";
-		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
+		var ws = Services.wm.getEnumerator(this.isSeaMonkey ? null : "navigator:browser");
 		while(ws.hasMoreElements()) {
 			var window = ws.getNext();
 			if(this.isTargetWindow(window))
@@ -452,7 +455,7 @@ var windowsObserver = {
 		var window = tab.ownerDocument.defaultView;
 		var tabState = this.ss.getTabState(tab);
 		//_log("Closed tab state:\n" + state);
-		if(Services.appinfo.name == "SeaMonkey")
+		if(this.isSeaMonkey)
 			window.setTimeout(this.forgetClosedTab.bind(this, window, tabState), 0);
 		else
 			this.forgetClosedTab(window, tabState);
@@ -783,7 +786,7 @@ var windowsObserver = {
 		var window = e.currentTarget;
 		var privateTab = window.privateTab;
 		privateTab._ssWindowBusy = busy;
-		if(Services.appinfo.name == "SeaMonkey") {
+		if(this.isSeaMonkey) {
 			window.clearTimeout(privateTab._ssWindowBusyRestoreTimer);
 			if(busy) {
 				privateTab._ssWindowBusyRestoreTimer = window.setTimeout(function() {
@@ -1964,7 +1967,7 @@ var prefs = {
 
 		//~ todo: add condition when https://bugzilla.mozilla.org/show_bug.cgi?id=564675 will be fixed
 		this.loadDefaultPrefs();
-		if(Services.appinfo.name == "SeaMonkey") {
+		if(windowsObserver.isSeaMonkey) {
 			this.setPref(
 				this.ns + "dragAndDropTabsBetweenDifferentWindows",
 				false,
