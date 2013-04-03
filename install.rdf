@@ -49,6 +49,15 @@
 				<em:translator>arbiger</em:translator>
 			</Description>
 		</em:localized>
-
+		
+		<em:localized>
+			<Description>
+				<em:locale>ja</em:locale>
+				<em:name>プライベートタブ</em:name>
+				<em:description>プライベートタブを追加します</em:description>
+				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
+		
 	</Description>
 </RDF>
