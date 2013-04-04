@@ -5,7 +5,10 @@ We just inherit private state from selected tab and tries preserve private state
 
 #### Styles:
 You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab) and `#main-window[privateTab-isPrivate]` (built-in private window) selectors in styles for <a href="http://kb.mozillazine.org/UserChrome.css">userChrome.css</a>/<a href="https://addons.mozilla.org/addon/stylish/">Stylish</a>.
-<br>Example style to change icon of private tabs: <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon/privateTabIcon.css">for Firefox</a>, <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon/privateTabIcon-SeaMonkey.css">for SeaMonkey</a>, to change background color: <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_background/privateTabBackground.css">for Firefox</a>, <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_background/privateTabBackground-SeaMonkey.css">for SeaMonkey</a>.
+<br>Example styles:
+* <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon">change icon of private tabs</a>
+* <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_background">change background color</a>
+* <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_overlay_icon">add overlay icon</a>
 
 #### API for other extensions:
 ##### Events:
