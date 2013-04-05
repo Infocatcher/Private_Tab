@@ -528,6 +528,14 @@ var windowsObserver = {
 			_log(e.type + ": missing source node, ignore");
 			return;
 		}
+		if(
+			!this.isSeaMonkey
+			&& sourceNode instanceof sourceNode.ownerDocument.defaultView.XULElement
+			&& this.getTabFromChild(sourceNode)
+		) { // Firefox calls browser.swapDocShells()
+			_log(e.type + ": ignore tabs drag-and-drop in Firefox");
+			return;
+		}
 		var isPrivateSource = sourceNode == this.dndPrivateNode;
 		this._dndPrivateNode = null;
 		_log(e.type + ": from " + (isPrivateSource ? "private" : "not private") + " tab");
@@ -537,8 +545,7 @@ var windowsObserver = {
 			var trg = e.originalTarget || e.target;
 			targetTab = this.getTabFromChild(trg);
 			if(
-				sourceNode
-				&& sourceNode instanceof window.XULElement
+				sourceNode instanceof window.XULElement
 				&& this.getTabFromChild(sourceNode)
 				&& sourceNode.ownerDocument.defaultView == window
 				&& (targetTab || this.getTabBarFromChild(trg))
