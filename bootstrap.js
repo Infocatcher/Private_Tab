@@ -332,6 +332,12 @@ var windowsObserver = {
 			patcher.wrapFunction(
 				browserProto, "swapDocShells", "browser.swapDocShells",
 				function before(otherBrowser) {
+					if("_privateTabIsPrivate" in this) {
+						before.isPrivate = this._privateTabIsPrivate;
+						delete this._privateTabIsPrivate;
+						_log("swapDocShells(): we recently set private state to " + before.isPrivate);
+						return;
+					}
 					try {
 						before.isPrivate = otherBrowser.webNavigation
 							.QueryInterface(Components.interfaces.nsILoadContext)
@@ -1568,6 +1574,14 @@ var windowsObserver = {
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 		privacyContext.usePrivateBrowsing = isPrivate;
+
+		// Workaround for browser.newtab.preload = true
+		var browser = tab.linkedBrowser;
+		browser._privateTabIsPrivate = isPrivate;
+		tab.ownerDocument.defaultView.setTimeout(function() {
+			delete browser._privateTabIsPrivate;
+		}, 0);
+
 		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255));
 		if(!_silent)
 			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
