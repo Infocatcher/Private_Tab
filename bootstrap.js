@@ -781,7 +781,7 @@ var windowsObserver = {
 				e.preventDefault();
 				e.stopPropagation();
 				e.stopImmediatePropagation();
-				this.handleCommand(window, kId);
+				this.handleCommand(window, kId.replace(/#.*$/, ""));
 			}
 		}
 	},
