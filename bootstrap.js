@@ -957,13 +957,13 @@ var windowsObserver = {
 	getContextTab: function(window, checkMenuVisibility) {
 		var cm, contextTab;
 		if("TabContextMenu" in window)
-			contextTab = window.TabContextMenu.contextTab;
-		if(!contextTab || checkMenuVisibility) {
+			contextTab = window.TabContextMenu.contextTab || null;
+		if(contextTab === undefined || checkMenuVisibility) {
 			cm = this.getTabContextMenu(window.document);
 			if(checkMenuVisibility && cm.state == "closed")
 				return null;
 		}
-		return contextTab || cm.triggerNode && window.gBrowser.mContextTab;
+		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
 	toggleContextTabPrivate: function(window) {
 		var tab = this.getContextTab(window, true)
