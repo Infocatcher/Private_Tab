@@ -125,9 +125,10 @@ var windowsObserver = {
 				root.setAttribute("privatebrowsingmode", "temporary");
 			root.setAttribute(this.privateAttr, "true");
 		}
-		this.appButtonNA = false;
-		this.fixAppButtonWidth(document);
 		window.setTimeout(function() {
+			// Wait for third-party styles like https://addons.mozilla.org/addon/movable-firefox-button/
+			this.appButtonNA = false;
+			this.fixAppButtonWidth(document);
 			this.updateWindowTitle(gBrowser);
 		}.bind(this), 0);
 
