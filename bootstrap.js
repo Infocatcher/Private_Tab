@@ -954,14 +954,19 @@ var windowsObserver = {
 		}
 		return null;
 	},
-	getContextTab: function(window) {
+	getContextTab: function(window, checkMenuVisibility) {
+		var cm, contextTab;
 		if("TabContextMenu" in window)
-			return window.TabContextMenu.contextTab;
-		var cm = this.getTabContextMenu(window.document);
-		return cm.triggerNode && window.gBrowser.mContextTab;
+			contextTab = window.TabContextMenu.contextTab;
+		if(!contextTab || checkMenuVisibility) {
+			cm = this.getTabContextMenu(window.document);
+			if(checkMenuVisibility && cm.state == "closed")
+				return null;
+		}
+		return contextTab || cm.triggerNode && window.gBrowser.mContextTab;
 	},
 	toggleContextTabPrivate: function(window) {
-		var tab = this.getContextTab(window)
+		var tab = this.getContextTab(window, true)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
 		if(this.isPendingTab(tab))
