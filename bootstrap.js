@@ -1494,7 +1494,9 @@ var windowsObserver = {
 				node.setAttribute("acceltext", "");
 			});
 			// May fail without setTimeout(), if other popup not yet hidden
-			this.initHotkeysText(document);
+			hasHotkeys && window.setTimeout(function() {
+				this.initHotkeysText(document);
+			}.bind(this), 0);
 		}, this);
 	},
 
