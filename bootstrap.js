@@ -81,6 +81,7 @@ var windowsObserver = {
 			case "popupshowing":              this.popupShowingHandler(e);   break;
 			case "command":                   this.commandHandler(e);        break;
 			case "click":                     this.clickHandler(e);          break;
+			case "keydown":
 			case "keypress":                  this.keypressHandler(e);       break;
 			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e); break;
 			case "SSWindowStateBusy":         this.setWindowBusy(e, true);   break;
@@ -143,7 +144,7 @@ var windowsObserver = {
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
 		if(this.hotkeys)
-			window.addEventListener("keypress", this, true);
+			window.addEventListener(this.keyEvent, this, true);
 		window.setTimeout(function() {
 			this.initControls(document);
 			window.setTimeout(function() {
@@ -186,7 +187,7 @@ var windowsObserver = {
 		window.removeEventListener("dragstart", this, true);
 		window.removeEventListener("dragend", this, true);
 		window.removeEventListener("drop", this, true);
-		window.removeEventListener("keypress", this, true);
+		window.removeEventListener(this.keyEvent, this, true);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
@@ -243,6 +244,8 @@ var windowsObserver = {
 
 	prefChanged: function(pName, pVal) {
 		if(pName.startsWith("key."))
+			this.updateHotkeys(true);
+		else if(pName == "keysUseKeydownEvent")
 			this.updateHotkeys();
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
@@ -750,7 +753,7 @@ var windowsObserver = {
 				&& e.metaKey == k.metaKey
 				&& e.getModifierState("OS") == k.osKey
 				&& (
-					k.char && String.fromCharCode(e.charCode).toUpperCase() == k.char
+					k.char && String.fromCharCode(e.charCode || e.keyCode).toUpperCase() == k.char
 					|| k.code && e.keyCode == k.code
 				)
 			) {
@@ -1322,6 +1325,11 @@ var windowsObserver = {
 		force && node.parentNode.removeChild(node);
 	},
 
+	get keyEvent() {
+		return prefs.get("keysUseKeydownEvent")
+			? "keydown"
+			: "keypress";
+	},
 	hotkeys: null,
 	_hotkeysHasText: false,
 	get accelKey() {
@@ -1339,6 +1347,12 @@ var windowsObserver = {
 		this._hotkeysHasText = false;
 		var hasKeys = false;
 		var keys = { __proto__: null };
+		function getVKChar(vk) {
+			var tmp = {};
+			Services.scriptloader.loadSubScript("chrome://privatetab/content/virtualKeyCodes.js", tmp);
+			getVKChar = tmp.getVKChar;
+			return getVKChar(vk);
+		}
 		function initHotkey(kId) {
 			var keyStr = prefs.get("key." + kId);
 			_log("initHotkey: " + kId + " = " + keyStr);
@@ -1367,7 +1381,11 @@ var windowsObserver = {
 			}
 			else { // VK_*
 				k.code = Components.interfaces.nsIDOMKeyEvent["DOM_" + key];
-				k._keyCode = key;
+				var char = getVKChar(key);
+				if(char)
+					k._key = char;
+				else
+					k._keyCode = key;
 			}
 			k._modifiers = tokens.join(",");
 			tokens.forEach(function(token) {
@@ -1479,13 +1497,17 @@ var windowsObserver = {
 			});
 		}
 	},
-	updateHotkeys: function() {
-		_log("updateHotkeys()");
-		this.initHotkeys();
+	updateHotkeys: function(updateAll) {
+		_log("updateHotkeys(" + (updateAll || "") + ")");
+		updateAll && this.initHotkeys();
 		var hasHotkeys = !!this.hotkeys;
+		var keyEvent = this.keyEvent;
 		this.windows.forEach(function(window) {
+			window.removeEventListener("keydown", this, true);
 			window.removeEventListener("keypress", this, true);
-			hasHotkeys && window.addEventListener("keypress", this, true);
+			hasHotkeys && window.addEventListener(keyEvent, this, true);
+			if(!updateAll)
+				return;
 			var document = window.document;
 			this.getHotkeysNodes(document, "*").forEach(function(node) {
 				var cl = node.classList;

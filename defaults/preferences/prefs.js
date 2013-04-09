@@ -3,14 +3,16 @@ pref("extensions.privateTab.loadInBackground", -1);
 // 0  - load in foreground
 // 1  - load in background
 
-pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if someone stops "keypress" event
+pref("extensions.privateTab.keysUseKeydownEvent", true); // Use "keydown" event instead of "keypress"
+pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if someone stops key* event
 // See https://developer.mozilla.org/en-US/docs/XUL/Tutorial/Keyboard_Shortcuts
 // and https://developer.mozilla.org/en-US/docs/DOM/KeyboardEvent#Virtual_key_codes
 // Syntax: [<modifiers> ]<key or keycode>
+// It's better to use VK_* codes for keysUseKeydownEvent = true.
 // You can also create alias for hotkey using extensions.privateTab.key.%command%#%alias_name%, example:
 // pref("extensions.privateTab.key.openNewPrivateTab#2", "VK_F8")
-pref("extensions.privateTab.key.openNewPrivateTab", "control alt p");
-pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
+pref("extensions.privateTab.key.openNewPrivateTab", "control alt VK_P");
+pref("extensions.privateTab.key.toggleTabPrivate", "control alt VK_V");
 
 pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 0 - make new (or target) tab private, if source or target are private
