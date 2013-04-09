@@ -5,7 +5,10 @@ pref("extensions.privateTab.loadInBackground", -1);
 
 pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if someone stops "keypress" event
 // See https://developer.mozilla.org/en-US/docs/XUL/Tutorial/Keyboard_Shortcuts
+// and https://developer.mozilla.org/en-US/docs/DOM/KeyboardEvent#Virtual_key_codes
 // Syntax: [<modifiers> ]<key or keycode>
+// You can also create alias for hotkey using extensions.privateTab.key.%command%#%alias_name%, example:
+// pref("extensions.privateTab.key.openNewPrivateTab#2", "VK_F8")
 pref("extensions.privateTab.key.openNewPrivateTab", "control alt p");
 pref("extensions.privateTab.key.toggleTabPrivate", "control alt v");
 
