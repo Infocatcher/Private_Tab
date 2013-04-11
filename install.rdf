@@ -33,7 +33,7 @@
 
 		<em:localized>
 			<Description>
-				<em:locale>fr-FR</em:locale>
+				<em:locale>fr</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>La navigation privée gérée par onglets.</em:description>
 				<em:creator>Infocatcher</em:creator>
