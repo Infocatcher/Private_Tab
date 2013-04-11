@@ -60,5 +60,15 @@
 			</Description>
 		</em:localized>
 
+		<em:localized>
+			<Description>
+				<em:locale>fr-FR</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>La navigation privée gérée par onglets.</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Stis</em:translator>
+			</Description>
+		</em:localized>
+
 	</Description>
 </RDF>
