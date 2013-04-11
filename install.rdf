@@ -59,6 +59,16 @@
 				<em:translator>charishi</em:translator>
 			</Description>
 		</em:localized>
+		
+		<em:localized>
+			<Description>
+				<em:locale>zh-CN</em:locale>
+				<em:name>隐私标签页</em:name>
+				<em:description>增加打开隐私标签页功能</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Cye3s</em:translator>
+			</Description>
+		</em:localized>
 
 		<em:localized>
 			<Description>
