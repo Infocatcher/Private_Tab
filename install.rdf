@@ -33,20 +33,11 @@
 
 		<em:localized>
 			<Description>
-				<em:locale>ru</em:locale>
+				<em:locale>fr-FR</em:locale>
 				<em:name>Private Tab</em:name>
-				<em:description>Добавляет приватные вкладки</em:description>
+				<em:description>La navigation privée gérée par onglets.</em:description>
 				<em:creator>Infocatcher</em:creator>
-			</Description>
-		</em:localized>
-
-		<em:localized>
-			<Description>
-				<em:locale>zh-TW</em:locale>
-				<em:name>隱私分頁</em:name>
-				<em:description>在分頁中開起隱私分頁</em:description>
-				<em:creator>Infocatcher</em:creator>
-				<em:translator>arbiger</em:translator>
+				<em:translator>Stis</em:translator>
 			</Description>
 		</em:localized>
 
@@ -59,7 +50,16 @@
 				<em:translator>charishi</em:translator>
 			</Description>
 		</em:localized>
-		
+
+		<em:localized>
+			<Description>
+				<em:locale>ru</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Добавляет приватные вкладки</em:description>
+				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
+
 		<em:localized>
 			<Description>
 				<em:locale>zh-CN</em:locale>
@@ -72,11 +72,11 @@
 
 		<em:localized>
 			<Description>
-				<em:locale>fr-FR</em:locale>
-				<em:name>Private Tab</em:name>
-				<em:description>La navigation privée gérée par onglets.</em:description>
+				<em:locale>zh-TW</em:locale>
+				<em:name>隱私分頁</em:name>
+				<em:description>在分頁中開起隱私分頁</em:description>
 				<em:creator>Infocatcher</em:creator>
-				<em:translator>Stis</em:translator>
+				<em:translator>arbiger</em:translator>
 			</Description>
 		</em:localized>
 
