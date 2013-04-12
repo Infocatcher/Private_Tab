@@ -178,6 +178,7 @@ var windowsObserver = {
 			this.destroyTitleModifier(document);
 			this.patchBrowsers(gBrowser, false);
 			this.patchTabBrowserDND(window, gBrowser, false);
+			delete window.privateTab;
 		}
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
