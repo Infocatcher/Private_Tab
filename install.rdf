@@ -59,6 +59,16 @@
 				<em:creator>Infocatcher</em:creator>
 			</Description>
 		</em:localized>
+		
+		<em:localized>
+			<Description>
+				<em:locale>vi</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Duyệt web riêng tư theo thẻ</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Leof36</em:translator>
+			</Description>
+		</em:localized>
 
 		<em:localized>
 			<Description>
