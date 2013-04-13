@@ -2149,7 +2149,7 @@ var patcher = {
 						)
 						.replace(
 							/\}$/,
-							"}).apply(this, arguments);\n"
+							"\t}).apply(this, arguments);\n"
 							+ '\twindow["' + key + '"].after.apply(this, [' + ret + "].concat(Array.slice(arguments)));\n"
 							+ "\treturn " + ret + ";\n"
 							+ "}"
