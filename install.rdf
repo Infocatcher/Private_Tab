@@ -33,6 +33,16 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>de</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Fügt private Tabs hinzu</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>sierkb</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>fr</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>La navigation privée gérée par onglets.</em:description>
