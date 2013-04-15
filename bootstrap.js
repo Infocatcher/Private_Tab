@@ -1873,6 +1873,7 @@ var windowsObserver = {
 			|| !("DownloadsPanel" in window) // SeaMonkey?
 			|| "_state" in window.DownloadsPanel
 				&& window.DownloadsPanel._state == window.DownloadsPanel.kStateUninitialized
+			|| "DownloadsCommon" in window && window.DownloadsCommon.useToolkitUI
 		)
 			return;
 		var pt = window.privateTab;
