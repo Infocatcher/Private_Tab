@@ -2110,7 +2110,7 @@ var prefs = {
 
 var patcher = {
 	// Do some magic to restore third party wrappers from other extensions
-	wrapNS: "privateTabMod::",
+	wrapNS: "privateTabMod:2:",
 	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
@@ -2121,8 +2121,9 @@ var patcher = {
 			orig = obj[meth];
 			wrapped = obj[meth] = callAfter
 				? function wrapper() {
-					if(win[key].before.apply(this, arguments))
-						return undefined;
+					var res = win[key].before.apply(this, arguments);
+					if(res)
+						return typeof res == "object" ? res.value : undefined;
 					try {
 						var ret = orig.apply(this, arguments);
 					}
@@ -2133,18 +2134,22 @@ var patcher = {
 					return ret;
 				}
 				: function wrapper() {
-					if(win[key].before.apply(this, arguments))
-						return undefined;
+					var res = win[key].before.apply(this, arguments);
+					if(res)
+						return typeof res == "object" ? res.value : undefined;
 					return orig.apply(this, arguments);
 				};
 			// Someone may want to do eval() patch...
 			var patch = callAfter
 				? function(s) {
-					var ret = "_ret_" + Math.random().toFixed(14).substr(2);
+					var rnd = Math.random().toFixed(14).substr(2);
+					var res = "_res_" + rnd;
+					var ret = "_ret_" + rnd;
 					return s
 						.replace(
 							"{",
-							'{\n\tif(window["' + key + '"].before.apply(this, arguments)) return;\n'
+							'{\n\tvar ' + res + ' = window["' + key + '"].before.apply(this, arguments);\n'
+							+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 							+ "\tvar " + ret + " = (function() {\n"
 						)
 						.replace(
@@ -2156,9 +2161,12 @@ var patcher = {
 						);
 				}
 				: function(s) {
+					var rnd = Math.random().toFixed(14).substr(2);
+					var res = "_res_" + rnd;
 					return s.replace(
 						"{",
-						'{\n\tif(window["' + key + '"].before.apply(this, arguments)) return;\n'
+						'{\n\tvar ' + res + ' = window["' + key + '"].before.apply(this, arguments);\n'
+						+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 					);
 				};
 			wrapped.toString = function() {
