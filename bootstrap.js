@@ -39,7 +39,8 @@ var windowsObserver = {
 		}, this);
 		Services.ww.registerNotification(this);
 
-		this.patchPrivateBrowsingUtils(true);
+		if(prefs.get("patchDownloads"))
+			this.patchPrivateBrowsingUtils(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -56,7 +57,8 @@ var windowsObserver = {
 		prefs.destroy();
 		this._dndPrivateNode = null;
 
-		this.patchPrivateBrowsingUtils(false);
+		if(prefs.get("patchDownloads"))
+			this.patchPrivateBrowsingUtils(false);
 	},
 
 	observe: function(subject, topic, data) {
@@ -277,6 +279,12 @@ var windowsObserver = {
 				var appMenuItem = document.getElementById(this.newTabAppMenuId);
 				if(appMenuItem)
 					appMenuItem.hidden = pVal;
+			}, this);
+		}
+		else if(pName == "patchDownloads") {
+			this.patchPrivateBrowsingUtils(pVal);
+			if(!pVal) this.windows.forEach(function(window) {
+				this.updateDownloadPanel(window);
 			}, this);
 		}
 	},
@@ -1836,7 +1844,8 @@ var windowsObserver = {
 	},
 	privateChanged: function(document, isPrivate) {
 		this.updateAppButtonWidth(document);
-		this.updateDownloadPanel(document.defaultView, isPrivate);
+		if(prefs.get("patchDownloads"))
+			this.updateDownloadPanel(document.defaultView, isPrivate);
 	},
 	updateAppButtonWidth: function(document, force) {
 		var window = document.defaultView;
