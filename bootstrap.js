@@ -2184,7 +2184,7 @@ var prefs = {
 
 var patcher = {
 	// Do some magic to restore third party wrappers from other extensions
-	wrapNS: "privateTabMod:2:",
+	wrapNS: "privateTabMod::",
 	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
