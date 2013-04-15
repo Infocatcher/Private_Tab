@@ -38,6 +38,8 @@ var windowsObserver = {
 			this.initWindow(window, reason);
 		}, this);
 		Services.ww.registerNotification(this);
+
+		this.patchPrivateBrowsingUtils(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -53,6 +55,8 @@ var windowsObserver = {
 		this.restoreAppButtonWidth();
 		prefs.destroy();
 		this._dndPrivateNode = null;
+
+		this.patchPrivateBrowsingUtils(false);
 	},
 
 	observe: function(subject, topic, data) {
@@ -1849,6 +1853,43 @@ var windowsObserver = {
 				}
 			}, 0);
 		}
+	},
+	patchPrivateBrowsingUtils: function(applyPatch) {
+		if(applyPatch) {
+			var _this = this;
+			var pbu = PrivateBrowsingUtils;
+			pbu._privateTabOrigIsWindowPrivate = pbu.isWindowPrivate;
+			patcher.wrapFunction(pbu, "isWindowPrivate", "PrivateBrowsingUtils.isWindowPrivate",
+				function before(window) {
+					if(
+						!window
+						|| !(window instanceof Components.interfaces.nsIDOMChromeWindow)
+						|| !_this.isTargetWindow(window)
+					)
+						return false;
+					var stack = new Error().stack;
+					//_log("PrivateBrowsingUtils.isWindowPrivate(): " + stack);
+					if(
+						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
+						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
+					) try {
+						//_log("PrivateBrowsingUtils.isWindowPrivate(): return state of selected tab");
+						return {
+							value: _this.isPrivateTab(window.gBrowser.selectedTab)
+						};
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+					}
+					return false;
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(PrivateBrowsingUtils, "isWindowPrivate", "PrivateBrowsingUtils.isWindowPrivate");
+			delete PrivateBrowsingUtils._privateTabOrigIsWindowPrivate;
+		}
+		_log("patchPrivateBrowsingUtils(" + applyPatch + ")");
 	},
 
 	getPrivacyContext: function(window) {
