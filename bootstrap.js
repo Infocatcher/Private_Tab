@@ -1901,6 +1901,9 @@ var windowsObserver = {
 					if(
 						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
 						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
+						|| stack.indexOf("@resource://app/components/DownloadsUI.js:") != -1
+						|| stack.indexOf("@resource://gre/modules/DownloadsCommon.jsm:") != -1
+						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
 					) try {
 						//_log("PrivateBrowsingUtils.isWindowPrivate(): return state of selected tab");
 						return {
