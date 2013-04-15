@@ -1832,7 +1832,11 @@ var windowsObserver = {
 			root.removeAttribute("privatebrowsingmode");
 		}
 		gBrowser.updateTitlebar();
+		this.privateChanged(document, isPrivate);
+	},
+	privateChanged: function(document, isPrivate) {
 		this.updateAppButtonWidth(document);
+		this.updateDownloadPanel(document.defaultView, isPrivate);
 	},
 	updateAppButtonWidth: function(document, force) {
 		var window = document.defaultView;
@@ -1853,6 +1857,21 @@ var windowsObserver = {
 				}
 			}, 0);
 		}
+	},
+	updateDownloadPanel: function(window, isPrivate) {
+		if(
+			!("DownloadsView" in window)
+			|| !("DownloadsPanel" in window) // SeaMonkey?
+			|| "_state" in window.DownloadsPanel
+				&& window.DownloadsPanel._state == window.DownloadsPanel.kStateUninitialized
+		)
+			return;
+		var pt = window.privateTab;
+		window.clearTimeout(pt._updateDownloadPanelTimer);
+		pt._updateDownloadPanelTimer = window.setTimeout(function() {
+			window.DownloadsView.onDataInvalidated();
+			_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+		}, 100);
 	},
 	patchPrivateBrowsingUtils: function(applyPatch) {
 		if(applyPatch) {
@@ -2014,6 +2033,7 @@ API.prototype = {
 	_openNewTabsPrivate: undefined,
 	_ssWindowBusy: false,
 	_ssWindowBusyRestoreTimer: 0,
+	_updateDownloadPanelTimer: 0,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
