@@ -284,7 +284,7 @@ var windowsObserver = {
 		else if(pName == "patchDownloads") {
 			this.patchPrivateBrowsingUtils(pVal);
 			if(!pVal) this.windows.forEach(function(window) {
-				this.updateDownloadPanel(window);
+				this.updateDownloadPanel(window, this.isPrivateWindow(window));
 			}, this);
 		}
 	},
@@ -1869,18 +1869,33 @@ var windowsObserver = {
 	},
 	updateDownloadPanel: function(window, isPrivate) {
 		if(
-			!("DownloadsView" in window)
-			|| !("DownloadsPanel" in window) // SeaMonkey?
-			|| "_state" in window.DownloadsPanel
-				&& window.DownloadsPanel._state == window.DownloadsPanel.kStateUninitialized
-			|| "DownloadsCommon" in window && window.DownloadsCommon.useToolkitUI
+			!( // SeaMonkey?
+				"DownloadsView" in window
+				&& "DownloadsPanel" in window
+				&& "DownloadsIndicatorView" in window
+				&& "DownloadsCommon" in window
+			) || window.DownloadsCommon.useToolkitUI
 		)
 			return;
 		var pt = window.privateTab;
 		window.clearTimeout(pt._updateDownloadPanelTimer);
 		pt._updateDownloadPanelTimer = window.setTimeout(function() {
-			window.DownloadsView.onDataInvalidated();
-			_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+			// Clear download panel:
+			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
+				window.DownloadsView.onDataInvalidated();
+				_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+			}
+			// Reinitialize download indicator:
+			//~ hack: cleanup raw download data
+			var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
+			var data = isPrivate
+				? global.DownloadsIndicatorData
+				: global.PrivateDownloadsIndicatorData;
+			data._itemCount = data._views.length = 0;
+
+			window.DownloadsIndicatorView.ensureTerminated();
+			window.DownloadsIndicatorView.ensureInitialized();
+			_log("updateDownloadPanel() => reinitialize download indicator");
 		}, 100);
 	},
 	patchPrivateBrowsingUtils: function(applyPatch) {
