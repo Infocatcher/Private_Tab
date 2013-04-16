@@ -77,6 +77,8 @@ var windowsObserver = {
 	handleEvent: function(e) {
 		switch(e.type) {
 			case "load":                      this.loadHandler(e);           break;
+			case "close":
+			case "beforeunload":              this.beforeunloadHandler(e);   break;
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
@@ -98,6 +100,14 @@ var windowsObserver = {
 		var window = e.originalTarget.defaultView;
 		window.removeEventListener("load", this, false);
 		this.initWindow(window, WINDOW_LOADED);
+	},
+	beforeunloadHandler: function(e) {
+		var window = e.currentTarget;
+		_log("beforeunloadHandler() [" + e.type + "]");
+		if(!this.isPrivateWindow(window)) {
+			_log(e.type + " => closePrivateTabs()");
+			this.closePrivateTabs(window);
+		}
 	},
 
 	initWindow: function(window, reason) {
@@ -149,6 +159,8 @@ var windowsObserver = {
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
+		window.addEventListener("close", this, false);
+		window.addEventListener("beforeunload", this, false);
 		if(this.hotkeys)
 			window.addEventListener(this.keyEvent, this, true);
 		window.setTimeout(function() {
@@ -164,6 +176,7 @@ var windowsObserver = {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
+		_log("destroyWindow()");
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
@@ -198,6 +211,8 @@ var windowsObserver = {
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
+		window.removeEventListener("close", this, false);
+		window.removeEventListener("beforeunload", this, false);
 		this.destroyControls(window, force);
 	},
 	get isSeaMonkey() {
@@ -481,6 +496,17 @@ var windowsObserver = {
 		else
 			this.forgetClosedTab(window);
 	},
+	closePrivateTabs: function(window) {
+		var gBrowser = window.gBrowser;
+		var tabs = gBrowser.tabs;
+		for(var i = tabs.length - 1; i >= 0; --i) {
+			var tab = tabs[i];
+			if(tab.hasAttribute(this.privateAttr)) {
+				gBrowser.removeTab(tab);
+				_log("closePrivateTabs(): remove tab: " + (tab.getAttribute("label") || "").substr(0, 256));
+			}
+		}
+	},
 	forgetClosedTab: function(window) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
@@ -496,7 +522,9 @@ var windowsObserver = {
 				return;
 			}
 		}
-		Components.utils.reportError(LOG_PREFIX + "!!! Can't forget about closed tab: tab not found");
+		Components.utils.reportError(
+			LOG_PREFIX + "!!! Can't forget about closed tab: tab not found, closed tabs count: " + l
+		);
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
