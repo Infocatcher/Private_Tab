@@ -1132,7 +1132,21 @@ var windowsObserver = {
 		// We can't do 'document.getElementById("appmenu_newPrivateWindow")' while App menu was never open:
 		// this (somehow) breaks binding for .menuitem-iconic-tooltip class
 		var appMenuPopup = document.getElementById("appmenu-popup");
-		appMenuPopup && appMenuPopup.addEventListener("popupshowing", this, false);
+		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
+		if(appMenuPopup && appMenuItemParent) {
+			// So will wait for "popupshowing" to move menuitem (and do other initializations)
+			appMenuPopup.addEventListener("popupshowing", this, false);
+
+			var appMenuItem = this.createNode(document, "menuitem", this.newTabAppMenuId, {
+				label: this.getLocalized("openNewPrivateTab"),
+				class: "menuitem-iconic",
+				"privateTab-command": "openNewPrivateTab"
+			});
+			if(prefs.get("makeNewEmptyTabsPrivate"))
+				appMenuItem.hidden = true;
+			appMenuItem._privateTabPreviousSibling = appMenuItemParent.lastChild;
+			appMenuItemParent.appendChild(appMenuItem);
+		}
 
 		var tabContext = this.getTabContextMenu(document);
 		_log("tabContext: " + tabContext);
@@ -1181,22 +1195,14 @@ var windowsObserver = {
 		popup.removeEventListener("popupshowing", this, false);
 
 		var document = window.document;
-		if(document.getElementById(this.newTabAppMenuId)) {
-			Components.utils.reportError(LOG_PREFIX + "#" + this.newTabAppMenuId + " already created");
+		var appMenuItem = document.getElementById(this.newTabAppMenuId);
+		if(!appMenuItem || appMenuItem.hasAttribute("privateTab-initialized")) {
+			Components.utils.reportError(
+				LOG_PREFIX + "#" + this.newTabAppMenuId + " not found or already initialized"
+			);
 			return;
 		}
-		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
-		if(!appMenuItemParent)
-			return;
-		var appMenuItem = this.createNode(document, "menuitem", this.newTabAppMenuId, {
-			label: this.getLocalized("openNewPrivateTab"),
-			acceltext: this.hotkeys
-				&& this.hotkeys.openNewPrivateTab
-				&& this.hotkeys.openNewPrivateTab._keyText || "",
-			"privateTab-command": "openNewPrivateTab"
-		});
-		if(prefs.get("makeNewEmptyTabsPrivate"))
-			appMenuItem.hidden = true;
+		appMenuItem.setAttribute("privateTab-initialized", "true");
 		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
 		if(newPrivateWin) {
 			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
@@ -1209,7 +1215,13 @@ var windowsObserver = {
 				appMenuItem.style.MozImageRegion = s.MozImageRegion;
 			}
 		}
-		this.insertNode(appMenuItem, appMenuItemParent, [newPrivateWin]);
+		var ps = appMenuItem._privateTabPreviousSibling;
+		delete appMenuItem._privateTabPreviousSibling;
+		if(ps != appMenuItem.previousSibling) {
+			_log("#" + this.newTabAppMenuId + " was moved (Personal Menu or something similar?), ignore");
+			return;
+		}
+		newPrivateWin && this.insertNode(appMenuItem, appMenuItem.parentNode, [newPrivateWin]);
 	},
 	get initPlacesContext() {
 		delete this.initPlacesContext;
