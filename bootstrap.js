@@ -476,25 +476,27 @@ var windowsObserver = {
 			+ "\nTry don't save it in undo close history"
 		);
 		var window = tab.ownerDocument.defaultView;
-		var tabState = this.ss.getTabState(tab);
-		//_log("Closed tab state:\n" + state);
 		if(this.isSeaMonkey)
-			window.setTimeout(this.forgetClosedTab.bind(this, window, tabState), 0);
+			window.setTimeout(this.forgetClosedTab.bind(this, window), 0);
 		else
-			this.forgetClosedTab(window, tabState);
+			this.forgetClosedTab(window);
 	},
-	forgetClosedTab: function(window, tabState) {
+	forgetClosedTab: function(window) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
 			var state = closedTab.state;
 			//_log("Found closed tab:\n" + JSON.stringify(state));
-			if(JSON.stringify(state) == tabState) {
+			if(
+				"attributes" in state
+				&& this.privateAttr in state.attributes
+			) {
 				this.ss.forgetClosedTab(window, i);
 				_log("Forget about closed tab #" + i);
-				break;
+				return;
 			}
 		}
+		Components.utils.reportError(LOG_PREFIX + "!!! Can't forget about closed tab: tab not found");
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
