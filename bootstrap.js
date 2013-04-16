@@ -1891,7 +1891,13 @@ var windowsObserver = {
 			var data = isPrivate
 				? global.DownloadsIndicatorData
 				: global.PrivateDownloadsIndicatorData;
-			data._itemCount = data._views.length = 0;
+			//data._itemCount = data._views.length = 0;
+			var views = data._views;
+			for(var i = views.length - 1; i >= 0; --i) {
+				var view = views[i];
+				if(Components.utils.getGlobalForObject(view) == window)
+					data.removeView(view);
+			}
 
 			window.DownloadsIndicatorView.ensureTerminated();
 			window.DownloadsIndicatorView.ensureInitialized();
