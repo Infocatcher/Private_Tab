@@ -25,6 +25,7 @@ function shutdown(params, reason) {
 
 var windowsObserver = {
 	initialized: false,
+	_hasQuitObserver: false,
 	init: function(reason) {
 		if(this.initialized)
 			return;
@@ -51,6 +52,10 @@ var windowsObserver = {
 			this.destroyWindow(window, reason);
 		}, this);
 		Services.ww.unregisterNotification(this);
+		if(this._hasQuitObserver) {
+			this._hasQuitObserver = false;
+			Services.obs.removeObserver(this, "quit-application-requested");
+		}
 
 		this.unloadStyles();
 		this.restoreAppButtonWidth();
@@ -72,6 +77,8 @@ var windowsObserver = {
 		}
 		else if(topic == "domwindowclosed")
 			this.destroyWindow(subject, WINDOW_CLOSED);
+		else if(topic == "quit-application-requested")
+			this.closeAllPrivateTabs();
 	},
 
 	handleEvent: function(e) {
@@ -126,6 +133,13 @@ var windowsObserver = {
 		this.ensureTitleModifier(document);
 		this.patchBrowsers(gBrowser, true);
 		window.setTimeout(function() {
+			// Trick to remove private tabs on browser exit: we should call
+			// addObserver() after resource:///modules/sessionstore/SessionStore.jsm
+			// to be notified before SessionStore will save windows data
+			if(!this._hasQuitObserver) {
+				this._hasQuitObserver = true;
+				Services.obs.addObserver(this, "quit-application-requested", false);
+			}
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
 			this.patchTabBrowserDND(window, gBrowser, true);
@@ -498,6 +512,15 @@ var windowsObserver = {
 			window.setTimeout(this.forgetClosedTab.bind(this, window), 0);
 		else
 			this.forgetClosedTab(window);
+	},
+	closeAllPrivateTabs: function() {
+		if(prefs.get("savePrivateTabsInSessions"))
+			return;
+		_log("closeAllPrivateTabs()");
+		this.windows.forEach(function(window) {
+			if(!this.isPrivateWindow(window))
+				this.closePrivateTabs(window);
+		}, this);
 	},
 	closePrivateTabs: function(window) {
 		var gBrowser = window.gBrowser;
