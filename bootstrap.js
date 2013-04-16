@@ -104,7 +104,10 @@ var windowsObserver = {
 	beforeunloadHandler: function(e) {
 		var window = e.currentTarget;
 		_log("beforeunloadHandler() [" + e.type + "]");
-		if(!this.isPrivateWindow(window)) {
+		if(
+			!this.isPrivateWindow(window)
+			&& !prefs.get("savePrivateTabsInSessions")
+		) {
 			_log(e.type + " => closePrivateTabs()");
 			this.closePrivateTabs(window);
 		}
