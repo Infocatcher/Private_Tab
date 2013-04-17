@@ -52,7 +52,8 @@ var windowsObserver = {
 			this.destroyWindow(window, reason);
 		}, this);
 		Services.ww.unregisterNotification(this);
-		Services.obs.removeObserver(this, "sessionstore-state-write");
+		if(reason != APP_SHUTDOWN) // nsISessionStore may save data after our shutdown
+			Services.obs.removeObserver(this, "sessionstore-state-write");
 
 		this.unloadStyles();
 		this.restoreAppButtonWidth();
