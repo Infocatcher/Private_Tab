@@ -2394,10 +2394,9 @@ function ts() {
 	return d.toLocaleFormat("%M:%S:") + "000".substr(String(ms).length) + ms + " ";
 }
 function _log(s) {
-	if(prefs.get("debug", true))
-		Services.console.logStringMessage(LOG_PREFIX + ts() + s);
-}
-function _dump(s) {
-	if(prefs.get("debug", true))
-		dump(LOG_PREFIX + ts() + s + "\n");
+	if(!prefs.get("debug", true))
+		return;
+	var msg = LOG_PREFIX + ts() + s;
+	Services.console.logStringMessage(msg);
+	dump(msg + "\n");
 }
