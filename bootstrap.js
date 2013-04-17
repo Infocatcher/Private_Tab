@@ -82,8 +82,6 @@ var windowsObserver = {
 	handleEvent: function(e) {
 		switch(e.type) {
 			case "load":                      this.loadHandler(e);           break;
-			case "close":
-			case "beforeunload":              this.beforeunloadHandler(e);   break;
 			case "TabOpen":                   this.tabOpenHandler(e);        break;
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
@@ -98,7 +96,10 @@ var windowsObserver = {
 			case "keypress":                  this.keypressHandler(e);       break;
 			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e); break;
 			case "SSWindowStateBusy":         this.setWindowBusy(e, true);   break;
-			case "SSWindowStateReady":        this.setWindowBusy(e, false);
+			case "SSWindowStateReady":        this.setWindowBusy(e, false);  break;
+			case "close":
+			case "beforeunload":
+			case "SSWindowClosing":           this.windowClosingHandler(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -106,15 +107,24 @@ var windowsObserver = {
 		window.removeEventListener("load", this, false);
 		this.initWindow(window, WINDOW_LOADED);
 	},
-	beforeunloadHandler: function(e) {
+	windowClosingHandler: function(e) {
 		var window = e.currentTarget;
-		_log("beforeunloadHandler() [" + e.type + "]");
+		_log("windowClosingHandler() [" + e.type + "]");
 		if(
 			!this.isPrivateWindow(window)
 			&& !prefs.get("savePrivateTabsInSessions")
 		) {
 			_log(e.type + " => closePrivateTabs()");
 			this.closePrivateTabs(window);
+		}
+		this.destroyWindowClosingHandler(window);
+	},
+	destroyWindowClosingHandler: function(window) {
+		window.removeEventListener("TabClose", this, false);
+		window.removeEventListener("SSWindowClosing", this, true);
+		if(this.isSeaMonkey) {
+			window.removeEventListener("close", this, false);
+			window.removeEventListener("beforeunload", this, false);
 		}
 	},
 
@@ -167,8 +177,11 @@ var windowsObserver = {
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
-		window.addEventListener("close", this, false);
-		window.addEventListener("beforeunload", this, false);
+		window.addEventListener("SSWindowClosing", this, true);
+		if(this.isSeaMonkey) { // SeaMonkey doesn't dispatch "SSWindowClosing" event :(
+			window.addEventListener("close", this, false);
+			window.addEventListener("beforeunload", this, false);
+		}
 		if(this.hotkeys)
 			window.addEventListener(this.keyEvent, this, true);
 		window.setTimeout(function() {
@@ -211,7 +224,6 @@ var windowsObserver = {
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
-		window.removeEventListener("TabClose", this, false);
 		window.removeEventListener("dragstart", this, true);
 		window.removeEventListener("dragend", this, true);
 		window.removeEventListener("drop", this, true);
@@ -219,8 +231,12 @@ var windowsObserver = {
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
-		window.removeEventListener("close", this, false);
-		window.removeEventListener("beforeunload", this, false);
+		if(reason != WINDOW_CLOSED) {
+			// See resource:///modules/sessionstore/SessionStore.jsm
+			// "domwindowclosed" => onClose() => "SSWindowClosing"
+			// This may happens after our "domwindowclosed" notification!
+			this.destroyWindowClosingHandler(window);
+		}
 		this.destroyControls(window, force);
 	},
 	get isSeaMonkey() {
@@ -499,10 +515,9 @@ var windowsObserver = {
 			+ "\nTry don't save it in undo close history"
 		);
 		var window = tab.ownerDocument.defaultView;
+		this.forgetClosedTab(window);
 		if(this.isSeaMonkey)
-			window.setTimeout(this.forgetClosedTab.bind(this, window), 0);
-		else
-			this.forgetClosedTab(window);
+			window.setTimeout(this.forgetClosedTab.bind(this, window, true), 0);
 	},
 	closePrivateTabs: function(window) {
 		var gBrowser = window.gBrowser;
@@ -515,7 +530,7 @@ var windowsObserver = {
 			}
 		}
 	},
-	forgetClosedTab: function(window) {
+	forgetClosedTab: function(window, _secondTry) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
@@ -526,7 +541,7 @@ var windowsObserver = {
 				&& this.privateAttr in state.attributes
 			) {
 				this.ss.forgetClosedTab(window, i);
-				_log("Forget about closed tab #" + i);
+				_log("Forget about closed tab #" + i + (_secondTry ? " (workaround for SeaMonkey)" : ""));
 				return;
 			}
 		}
