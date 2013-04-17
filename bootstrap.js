@@ -38,6 +38,7 @@ var windowsObserver = {
 			this.initWindow(window, reason);
 		}, this);
 		Services.ww.registerNotification(this);
+		Services.obs.addObserver(this, "sessionstore-state-write", false);
 
 		if(prefs.get("patchDownloads"))
 			this.patchPrivateBrowsingUtils(true);
@@ -51,6 +52,7 @@ var windowsObserver = {
 			this.destroyWindow(window, reason);
 		}, this);
 		Services.ww.unregisterNotification(this);
+		Services.obs.removeObserver(this, "sessionstore-state-write");
 
 		this.unloadStyles();
 		this.restoreAppButtonWidth();
@@ -72,6 +74,8 @@ var windowsObserver = {
 		}
 		else if(topic == "domwindowclosed")
 			this.destroyWindow(subject, WINDOW_CLOSED);
+		else if(topic == "sessionstore-state-write")
+			this.filterSession(subject);
 	},
 
 	handleEvent: function(e) {
@@ -528,6 +532,37 @@ var windowsObserver = {
 		Components.utils.reportError(
 			LOG_PREFIX + "!!! Can't forget about closed tab: tab not found, closed tabs count: " + l
 		);
+	},
+	filterSession: function(stateData) {
+		if(!stateData || !(stateData instanceof Components.interfaces.nsISupportsString))
+			return;
+		var stateString = stateData.data;
+		//_log("filterSession():\n" + stateString);
+		if(
+			prefs.get("savePrivateTabsInSessions")
+			|| stateString.indexOf('"privateTab-isPrivate":"true"') == -1 // Should be faster, than JSON.parse()
+		)
+			return;
+		var state = JSON.parse(stateString);
+		var changed = false;
+		state.windows.forEach(function(windowState) {
+			if(windowState.isPrivate) // Browser should ignore private windows itself
+				return;
+			windowState.tabs = windowState.tabs.filter(function(tabState) {
+				var isPrivate = "attributes" in tabState && this.privateAttr in tabState.attributes;
+				if(isPrivate)
+					changed = true;
+				return !isPrivate;
+			}, this);
+			//~ todo: update windowState.selected ?
+		}, this);
+		if(!changed)
+			return;
+		var newStateString = JSON.stringify(state);
+		if(newStateString == stateString)
+			return;
+		stateData.data = newStateString;
+		//_log("Try override session state");
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
