@@ -514,10 +514,16 @@ var windowsObserver = {
 			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
 		);
+		var silentFail = false;
+		if(tab.hasAttribute("closedownloadtabs-closed")) {
+			// https://github.com/Infocatcher/Close_Download_Tabs
+			_log('Found "closedownloadtabs-closed" attribute');
+			silentFail = true;
+		}
 		var window = tab.ownerDocument.defaultView;
-		this.forgetClosedTab(window);
+		this.forgetClosedTab(window, silentFail);
 		if(this.isSeaMonkey)
-			window.setTimeout(this.forgetClosedTab.bind(this, window, true), 0);
+			window.setTimeout(this.forgetClosedTab.bind(this, window, silentFail, true), 0);
 	},
 	closePrivateTabs: function(window) {
 		var gBrowser = window.gBrowser;
@@ -530,7 +536,7 @@ var windowsObserver = {
 			}
 		}
 	},
-	forgetClosedTab: function(window, _secondTry) {
+	forgetClosedTab: function(window, silentFail, _secondTry) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
@@ -545,7 +551,7 @@ var windowsObserver = {
 				return;
 			}
 		}
-		Components.utils.reportError(
+		!silentFail && Components.utils.reportError(
 			LOG_PREFIX + "!!! Can't forget about closed tab: tab not found, closed tabs count: " + l
 		);
 	},
