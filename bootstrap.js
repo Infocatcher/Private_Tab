@@ -110,8 +110,8 @@ var windowsObserver = {
 	windowClosingHandler: function(e) {
 		var window = e.currentTarget;
 		_log("windowClosingHandler() [" + e.type + "]");
-		if(
-			!this.isPrivateWindow(window)
+		if( //~ todo: this looks like SeaMonkey bug... and may be fixed later
+			(this.isSeaMonkey || !this.isPrivateWindow(window))
 			&& !prefs.get("savePrivateTabsInSessions")
 		) {
 			_log(e.type + " => closePrivateTabs()");
