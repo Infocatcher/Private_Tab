@@ -1983,15 +1983,22 @@ var windowsObserver = {
 		var pt = window.privateTab;
 		window.clearTimeout(pt._updateDownloadPanelTimer);
 		pt._updateDownloadPanelTimer = window.setTimeout(function() {
+			// See chrome://browser/content/downloads/downloads.js,
+			// chrome://browser/content/downloads/indicator.js,
+			// resource:///modules/DownloadsCommon.jsm
 			// Clear download panel:
 			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
-				window.DownloadsView.onDataInvalidated();
+				window.DownloadsView.onDataInvalidated(); // This calls DownloadsPanel.terminate();
 				_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+				window.DownloadsPanel.initialize(function() {
+					_log("updateDownloadPanel() => DownloadsPanel.initialize() done");
+				});
+				_log("updateDownloadPanel() => DownloadsPanel.initialize()");
 			}
 			// Reinitialize download indicator:
 			var diw = window.DownloadsIndicatorView;
 			if(diw._initialized) {
-				//~ hack: cleanup raw download data
+				//~ hack: cleanup raw download data, see DownloadsCommon.getData()
 				var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
 				var data = isPrivate
 					? global.DownloadsIndicatorData
@@ -2002,7 +2009,7 @@ var windowsObserver = {
 					if(Components.utils.getGlobalForObject(view) == window)
 						data.removeView(view);
 				}
-				// Restert download indicator:
+				// Restart download indicator:
 				diw.ensureTerminated();
 				diw.ensureInitialized();
 				_log("updateDownloadPanel() => reinitialize download indicator");
