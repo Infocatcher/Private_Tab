@@ -1982,22 +1982,24 @@ var windowsObserver = {
 				_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
 			}
 			// Reinitialize download indicator:
-			//~ hack: cleanup raw download data
-			var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
-			var data = isPrivate
-				? global.DownloadsIndicatorData
-				: global.PrivateDownloadsIndicatorData;
-			//data._itemCount = data._views.length = 0;
-			var views = data._views;
-			for(var i = views.length - 1; i >= 0; --i) {
-				var view = views[i];
-				if(Components.utils.getGlobalForObject(view) == window)
-					data.removeView(view);
+			var diw = window.DownloadsIndicatorView;
+			if(diw._initialized) {
+				//~ hack: cleanup raw download data
+				var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
+				var data = isPrivate
+					? global.DownloadsIndicatorData
+					: global.PrivateDownloadsIndicatorData;
+				var views = data._views;
+				for(var i = views.length - 1; i >= 0; --i) {
+					var view = views[i];
+					if(Components.utils.getGlobalForObject(view) == window)
+						data.removeView(view);
+				}
+				// Restert download indicator:
+				diw.ensureTerminated();
+				diw.ensureInitialized();
+				_log("updateDownloadPanel() => reinitialize download indicator");
 			}
-
-			window.DownloadsIndicatorView.ensureTerminated();
-			window.DownloadsIndicatorView.ensureInitialized();
-			_log("updateDownloadPanel() => reinitialize download indicator");
 		}, 100);
 	},
 	patchPrivateBrowsingUtils: function(applyPatch) {
