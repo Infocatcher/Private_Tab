@@ -1646,6 +1646,7 @@ var windowsObserver = {
 			|| tabLabel == "about:blank"
 			|| tabLabel == "chrome://fvd.speeddial/content/fvd_about_blank.html"
 			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
+			|| tabLabel == "chrome://superstart/content/index.html"
 		)
 			return true;
 		if(/^\w+:\S*$/.test(tabLabel))
