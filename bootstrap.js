@@ -566,19 +566,32 @@ var windowsObserver = {
 		)
 			return;
 		var state = JSON.parse(stateString);
-		var changed = false;
+		var sessionChanged = false;
 		state.windows.forEach(function(windowState) {
 			if(windowState.isPrivate) // Browser should ignore private windows itself
 				return;
-			windowState.tabs = windowState.tabs.filter(function(tabState) {
+			var windowChanged = false;
+			var oldSelected = windowState.selected || 1;
+			var newSelected;
+			var newIndex = 0;
+			var tabs = windowState.tabs = windowState.tabs.filter(function(tabState, i) {
 				var isPrivate = "attributes" in tabState && this.privateAttr in tabState.attributes;
 				if(isPrivate)
-					changed = true;
+					sessionChanged = windowChanged = true;
+				else {
+					++newIndex;
+					if(!newSelected && i + 1 >= oldSelected)
+						newSelected = newIndex;
+				}
 				return !isPrivate;
 			}, this);
-			//~ todo: update windowState.selected ?
+			if(windowChanged) {
+				windowState.selected = newSelected || tabs.length;
+				//_log("Correct selected tab: " + oldSelected + " => " + newSelected + " => " + windowState.selected);
+			}
+			//~ todo: what to do with empty window without tabs ?
 		}, this);
-		if(!changed)
+		if(!sessionChanged)
 			return;
 		var newStateString = JSON.stringify(state);
 		if(newStateString == stateString)
