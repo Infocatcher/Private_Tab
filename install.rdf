@@ -55,9 +55,9 @@
 			<Description>
 				<em:locale>it</em:locale>
 				<em:name>Private Tab</em:name>
-				<em:description>La navigazione anonima su schede.</em:description>
+				<em:description>La navigazione anonima su schede</em:description>
 				<em:creator>Infocatcher</em:creator>
-				<em:translator>Stis</em:translator>
+				<em:translator>moretti</em:translator>
 			</Description>
 		</em:localized>
 
