@@ -2360,22 +2360,34 @@ var patcher = {
 					return orig.apply(this, arguments);
 				};
 			// Someone may want to do eval() patch...
+			var getGlobal = function() {
+				if(win instanceof Components.interfaces.nsIDOMWindow)
+					return ["window", ""];
+				var global = "_global_" + Math.random().toFixed(14).substr(2);
+				return [
+					global,
+					"\n\tvar " + global + " = Components.utils.getGlobalForObject(this);"
+				];
+			};
 			var patch = callAfter
 				? function(s) {
 					var rnd = Math.random().toFixed(14).substr(2);
 					var res = "_res_" + rnd;
 					var ret = "_ret_" + rnd;
+					var [global, ensureGlobal] = getGlobal();
 					return s
 						.replace(
 							"{",
-							'{\n\tvar ' + res + ' = window["' + key + '"].before.apply(this, arguments);\n'
+							"{" + ensureGlobal
+							+ "\n\tvar " + res + " = " + global + '["' + key + '"].before.apply(this, arguments);\n'
 							+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 							+ "\tvar " + ret + " = (function() {\n"
 						)
 						.replace(
 							/\}$/,
 							"\t}).apply(this, arguments);\n"
-							+ '\twindow["' + key + '"].after.apply(this, [' + ret + "].concat(Array.slice(arguments)));\n"
+							+ "\t" + global + '["' + key + '"].after'
+							+ '.apply(this, [' + ret + "].concat(Array.slice(arguments)));\n"
 							+ "\treturn " + ret + ";\n"
 							+ "}"
 						);
@@ -2383,9 +2395,11 @@ var patcher = {
 				: function(s) {
 					var rnd = Math.random().toFixed(14).substr(2);
 					var res = "_res_" + rnd;
+					var [global, ensureGlobal] = getGlobal();
 					return s.replace(
 						"{",
-						'{\n\tvar ' + res + ' = window["' + key + '"].before.apply(this, arguments);\n'
+						"{" + ensureGlobal
+						+ "\n\tvar " + res + " = " + global + '["' + key + '"].before.apply(this, arguments);\n'
 						+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 					);
 				};
