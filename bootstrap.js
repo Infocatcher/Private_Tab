@@ -2243,11 +2243,9 @@ var prefs = {
 		//~ todo: add condition when https://bugzilla.mozilla.org/show_bug.cgi?id=564675 will be fixed
 		this.loadDefaultPrefs();
 		if(windowsObserver.isSeaMonkey) {
-			this.setPref(
-				this.ns + "dragAndDropTabsBetweenDifferentWindows",
-				false,
-				Services.prefs.getDefaultBranch("")
-			);
+			var defaultBranch = Services.prefs.getDefaultBranch("");
+			this.setPref(this.ns + "dragAndDropTabsBetweenDifferentWindows", false, defaultBranch);
+			this.setPref(this.ns + "patchDownloads", false, defaultBranch);
 		}
 		Services.prefs.addObserver(this.ns, this, false);
 	},
