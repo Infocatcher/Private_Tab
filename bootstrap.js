@@ -52,16 +52,19 @@ var windowsObserver = {
 			this.destroyWindow(window, reason);
 		}, this);
 		Services.ww.unregisterNotification(this);
-		if(reason != APP_SHUTDOWN) // nsISessionStore may save data after our shutdown
+
+		if(reason != APP_SHUTDOWN) {
+			// nsISessionStore may save data after our shutdown
 			Services.obs.removeObserver(this, "sessionstore-state-write");
 
-		this.unloadStyles();
-		this.restoreAppButtonWidth();
+			this.unloadStyles();
+			this.restoreAppButtonWidth();
+			if(prefs.get("patchDownloads"))
+				this.patchPrivateBrowsingUtils(false);
+		}
+
 		prefs.destroy();
 		this._dndPrivateNode = null;
-
-		if(prefs.get("patchDownloads"))
-			this.patchPrivateBrowsingUtils(false);
 	},
 
 	observe: function(subject, topic, data) {
