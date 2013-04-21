@@ -137,10 +137,10 @@ var windowsObserver = {
 			return;
 		}
 
-		var document = window.document;
-		this.loadStyles(window);
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
+		var document = window.document;
+		this.loadStyles(window);
 		this.ensureTitleModifier(document);
 		this.patchBrowsers(gBrowser, true);
 		window.setTimeout(function() {
@@ -2127,13 +2127,31 @@ var windowsObserver = {
 			.getService(Components.interfaces.nsIStyleSheetService);
 	},
 	makeCSSURI: function(window) {
-		var s = window.document.documentElement.style;
+		var document = window.document;
+		var s = document.documentElement.style;
 		var prefix = "textDecorationColor" in s && "textDecorationStyle" in s
 			? ""
 			: "-moz-";
+		var ttColor = "-moz-nativehyperlinktext";
+		var ttAddStyles = "";
+		var tt = this.getTabTooltip(document)
+			|| document.getElementsByTagName("tooltip")[0];
+		var ttOrigColor = tt && window.getComputedStyle(tt, null).color;
+		_log("Original tooltip color: " + ttOrigColor);
+		if(/^rgb\((\d+), *(\d+), *(\d+)\)$/.test(ttOrigColor)) {
+			var r = +RegExp.$1, g = +RegExp.$2, b = +RegExp.$3;
+			var brightness = Math.max(r/255, g/255, b/255); // HSV, 0..1
+			if(brightness > 0.5) { // Bright text, dark background
+				ttColor = "currentColor";
+				ttAddStyles = '\n\
+					text-decoration: underline;\n\
+					' + prefix + 'text-decoration-color: currentColor;\n\
+					' + prefix + 'text-decoration-style: dashed;';
+			}
+		}
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
-			@-moz-document url("' + window.document.documentURI + '") {\n\
+			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '] {\n\
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
@@ -2144,7 +2162,7 @@ var windowsObserver = {
 					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
 				}\n\
 				#' + this.tabTipId + ' {\n\
-					color: -moz-nativehyperlinktext;\n\
+					color: ' + ttColor + ';' + ttAddStyles + '\n\
 				}\n\
 				#' + this.tabScopeTipId + '{\n\
 					color: -moz-nativehyperlinktext;\n\
@@ -2152,7 +2170,7 @@ var windowsObserver = {
 					margin: 1px;\n\
 				}\n\
 			}\n\
-			@-moz-document url("' + window.document.documentURI + '"),\n\
+			@-moz-document url("' + document.documentURI + '"),\n\
 				url("chrome://global/content/customizeToolbar.xul") {\n\
 				#' + this.toolbarButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-24.png") !important;\n\
