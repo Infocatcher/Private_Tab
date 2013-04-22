@@ -2144,6 +2144,7 @@ var windowsObserver = {
 			if(brightness > 0.5) { // Bright text, dark background
 				ttColor = "currentColor";
 				ttAddStyles = '\n\
+					font-weight: bold;\n\
 					text-decoration: underline;\n\
 					' + prefix + 'text-decoration-color: currentColor;\n\
 					' + prefix + 'text-decoration-style: dashed;';
