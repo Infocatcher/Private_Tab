@@ -531,9 +531,14 @@ var windowsObserver = {
 	closePrivateTabs: function(window) {
 		var gBrowser = window.gBrowser;
 		var tabs = gBrowser.tabs;
+		var hasNotPrivate = false;
 		for(var i = tabs.length - 1; i >= 0; --i) {
 			var tab = tabs[i];
-			if(tab.hasAttribute(this.privateAttr)) {
+			if(!tab.hasAttribute(this.privateAttr))
+				hasNotPrivate = true;
+			else {
+				if(i == 0 && !hasNotPrivate)
+					gBrowser.selectedTab = gBrowser.addTab("about:blank", { skipAnimation: true });
 				gBrowser.removeTab(tab);
 				_log("closePrivateTabs(): remove tab: " + (tab.getAttribute("label") || "").substr(0, 256));
 			}
