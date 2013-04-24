@@ -5,6 +5,7 @@ locale privatetab de    locale/de/
 locale privatetab el    locale/el/
 locale privatetab fr    locale/fr/
 locale privatetab ja    locale/ja/
+locale privatetab pl    locale/pl/
 locale privatetab ru    locale/ru/
 locale privatetab vi    locale/vi/
 locale privatetab zh-CN locale/zh-CN/
