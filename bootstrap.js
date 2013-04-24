@@ -539,7 +539,7 @@ var windowsObserver = {
 			else {
 				if(i == 0 && !hasNotPrivate)
 					gBrowser.selectedTab = gBrowser.addTab("about:blank", { skipAnimation: true });
-				gBrowser.removeTab(tab);
+				gBrowser.removeTab(tab, { animate: false });
 				_log("closePrivateTabs(): remove tab: " + (tab.getAttribute("label") || "").substr(0, 256));
 			}
 		}
