@@ -291,6 +291,7 @@ var windowsObserver = {
 			&& args[1] === null
 			&& args[2] === null
 			&& args[3] === null
+			&& !prefs.get("allowOpenExternalLinksInPrivateTabs")
 		) {
 			_log("Looks like window, opened from external application, ignore");
 			return;
@@ -323,7 +324,7 @@ var windowsObserver = {
 		}
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
 			this.windows.forEach(function(window) {
-				this.patchTabBrowserDND(window, window.gBrowser, pVal);
+				this.patchTabBrowserDND(window, window.gBrowser, pVal, true);
 			}, this);
 		}
 		else if(pName == "makeNewEmptyTabsPrivate") {
@@ -343,6 +344,11 @@ var windowsObserver = {
 				this.updateDownloadPanel(window, this.isPrivateWindow(window));
 			}, this);
 		}
+		else if(pName == "allowOpenExternalLinksInPrivateTabs") {
+			this.windows.forEach(function(window) {
+				this.patchTabBrowserLoadURI(window, window.gBrowser, !pVal, true);
+			}, this);
+		}
 	},
 
 	get pbuFake() {
@@ -357,11 +363,8 @@ var windowsObserver = {
 			}
 		});
 	},
-	patchTabBrowserDND: function(window, gBrowser, applyPatch) {
-		if(
-			!prefs.get("dragAndDropTabsBetweenDifferentWindows")
-			&& (applyPatch || !("_privateTabPrivateBrowsingUtils" in window))
-		)
+	patchTabBrowserDND: function(window, gBrowser, applyPatch, force) {
+		if(!force && !prefs.get("dragAndDropTabsBetweenDifferentWindows"))
 			return;
 
 		if(applyPatch)
@@ -388,7 +391,10 @@ var windowsObserver = {
 			applyPatch
 		);
 	},
-	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch) {
+	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, force) {
+		if(!force && prefs.get("allowOpenExternalLinksInPrivateTabs"))
+			return;
+
 		if(applyPatch) {
 			var _this = this;
 			patcher.wrapFunction(
@@ -506,10 +512,12 @@ var windowsObserver = {
 		}
 		//_log(e.type + ": new Error().stack:\n" + new Error().stack);
 		//_log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
-		var err = new Error();
-		if(err.stack.replace(/:\d+\s*$/, "").endsWith("@" + err.fileName)) { // Only current file in the stack
-			_log("Looks like tab, opened from external application, ignore");
-			return;
+		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) {
+			var err = new Error();
+			if(err.stack.replace(/:\d+\s*$/, "").endsWith("@" + err.fileName)) { // Only current file in the stack
+				_log("Looks like tab, opened from external application, ignore");
+				return;
+			}
 		}
 		var gBrowser = this.getTabBrowser(tab);
 		var window = tab.ownerDocument.defaultView;

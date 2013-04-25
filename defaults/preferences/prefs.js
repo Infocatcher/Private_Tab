@@ -23,6 +23,7 @@ pref("extensions.privateTab.rememberClosedPrivateTabs", false);
 pref("extensions.privateTab.savePrivateTabsInSessions", false);
 pref("extensions.privateTab.makeNewEmptyTabsPrivate", false);
 pref("extensions.privateTab.makeNewEmptyWindowsPrivate", false); // Note: make single empty tab in new window private
+pref("extensions.privateTab.allowOpenExternalLinksInPrivateTabs", false);
 pref("extensions.privateTab.sendRefererHeader", 2);
 // 0 - don't send
 // 1 - only if private tab opened from private tab
