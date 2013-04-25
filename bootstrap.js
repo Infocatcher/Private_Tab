@@ -2024,6 +2024,14 @@ var windowsObserver = {
 		else {
 			root.removeAttribute("privatebrowsingmode");
 		}
+		// See chrome://browser/content/browser.js, gPrivateBrowsingUI.init()
+		// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
+		if(Services.appinfo.OS == "Darwin") {
+			if(isPrivate && pbTemp)
+				root.setAttribute("drawintitlebar", "true");
+			else
+				root.removeAttribute("drawintitlebar");
+		}
 		gBrowser.updateTitlebar();
 		this.privateChanged(document, isPrivate);
 	},
