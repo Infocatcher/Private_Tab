@@ -272,7 +272,7 @@ var windowsObserver = {
 		);
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
-		var isEmptyWindow = !args || !(3 in args);
+		var isEmptyWindow = args && !(3 in args);
 		if((!opener || isEmptyWindow) && prefs.get("makeNewEmptyWindowsPrivate")) {
 			_log("Make new empty window private");
 			this.toggleWindowPrivate(window, true);
