@@ -268,7 +268,7 @@ var windowsObserver = {
 		_log(
 			"inheritWindowState():\nwindow.opener: " + window.opener
 			+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
-			+ "\nwindow.arguments:\n" + args && Array.map(args, String).join("\n")
+			+ "\nwindow.arguments:\n" + (args && Array.map(args, String).join("\n"))
 		);
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
