@@ -147,6 +147,7 @@ var windowsObserver = {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
 			this.patchTabBrowserDND(window, gBrowser, true);
+			this.patchTabBrowserLoadURI(window, gBrowser, true);
 		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
@@ -221,6 +222,7 @@ var windowsObserver = {
 			this.destroyTitleModifier(document);
 			this.patchBrowsers(gBrowser, false);
 			this.patchTabBrowserDND(window, gBrowser, false);
+			this.patchTabBrowserLoadURI(window, gBrowser, false);
 			delete window.privateTab;
 		}
 		this.unwatchAppButton(window);
@@ -385,6 +387,32 @@ var windowsObserver = {
 			"gBrowser.swapBrowsersAndCloseOther",
 			applyPatch
 		);
+	},
+	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch) {
+		if(applyPatch) {
+			var _this = this;
+			patcher.wrapFunction(
+				gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags",
+				function before(aURI, aFlags, aReferrerURI, aCharset, aPostData) {
+					if(
+						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
+						&& _this.isPrivateTab(this.selectedTab)
+					) {
+						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
+						// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
+						var tab = this.loadOneTab(aURI || "about:blank", {
+							referrerURI: aReferrerURI,
+							fromExternal: true,
+							inBackground: prefs.getPref("browser.tabs.loadDivertedInBackground")
+						});
+						return !!tab;
+					}
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags");
+		}
 	},
 	patchBrowsers: function(gBrowser, applyPatch) {
 		var browser = gBrowser.browsers && gBrowser.browsers[0];
