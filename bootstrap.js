@@ -514,7 +514,13 @@ var windowsObserver = {
 		//_log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
 		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) {
 			var err = new Error();
-			if(err.stack.replace(/:\d+\s*$/, "").endsWith("@" + err.fileName)) { // Only current file in the stack
+			var curFile = "@" + err.fileName + ":";
+			var stack = err.stack.trimRight().split("\n");
+			if( // this.handleEvent() => this.tabOpenHandler()
+				stack.length == 2 && stack.every(function(line) {
+					return line.indexOf(curFile) != -1;
+				})
+			) {
 				_log("Looks like tab, opened from external application, ignore");
 				return;
 			}
