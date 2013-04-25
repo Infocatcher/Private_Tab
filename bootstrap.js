@@ -262,14 +262,15 @@ var windowsObserver = {
 			|| winType == "navigator:private"; // SeaMonkey >= 2.19a1 (2013-03-27)
 	},
 	inheritWindowState: function(window) {
+		var args = window.arguments || undefined;
 		_log(
 			"inheritWindowState():\nwindow.opener: " + window.opener
 			+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
-			+ "\nwindow.arguments:\n" + Array.map(window.arguments || [], String).join("\n")
+			+ "\nwindow.arguments:\n" + args && Array.map(args, String).join("\n")
 		);
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
-		var isEmptyWindow = !("arguments" in window) || !(3 in window.arguments);
+		var isEmptyWindow = !args || !(3 in args);
 		if((!opener || isEmptyWindow) && prefs.get("makeNewEmptyWindowsPrivate")) {
 			_log("Make new empty window private");
 			this.toggleWindowPrivate(window, true);
@@ -279,6 +280,17 @@ var windowsObserver = {
 			return;
 		if(isEmptyWindow) {
 			_log("inheritWindowState(): Looks like new empty window, ignore");
+			return;
+		}
+		// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
+		// newWindow = openDialog(getBrowserURL(), "_blank", "all,dialog=no", url, null, null, null);
+		if(
+			args && 3 in args && !(4 in args)
+			&& args[1] === null
+			&& args[2] === null
+			&& args[3] === null
+		) {
+			_log("Looks like window, opened from external application, ignore");
 			return;
 		}
 		if(this.isPrivateWindow(window)) {
@@ -462,6 +474,13 @@ var windowsObserver = {
 		var tab = e.originalTarget || e.target;
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
+			return;
+		}
+		//_log(e.type + ": new Error().stack:\n" + new Error().stack);
+		//_log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
+		var err = new Error();
+		if(err.stack.replace(/:\d+\s*$/, "").endsWith("@" + err.fileName)) { // Only current file in the stack
+			_log("Looks like tab, opened from external application, ignore");
 			return;
 		}
 		var gBrowser = this.getTabBrowser(tab);
