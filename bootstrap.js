@@ -2454,10 +2454,10 @@ var patcher = {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
 		key = this.wrapNS + key;
-		var orig, wrapped;
+		var orig = obj[meth];
+		var wrapped;
 		if(!(key in win)) {
 			_log("[patcher] Patch " + name);
-			orig = obj[meth];
 			wrapped = obj[meth] = callAfter
 				? function wrapper() {
 					var res = win[key].before.apply(this, arguments);
