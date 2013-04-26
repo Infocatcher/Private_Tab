@@ -201,11 +201,11 @@ var windowsObserver = {
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 		_log("destroyWindow()");
+		var gBrowser = window.gBrowser;
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
 			var document = window.document;
-			var gBrowser = window.gBrowser;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
@@ -219,11 +219,12 @@ var windowsObserver = {
 			if(!isPrivateWindow)
 				this.updateWindowTitle(gBrowser, false);
 			this.destroyTitleModifier(document);
-			this.patchBrowsers(gBrowser, false);
-			this.patchTabBrowserDND(window, gBrowser, false);
-			this.patchTabBrowserLoadURI(window, gBrowser, false);
-			delete window.privateTab;
 		}
+		this.patchBrowsers(gBrowser, false, !force);
+		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
+		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
+		delete window.privateTab;
+
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
 		window.removeEventListener("SSTabRestoring", this, false);
@@ -362,8 +363,8 @@ var windowsObserver = {
 			}
 		});
 	},
-	patchTabBrowserDND: function(window, gBrowser, applyPatch, force) {
-		if(!force && !prefs.get("dragAndDropTabsBetweenDifferentWindows"))
+	patchTabBrowserDND: function(window, gBrowser, applyPatch, skipCheck, forceDestroy) {
+		if(!skipCheck && !prefs.get("dragAndDropTabsBetweenDifferentWindows"))
 			return;
 
 		if(applyPatch)
@@ -380,14 +381,16 @@ var windowsObserver = {
 			gBrowser.tabContainer,
 			"_setEffectAllowedForDataTransfer",
 			"gBrowser.tabContainer._setEffectAllowedForDataTransfer",
-			applyPatch
+			applyPatch,
+			forceDestroy
 		);
 		this.overridePrivateBrowsingUtils(
 			window,
 			gBrowser,
 			"swapBrowsersAndCloseOther",
 			"gBrowser.swapBrowsersAndCloseOther",
-			applyPatch
+			applyPatch,
+			forceDestroy
 		);
 	},
 	ensureTabBrowserLoadURIPatched: function(window) {
@@ -397,8 +400,8 @@ var windowsObserver = {
 		)
 			this.patchTabBrowserLoadURI(window, window.gBrowser, true, true);
 	},
-	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, force) {
-		if(!force && prefs.get("allowOpenExternalLinksInPrivateTabs"))
+	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, skipCheck, forceDestroy) {
+		if(!skipCheck && prefs.get("allowOpenExternalLinksInPrivateTabs"))
 			return;
 
 		if(applyPatch) {
@@ -423,10 +426,10 @@ var windowsObserver = {
 			);
 		}
 		else {
-			patcher.unwrapFunction(gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags");
+			patcher.unwrapFunction(gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags", forceDestroy);
 		}
 	},
-	patchBrowsers: function(gBrowser, applyPatch) {
+	patchBrowsers: function(gBrowser, applyPatch, forceDestroy) {
 		var browser = gBrowser.browsers && gBrowser.browsers[0];
 		if(!browser) {
 			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.swapDocShells()");
@@ -477,10 +480,10 @@ var windowsObserver = {
 		}
 		else {
 			_log("Restore browser.__proto__.swapDocShells() method");
-			patcher.unwrapFunction(browserProto, "swapDocShells", "browser.swapDocShells");
+			patcher.unwrapFunction(browserProto, "swapDocShells", "browser.swapDocShells", forceDestroy);
 		}
 	},
-	overridePrivateBrowsingUtils: function(window, obj, meth, key, applyPatch) {
+	overridePrivateBrowsingUtils: function(window, obj, meth, key, applyPatch, forceDestroy) {
 		if(!obj || !(meth in obj)) {
 			Components.utils.reportError(LOG_PREFIX + "!!! Can't find " + key + "()");
 			return;
@@ -506,7 +509,7 @@ var windowsObserver = {
 			);
 		}
 		else {
-			patcher.unwrapFunction(obj, meth, key);
+			patcher.unwrapFunction(obj, meth, key, forceDestroy);
 		}
 	},
 
@@ -1485,8 +1488,8 @@ var windowsObserver = {
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
-		if(force && "TabScope" in window && "_updateTitle" in window.TabScope)
-			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle");
+		if("TabScope" in window && "_updateTitle" in window.TabScope)
+			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle", !force);
 
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
@@ -2538,23 +2541,29 @@ var patcher = {
 		if(callAfter)
 			callAfter.before = callBefore;
 	},
-	unwrapFunction: function(obj, meth, key) {
+	unwrapFunction: function(obj, meth, key, forceDestroy) {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
 		key = this.wrapNS + key;
 		if(!(key in win))
 			return;
 		var wrapper = win[key];
-		if(obj[meth] != wrapper.wrapped) {
+		if(!forceDestroy && obj[meth] != wrapper.wrapped) {
 			_log("[patcher] Can't completely restore " + name + ": detected third-party wrapper!");
 			var dummy = function() {};
 			win[key] = {
 				before: dummy,
 				after: wrapper.after && dummy
 			};
+			if(win instanceof Components.interfaces.nsIDOMWindow) {
+				win.addEventListener("unload", function destroyWrapper(e) {
+					win.removeEventListener(e.type, destroyWrapper, false);
+					delete win[key];
+				}, false);
+			}
 		}
 		else {
-			_log("[patcher] Restore " + name);
+			_log("[patcher] Restore " + name + (forceDestroy ? " [force]" : ""));
 			delete win[key];
 			obj[meth] = wrapper.orig;
 		}
