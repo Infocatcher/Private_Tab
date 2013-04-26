@@ -8,7 +8,7 @@ Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 this.__defineGetter__("patcher", function() {
 	delete this.patcher;
 	Components.utils.import("chrome://privatetab/content/patcher.jsm");
-	patcher.init(_log);
+	patcher.init("privateTabMod::", _log);
 	return patcher;
 });
 

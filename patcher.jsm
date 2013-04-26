@@ -1,7 +1,15 @@
 var EXPORTED_SYMBOLS = ["patcher"];
 var patcher = {
 	// Do some magic to restore third party wrappers from other extensions
-	wrapNS: "privateTabMod::",
+	wrapNS: "patcher::",
+	init: function(ns, logger) {
+		this.wrapNS = ns;
+		if(logger)
+			_log = logger;
+	},
+	destroy: function() {
+		_log = function() {};
+	},
 	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
@@ -123,12 +131,6 @@ var patcher = {
 		var win = Components.utils.getGlobalForObject(obj);
 		key = this.wrapNS + key;
 		return key in win && win[key].hasOwnProperty("wrapped");
-	},
-	init: function(logger) {
-		_log = logger;
-	},
-	destroy: function() {
-		_log = function() {};
 	}
 };
 function _log() {}
