@@ -2548,19 +2548,18 @@ var patcher = {
 		if(!(key in win))
 			return;
 		var wrapper = win[key];
-		if(!forceDestroy && obj[meth] != wrapper.wrapped) {
-			_log("[patcher] Can't completely restore " + name + ": detected third-party wrapper!");
-			var dummy = function() {};
+		var wrapped = wrapper.wrapped;
+		if(!forceDestroy && obj[meth] != wrapped) {
+			_log("[patcher] !!! Can't completely restore " + name + ": detected third-party wrapper!");
+			if(wrapped) { // First failure, all next iterations will use already existing wrapper
+				delete wrapped.toString;
+				delete wrapped.toSource;
+			}
+			var dummy = function dummy() {};
 			win[key] = {
 				before: dummy,
-				after: wrapper.after && dummy
+				after: dummy
 			};
-			if(win instanceof Components.interfaces.nsIDOMWindow) {
-				win.addEventListener("unload", function destroyWrapper(e) {
-					win.removeEventListener(e.type, destroyWrapper, false);
-					delete win[key];
-				}, false);
-			}
 		}
 		else {
 			_log("[patcher] Restore " + name + (forceDestroy ? " [force]" : ""));
