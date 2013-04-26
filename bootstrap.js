@@ -1475,7 +1475,7 @@ var windowsObserver = {
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
-		if("TabScope" in window && "_updateTitle" in window.TabScope)
+		if(force && "TabScope" in window && "_updateTitle" in window.TabScope)
 			patcher.unwrapFunction(window.TabScope, "_updateTitle", "TabScope._updateTitle");
 
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
