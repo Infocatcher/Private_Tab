@@ -139,6 +139,7 @@ var windowsObserver = {
 
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
+		window.privateTab = new API(window);
 		var document = window.document;
 		this.loadStyles(window);
 		this.ensureTitleModifier(document);
@@ -147,7 +148,6 @@ var windowsObserver = {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
 			this.patchTabBrowserDND(window, gBrowser, true);
-			this.patchTabBrowserLoadURI(window, gBrowser, true);
 		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
@@ -195,7 +195,6 @@ var windowsObserver = {
 			}.bind(this), 10);
 		}.bind(this), 50);
 		this.initToolbarButton(document);
-		window.privateTab = new API(window);
 	},
 	destroyWindow: function(window, reason) {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
@@ -391,6 +390,13 @@ var windowsObserver = {
 			applyPatch
 		);
 	},
+	ensureTabBrowserLoadURIPatched: function(window) {
+		if(
+			!prefs.get("allowOpenExternalLinksInPrivateTabs")
+			&& !patcher.isWrapped(window.gBrowser, "gBrowser.loadURIWithFlags")
+		)
+			this.patchTabBrowserLoadURI(window, window.gBrowser, true, true);
+	},
 	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, force) {
 		if(!force && prefs.get("allowOpenExternalLinksInPrivateTabs"))
 			return;
@@ -566,6 +572,10 @@ var windowsObserver = {
 		if(this.isPrivateTab(tab) != isPrivate) {
 			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
 			this.toggleTabPrivate(tab, isPrivate);
+			if(isPrivate) {
+				var window = tab.ownerDocument.defaultView;
+				window.privateTab._onFirstPrivateTab(window, tab);
+			}
 		}
 	},
 	tabCloseHandler: function(e) {
@@ -1753,11 +1763,20 @@ var windowsObserver = {
 			return;
 		if(isPrivate) {
 			tab.setAttribute(this.privateAttr, "true");
-			this.persistTabAttributeOnce();
+			var window = tab.ownerDocument.defaultView;
+			this.onFirstPrivateTab(window, tab);
+			window.privateTab._onFirstPrivateTab(window, tab);
 		}
 		else {
 			tab.removeAttribute(this.privateAttr);
 		}
+	},
+	onFirstPrivateTab: function(window, tab) {
+		this.onFirstPrivateTab = function() {};
+		_log("First private tab");
+		window.setTimeout(function() {
+			this.ss.persistTabAttribute(this.privateAttr);
+		}.bind(this), 0);
 	},
 	fixTabState: function(tab, isPrivate) {
 		if(!this.isPendingTab(tab) || !prefs.get("workaroundForPendingTabs"))
@@ -2172,10 +2191,6 @@ var windowsObserver = {
 			|| Components.classes["@mozilla.org/suite/sessionstore;1"]
 		).getService(Components.interfaces.nsISessionStore);
 	},
-	persistTabAttributeOnce: function() {
-		this.persistTabAttributeOnce = function() {};
-		this.ss.persistTabAttribute(this.privateAttr);
-	},
 
 	_stylesLoaded: false,
 	loadStyles: function(window) {
@@ -2297,6 +2312,13 @@ API.prototype = {
 	handleEvent: function(e) {
 		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined)
 			privateTabInternal.toggleTabPrivate(e.originalTarget || e.target, this._openNewTabsPrivate);
+	},
+	_onFirstPrivateTab: function(window, tab) {
+		this._onFirstPrivateTab = function() {};
+		_log("First private tab in window");
+		window.setTimeout(function() {
+			privateTabInternal.ensureTabBrowserLoadURIPatched(window);
+		}, 50);
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
@@ -2536,6 +2558,11 @@ var patcher = {
 			delete win[key];
 			obj[meth] = wrapper.orig;
 		}
+	},
+	isWrapped: function(obj, key) {
+		var win = Components.utils.getGlobalForObject(obj);
+		key = this.wrapNS + key;
+		return key in win && win[key].hasOwnProperty("wrapped");
 	}
 };
 
