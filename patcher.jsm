@@ -14,10 +14,10 @@ var patcher = {
 		var win = Components.utils.getGlobalForObject(obj);
 		var name = key;
 		key = this.wrapNS + key;
-		var orig = obj[meth];
-		var wrapped;
+		var orig, wrapped;
 		if(!(key in win)) {
 			_log("[patcher] Patch " + name);
+			orig = obj[meth];
 			wrapped = obj[meth] = callAfter
 				? function wrapper() {
 					var res = win[key].before.apply(this, arguments);
@@ -91,15 +91,17 @@ var patcher = {
 		}
 		else {
 			_log("[patcher] Will use previous patch for " + name);
+			orig = win[key].orig; // Leave ability to unwrap (and break all third-party wrappers!)
 		}
+		if(callAfter)
+			callAfter.before = callBefore;
 		win[key] = {
 			before:  callBefore,
 			after:   callAfter,
 			orig:    orig,
-			wrapped: wrapped
+			wrapped: wrapped,
+			enabled: true
 		};
-		if(callAfter)
-			callAfter.before = callBefore;
 	},
 	unwrapFunction: function(obj, meth, key, forceDestroy) {
 		var win = Components.utils.getGlobalForObject(obj);
@@ -109,28 +111,34 @@ var patcher = {
 			return;
 		var wrapper = win[key];
 		var wrapped = wrapper.wrapped;
-		if(!forceDestroy && obj[meth] != wrapped) {
+		var canRestore = obj[meth] == wrapped;
+		if(canRestore || forceDestroy) {
+			_log("[patcher] Restore " + name + (canRestore ? "" : " [force]"));
+			delete win[key];
+			obj[meth] = wrapper.orig;
+		}
+		else {
 			_log("[patcher] !!! Can't completely restore " + name + ": detected third-party wrapper!");
 			if(wrapped) { // First failure, all next iterations will use already existing wrapper
 				delete wrapped.toString;
 				delete wrapped.toSource;
+				wrapper.wrapped = undefined;
 			}
-			var dummy = function dummy() {};
-			win[key] = {
-				before: dummy,
-				after: dummy
-			};
-		}
-		else {
-			_log("[patcher] Restore " + name + (forceDestroy ? " [force]" : ""));
-			delete win[key];
-			obj[meth] = wrapper.orig;
+			wrapper.before = wrapper.after = function empty() {};
+			wrapper.enabled = false;
+			if(win instanceof Components.interfaces.nsIDOMWindow) {
+				win.addEventListener("unload", function destroyWrapper(e) {
+					win.removeEventListener(e.type, destroyWrapper, false);
+					delete win[key];
+					obj[meth] = wrapper.orig;
+				}, false);
+			}
 		}
 	},
 	isWrapped: function(obj, key) {
 		var win = Components.utils.getGlobalForObject(obj);
 		key = this.wrapNS + key;
-		return key in win && win[key].hasOwnProperty("wrapped");
+		return key in win && win[key].enabled;
 	}
 };
 function _log() {}
