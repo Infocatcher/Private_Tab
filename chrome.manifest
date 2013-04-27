@@ -3,6 +3,7 @@ content privatetab ./
 locale privatetab en-US locale/en-US/
 locale privatetab de    locale/de/
 locale privatetab el    locale/el/
+locale privatetab et    locale/et/
 locale privatetab fr    locale/fr/
 locale privatetab ja    locale/ja/
 locale privatetab pl    locale/pl/

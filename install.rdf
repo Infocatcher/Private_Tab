@@ -53,6 +53,16 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>et</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Lisab privaatse kaardi funktsiooni</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Maidur</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>fr</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>La navigation privée gérée par onglets.</em:description>
