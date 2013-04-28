@@ -199,7 +199,7 @@ var windowsObserver = {
 		window.setTimeout(function() {
 			this.initControls(document);
 			window.setTimeout(function() {
-				this.initHotkeysText(document);
+				this.setHotkeysText(document);
 			}.bind(this), 10);
 		}.bind(this), 50);
 		this.initToolbarButton(document);
@@ -1549,7 +1549,6 @@ var windowsObserver = {
 			: "keypress";
 	},
 	hotkeys: null,
-	_hotkeysHasText: false,
 	get accelKey() {
 		var accelKey = "ctrlKey";
 		var ke = Components.interfaces.nsIDOMKeyEvent;
@@ -1562,7 +1561,6 @@ var windowsObserver = {
 	},
 	initHotkeys: function() {
 		_log("initHotkeys()");
-		this._hotkeysHasText = false;
 		var hasKeys = false;
 		var keys = { __proto__: null };
 		function getVKChar(vk) {
@@ -1616,82 +1614,13 @@ var windowsObserver = {
 					case "accel":   k[this.accelKey] = true;
 				}
 			}, this);
-			k.forbidInTextFields = k.char && !k.ctrlKey && !k.altKey && !k.metaKey;
+			k.forbidInTextFields = k.char && !k.ctrlKey && !k.altKey && !k.metaKey || false;
 		}
 		Services.prefs.getBranch(prefs.ns + "key.")
 			.getChildList("", {})
 			.forEach(initHotkey, this);
 		this.hotkeys = hasKeys ? keys : null;
 		_log("Keys:\n" + JSON.stringify(keys, null, "\t"));
-	},
-	_hotkeysDocuments: null,
-	initHotkeysText: function(document) {
-		var keys = this.hotkeys;
-		if(!keys)
-			return;
-		if(this._hotkeysHasText) {
-			_log("setHotkeysText()");
-			this.setHotkeysText(document);
-			return;
-		}
-		if(!this._hotkeysDocuments)
-			this._hotkeysDocuments = [];
-		if(this._hotkeysDocuments.push(document) > 1) {
-			_log("initHotkeysText(): already called and not yet finished");
-			return;
-		}
-		_log("initHotkeysText()");
-		//~ hack: show fake hidden popup to get descriptions
-		var root = document.documentElement;
-		var keyset = document.createElement("keyset");
-		var mp = document.createElement("menupopup");
-		mp.style.visibility = "collapse";
-		for(var kId in keys) {
-			var k = keys[kId];
-			var id = "_privateTab-key-" + kId;
-			var key = document.createElement("key");
-			key.setAttribute("id", id);
-			k._key       && key.setAttribute("key",       k._key);
-			k._keyCode   && key.setAttribute("keycode",   k._keyCode);
-			k._modifiers && key.setAttribute("modifiers", k._modifiers);
-			var mi = document.createElement("menuitem");
-			mi.setAttribute("key", id);
-			mi._id = kId;
-			keyset.appendChild(key);
-			mp.appendChild(mi);
-		}
-		root.appendChild(keyset);
-		root.appendChild(mp);
-
-		var window = document.defaultView;
-		mp._onpopupshown = function() {
-			Array.forEach(
-				mp.childNodes,
-				function(mi) {
-					var k = keys[mi._id];
-					k._keyText = mi.getAttribute("acceltext") || "";
-					_log('Key text for "' + mi._id + '": ' + k._keyText);
-				}
-			);
-			this._hotkeysHasText = true;
-			_log("=> setHotkeysText()");
-			mp.parentNode.removeChild(mp);
-			keyset.parentNode.removeChild(keyset);
-			window.clearInterval(tryAgain);
-			window.clearTimeout(tryAgainLimit);
-			this._hotkeysDocuments.forEach(this.setHotkeysText, this);
-			this._hotkeysDocuments = null;
-		}.bind(this);
-		mp.setAttribute("onpopupshown", "this._onpopupshown();");
-		var tryAgain = window.setInterval(function() {
-			_log("initHotkeysText(), next try...");
-			mp.hidePopup();
-			mp.openPopup();
-		}, 1e3);
-		var tryAgainLimit = window.setTimeout(function() {
-			window.clearInterval(tryAgain);
-		}, 15e3);
-		mp.openPopup();
 	},
 	getHotkeysNodes: function(document, attr) {
 		var nodes = Array.slice(document.getElementsByAttribute(this.cmdAttr, attr));
@@ -1700,19 +1629,50 @@ var windowsObserver = {
 			nodes.push.apply(nodes, Array.slice(tabContext.getElementsByAttribute(this.cmdAttr, attr)));
 		return nodes;
 	},
+	keyInTooltip: function(node) {
+		var cl = node.classList;
+		return cl.contains("menuitem-tooltip") || cl.contains("menuitem-iconic-tooltip");
+	},
 	setHotkeysText: function(document) {
 		_log("setHotkeysText(): " + document.title);
+
+		const keysetId = "privateTab-keyset";
+		var keyset = document.getElementById(keysetId);
+		keyset && keyset.parentNode.removeChild(keyset);
+
 		var keys = this.hotkeys;
+		if(!keys)
+			return;
+
+		keyset = document.createElement("keyset");
+		keyset.id = keysetId;
+		keyset.setAttribute("privateTab-command", "<nothing>");
+		document.documentElement.appendChild(keyset);
+		var uid = "-" + Date.now();
 		for(var kId in keys) {
-			var keyText = keys[kId]._keyText;
-			_log("Set " + keyText + " for " + kId);
+			var k = keys[kId];
+			var id = "privateTab-key-" + kId + uid;
+			var key = document.createElement("key");
+			key.setAttribute("id", id);
+			k._key       && key.setAttribute("key",       k._key);
+			k._keyCode   && key.setAttribute("keycode",   k._keyCode);
+			k._modifiers && key.setAttribute("modifiers", k._modifiers);
+			keyset.appendChild(key);
 			this.getHotkeysNodes(document, kId).forEach(function(node) {
-				var cl = node.classList;
-				if(cl.contains("menuitem-tooltip") || cl.contains("menuitem-iconic-tooltip"))
-					node.setAttribute("tooltiptext", keyText);
-				else
-					node.setAttribute("acceltext", keyText);
-			});
+				_log("setHotkeysText(): Update #" + node.id);
+				node.removeAttribute("acceltext");
+				node.setAttribute("key", id);
+				if(this.keyInTooltip(node)) {
+					var cn = node.className;
+					var cl = node.classList;
+					cl.remove("menuitem-tooltip");
+					cl.remove("menuitem-iconic-tooltip");
+					node.offsetHeight; // Ensure binding changed
+					document.defaultView.setTimeout(function() {
+						node.className = cn;
+					}, 50);
+				}
+			}, this);
 		}
 	},
 	updateHotkeys: function(updateAll) {
@@ -1728,15 +1688,12 @@ var windowsObserver = {
 				return;
 			var document = window.document;
 			this.getHotkeysNodes(document, "*").forEach(function(node) {
-				var cl = node.classList;
-				if(cl.contains("menuitem-tooltip") || cl.contains("menuitem-iconic-tooltip"))
+				node.removeAttribute("key");
+				node.removeAttribute("acceltext");
+				if(this.keyInTooltip(node))
 					node.removeAttribute("tooltiptext");
-				node.setAttribute("acceltext", "");
-			});
-			// May fail without setTimeout(), if other popup not yet hidden
-			hasHotkeys && window.setTimeout(function() {
-				this.initHotkeysText(document);
-			}.bind(this), 0);
+			}, this);
+			hasHotkeys && this.setHotkeysText(document);
 		}, this);
 	},
 
