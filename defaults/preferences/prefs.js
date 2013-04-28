@@ -4,6 +4,7 @@ pref("extensions.privateTab.loadInBackground", -1);
 // 1  - load in background
 
 pref("extensions.privateTab.keysUseKeydownEvent", true); // Use "keydown" event instead of "keypress"
+pref("extensions.privateTab.keysHighPriority", true); // Handle key* event in capturing phase
 pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if someone stops key* event
 // See https://developer.mozilla.org/en-US/docs/XUL/Tutorial/Keyboard_Shortcuts
 // and https://developer.mozilla.org/en-US/docs/DOM/KeyboardEvent#Virtual_key_codes

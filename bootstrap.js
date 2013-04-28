@@ -195,7 +195,7 @@ var windowsObserver = {
 			window.addEventListener("beforeunload", this, false);
 		}
 		if(this.hotkeys)
-			window.addEventListener(this.keyEvent, this, true);
+			window.addEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.setTimeout(function() {
 			this.initControls(document);
 			window.setTimeout(function() {
@@ -240,7 +240,7 @@ var windowsObserver = {
 		window.removeEventListener("dragstart", this, true);
 		window.removeEventListener("dragend", this, true);
 		window.removeEventListener("drop", this, true);
-		window.removeEventListener(this.keyEvent, this, true);
+		window.removeEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
@@ -317,7 +317,7 @@ var windowsObserver = {
 	prefChanged: function(pName, pVal) {
 		if(pName.startsWith("key."))
 			this.updateHotkeys(true);
-		else if(pName == "keysUseKeydownEvent")
+		else if(pName == "keysUseKeydownEvent" || pName == "keysHighPriority")
 			this.updateHotkeys();
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
@@ -963,7 +963,13 @@ var windowsObserver = {
 					|| k.code && e.keyCode == k.code
 				)
 			) {
-				_log(e.type + ": matched key: " + kId);
+				var phase;
+				switch(e.eventPhase) {
+					case e.CAPTURING_PHASE: phase = "CAPTURING_PHASE"; break;
+					case e.AT_TARGET:       phase = "AT_TARGET";       break;
+					case e.BUBBLING_PHASE:  phase = "BUBBLING_PHASE";
+				}
+				_log(e.type + ": matched key: " + kId + ", phase: " + phase);
 				if(e.defaultPrevented && !prefs.get("keysIgnoreDefaultPrevented")) {
 					_log(e.type + ": event.defaultPrevented => do nothing");
 					return;
@@ -1548,6 +1554,9 @@ var windowsObserver = {
 			? "keydown"
 			: "keypress";
 	},
+	get keyHighPriority() {
+		return prefs.get("keysHighPriority");
+	},
 	hotkeys: null,
 	get accelKey() {
 		var accelKey = "ctrlKey";
@@ -1679,10 +1688,13 @@ var windowsObserver = {
 		updateAll && this.initHotkeys();
 		var hasHotkeys = !!this.hotkeys;
 		var keyEvent = this.keyEvent;
+		var keyHighPriority = this.keyHighPriority;
 		this.windows.forEach(function(window) {
 			window.removeEventListener("keydown", this, true);
+			window.removeEventListener("keydown", this, false);
 			window.removeEventListener("keypress", this, true);
-			hasHotkeys && window.addEventListener(keyEvent, this, true);
+			window.removeEventListener("keypress", this, false);
+			hasHotkeys && window.addEventListener(keyEvent, this, keyHighPriority);
 			if(!updateAll)
 				return;
 			var document = window.document;
