@@ -1586,7 +1586,6 @@ var windowsObserver = {
 				_key: null,
 				_keyCode: null,
 				_modifiers: null,
-				_keyText: "",
 				__proto__: null
 			};
 			var tokens = keyStr.split(" ");
