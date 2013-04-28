@@ -56,8 +56,8 @@ var patcher = {
 					var [global, ensureGlobal] = getGlobal();
 					return s
 						.replace(
-							"{",
-							"{" + ensureGlobal
+							/\{(?:\s*("|')use strict\1;)?/,
+							"$&" + ensureGlobal
 							+ "\n\tvar " + res + " = " + global + '["' + key + '"].before.apply(this, arguments);\n'
 							+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 							+ "\tvar " + ret + " = (function() {\n"
@@ -76,8 +76,8 @@ var patcher = {
 					var res = "_res_" + rnd;
 					var [global, ensureGlobal] = getGlobal();
 					return s.replace(
-						"{",
-						"{" + ensureGlobal
+						/\{(?:\s*("|')use strict\1;)?/,
+						"$&" + ensureGlobal
 						+ "\n\tvar " + res + " = " + global + '["' + key + '"].before.apply(this, arguments);\n'
 						+ '\tif(' + res + ') return typeof ' + res + ' == "object" ? ' + res + '.value : undefined;\n'
 					);
