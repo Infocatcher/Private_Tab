@@ -54,6 +54,9 @@ var windowsObserver = {
 			return;
 		this.initialized = false;
 
+		if(reason == ADDON_DISABLE || ADDON_DISABLE == ADDON_UNINSTALL)
+			this.askToClosePrivateTabs();
+
 		this.windows.forEach(function(window) {
 			this.destroyWindow(window, reason);
 		}, this);
@@ -625,6 +628,46 @@ var windowsObserver = {
 				_log("closePrivateTabs(): remove tab: " + (tab.getAttribute("label") || "").substr(0, 256));
 			}
 		}
+		return !hasNotPrivate;
+	},
+	askToClosePrivateTabs: function() {
+		var privateTabs = 0;
+		this.windows.forEach(function(window) {
+			if(this.isPrivateWindow(window))
+				return;
+			Array.forEach(
+				window.gBrowser.tabs,
+				function(tab) {
+					if(tab.hasAttribute(this.privateAttr))
+						++privateTabs;
+				},
+				this
+			);
+		}, this);
+		_log("askToClosePrivateTabs(): tabs count: " + privateTabs);
+		if(!privateTabs)
+			return;
+		var ps = Services.prompt;
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+		// confirmEx always returns 1 if the user closes the window using the close button in the titlebar
+		var closeTabs = ps.confirmEx(
+			Services.ww.activeWindow,
+			this.getLocalized("dialogTitle"),
+			this.getLocalized("dialogQuestion").replace("%S", privateTabs),
+			  ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_0_DEFAULT,
+			this.getLocalized("dialogClose"),
+			this.getLocalized("dialogRestore"),
+			"",
+			null, {}
+		) != 1;
+		closeTabs && this.windows.forEach(function(window) {
+			if(this.isPrivateWindow(window))
+				return;
+			if(this.closePrivateTabs(window))
+				window.setTimeout(window.close, 0);
+		}, this);
 	},
 	forgetClosedTab: function(window, silentFail, _secondTry) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
