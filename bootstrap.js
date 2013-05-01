@@ -2339,9 +2339,11 @@ API.prototype = {
 	_onFirstPrivateTab: function(window, tab) {
 		this._onFirstPrivateTab = function() {};
 		_log("First private tab in window");
-		window.setTimeout(function() {
-			privateTabInternal.ensureTabBrowserLoadURIPatched(window);
-		}, 50);
+		if(!privateTabInternal.isPrivateWindow(window)) {
+			window.setTimeout(function() {
+				privateTabInternal.ensureTabBrowserLoadURIPatched(window);
+			}, 50);
+		}
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
