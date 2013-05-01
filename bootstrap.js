@@ -124,6 +124,18 @@ var windowsObserver = {
 	windowClosingHandler: function(e) {
 		var window = e.currentTarget;
 		_log("windowClosingHandler() [" + e.type + "]");
+		if(e.type == "close" || e.type == "beforeunload") {
+			if(
+				this.hasPrivateTab(window)
+				&& this.isLastPrivate(window)
+				&& this.forbidCloseLastPrivate()
+			) {
+				e.preventDefault();
+				return;
+			}
+			if(!this.isSeaMonkey)
+				return; // This is Firefox, will wait for "SSWindowClosing"
+		}
 		if( //~ todo: this looks like SeaMonkey bug... and may be fixed later
 			(this.isSeaMonkey || !this.isPrivateWindow(window))
 			&& !prefs.get("savePrivateTabsInSessions")
@@ -136,10 +148,8 @@ var windowsObserver = {
 	destroyWindowClosingHandler: function(window) {
 		window.removeEventListener("TabClose", this, false);
 		window.removeEventListener("SSWindowClosing", this, true);
-		if(this.isSeaMonkey) {
-			window.removeEventListener("close", this, false);
-			window.removeEventListener("beforeunload", this, false);
-		}
+		window.removeEventListener("close", this, false);
+		window.removeEventListener("beforeunload", this, false);
 	},
 
 	initWindow: function(window, reason) {
@@ -193,10 +203,8 @@ var windowsObserver = {
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
 		window.addEventListener("SSWindowClosing", this, true);
-		if(this.isSeaMonkey) { // SeaMonkey doesn't dispatch "SSWindowClosing" event :(
-			window.addEventListener("close", this, false);
-			window.addEventListener("beforeunload", this, false);
-		}
+		window.addEventListener("close", this, false);
+		window.addEventListener("beforeunload", this, false);
 		if(this.hotkeys)
 			window.addEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.setTimeout(function() {
@@ -2229,18 +2237,17 @@ var windowsObserver = {
 		else if(tabOrWindow.ownerDocument)
 			ourTab = tabOrWindow;
 		return !this.windows.some(function(window) {
-			if(window == ourWindow)
-				return false;
-			if(this.isPrivateWindow(window))
-				return true;
-			return Array.some(
-				window.gBrowser.tabs,
-				function(tab) {
-					return tab != ourTab && this.isPrivateTab(tab);
-				},
-				this
-			);
+			return window != ourWindow && this.hasPrivateTab(window, ourTab);
 		}, this);
+	},
+	hasPrivateTab: function(window, ignoreTab) {
+		return Array.some(
+			window.gBrowser.tabs,
+			function(tab) {
+				return tab != ignoreTab && this.isPrivateTab(tab);
+			},
+			this
+		);
 	},
 	forbidCloseLastPrivate: function() {
 		var exitingCanceled = Components.classes["@mozilla.org/supports-PRBool;1"]
