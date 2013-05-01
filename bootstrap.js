@@ -132,10 +132,18 @@ var windowsObserver = {
 			if(
 				this.hasPrivateTab(window)
 				&& this.isLastPrivate(window)
-				&& this.forbidCloseLastPrivate()
 			) {
-				e.preventDefault();
-				return;
+				if(this.forbidCloseLastPrivate()) {
+					e.preventDefault();
+					return;
+				}
+				else {
+					var pt = window.privateTab;
+					pt._checkLastPrivate = false;
+					window.setTimeout(function() { // OK, seems like window stay open
+						pt._checkLastPrivate = true;
+					}, 50);
+				}
 			}
 			if(!this.isSeaMonkey)
 				return; // This is Firefox, will wait for "SSWindowClosing"
@@ -612,7 +620,10 @@ var windowsObserver = {
 		if(!this.isPrivateTab(tab))
 			return;
 		var window = tab.ownerDocument.defaultView;
-		if(this.isLastPrivate(tab)) {
+		if(
+			window.privateTab._checkLastPrivate
+			&& this.isLastPrivate(tab)
+		) {
 			_log("Closed last private tab");
 			if(this.forbidCloseLastPrivate())
 				this.openNewPrivateTab(window);
@@ -2382,6 +2393,7 @@ API.prototype = {
 	_ssWindowBusy: false,
 	_ssWindowBusyRestoreTimer: 0,
 	_updateDownloadPanelTimer: 0,
+	_checkLastPrivate: true,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
