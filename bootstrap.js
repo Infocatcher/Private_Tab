@@ -599,6 +599,12 @@ var windowsObserver = {
 		var tab = e.originalTarget || e.target;
 		if(!this.isPrivateTab(tab))
 			return;
+		var window = tab.ownerDocument.defaultView;
+		if(this.isLastPrivate(tab)) {
+			_log("Closed last private tab");
+			if(this.forbidCloseLastPrivate())
+				this.openNewPrivateTab(window);
+		}
 		_log(
 			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
@@ -609,7 +615,6 @@ var windowsObserver = {
 			_log('Found "closedownloadtabs-closed" attribute');
 			silentFail = true;
 		}
-		var window = tab.ownerDocument.defaultView;
 		this.forgetClosedTab(window, silentFail);
 		if(this.isSeaMonkey)
 			window.setTimeout(this.forgetClosedTab.bind(this, window, silentFail, true), 0);
@@ -2204,6 +2209,34 @@ var windowsObserver = {
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending")
 			|| tab.linkedBrowser.contentDocument.readyState == "uninitialized";
+	},
+
+	isLastPrivate: function(tabOrWindow) {
+		var ourTab, ourWindow;
+		if(tabOrWindow instanceof Components.interfaces.nsIDOMChromeWindow)
+			ourWindow = tabOrWindow;
+		else if(tabOrWindow.ownerDocument)
+			ourTab = tabOrWindow;
+		return !this.windows.some(function(window) {
+			if(window == ourWindow)
+				return false;
+			if(this.isPrivateWindow(window))
+				return true;
+			return Array.some(
+				window.gBrowser.tabs,
+				function(tab) {
+					return tab != ourTab && this.isPrivateTab(tab);
+				},
+				this
+			);
+		}, this);
+	},
+	forbidCloseLastPrivate: function() {
+		var exitingCanceled = Components.classes["@mozilla.org/supports-PRBool;1"]
+			.createInstance(Components.interfaces.nsISupportsPRBool);
+		exitingCanceled.data = false;
+		Services.obs.notifyObservers(exitingCanceled, "last-pb-context-exiting", null);
+		return exitingCanceled.data;
 	},
 
 	privateAttr: "privateTab-isPrivate",
