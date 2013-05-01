@@ -588,6 +588,7 @@ var windowsObserver = {
 			this.toggleTabPrivate(tab, isPrivate);
 			if(isPrivate) {
 				var window = tab.ownerDocument.defaultView;
+				this.onFirstPrivateTab(window, tab);
 				window.privateTab._onFirstPrivateTab(window, tab);
 			}
 		}
