@@ -125,6 +125,10 @@ var windowsObserver = {
 		var window = e.currentTarget;
 		_log("windowClosingHandler() [" + e.type + "]");
 		if(e.type == "close" || e.type == "beforeunload") {
+			if(e.defaultPrevented) {
+				_log(e.type + ": Someone already prevent window closing");
+				return;
+			}
 			if(
 				this.hasPrivateTab(window)
 				&& this.isLastPrivate(window)
