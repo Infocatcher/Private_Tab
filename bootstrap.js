@@ -1848,6 +1848,17 @@ var windowsObserver = {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
+
+		if(
+			!isPrivate
+			&& privacyContext.usePrivateBrowsing
+			&& this.isLastPrivate(tab)
+		) {
+			_log("toggleTabPrivate() called for last private tab");
+			if(this.forbidCloseLastPrivate())
+				return undefined;
+		}
+
 		privacyContext.usePrivateBrowsing = isPrivate;
 
 		// Workaround for browser.newtab.preload = true
