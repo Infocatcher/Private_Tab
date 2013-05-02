@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	 xmlns:em="http://www.mozilla.org/2004/em-rdf#">
@@ -48,6 +48,16 @@
 				<em:description>Δημιουργία καρτελών ιδιωτικής περιήγησης</em:description>
 				<em:creator>Infocatcher</em:creator>
 				<em:translator>Γιώργος Μαλαμάς</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>es</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Añade pestañas privadas</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>strel</em:translator>
 			</Description>
 		</em:localized>
 
