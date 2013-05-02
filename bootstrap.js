@@ -54,7 +54,7 @@ var windowsObserver = {
 			return;
 		this.initialized = false;
 
-		if(reason == ADDON_DISABLE || ADDON_DISABLE == ADDON_UNINSTALL)
+		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
 
 		this.windows.forEach(function(window) {
