@@ -258,7 +258,6 @@ var windowsObserver = {
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
 		this.patchWarnAboutClosingWindow(window, false, !force);
 		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
-		delete window.privateTab;
 
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
@@ -278,6 +277,9 @@ var windowsObserver = {
 			this.destroyWindowClosingHandler(window);
 		}
 		this.destroyControls(window, force);
+
+		window.privateTab._destroy();
+		delete window.privateTab;
 	},
 	get isSeaMonkey() {
 		delete this.isSeaMonkey;
