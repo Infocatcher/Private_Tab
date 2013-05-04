@@ -158,6 +158,7 @@ var windowsObserver = {
 		this.destroyWindowClosingHandler(window);
 	},
 	destroyWindowClosingHandler: function(window) {
+		window.removeEventListener("TabClose", this, true);
 		window.removeEventListener("TabClose", this, false);
 		window.removeEventListener("SSWindowClosing", this, true);
 		window.removeEventListener("close", this, false);
@@ -210,6 +211,7 @@ var windowsObserver = {
 		window.addEventListener("TabOpen", this, false);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
+		window.addEventListener("TabClose", this, true);
 		window.addEventListener("TabClose", this, false);
 		window.addEventListener("dragstart", this, true);
 		window.addEventListener("dragend", this, true);
@@ -641,20 +643,34 @@ var windowsObserver = {
 		}
 	},
 	tabCloseHandler: function(e) {
+		if(e.eventPhase == e.CAPTURING_PHASE)
+			this.checkForLastPrivateTab(e);
+		else
+			this.cleanupClosedTab(e);
+	},
+	checkForLastPrivateTab: function(e) {
+		// We can't open new private tab in bubbling phase:
+		// Error: TypeError: preview is undefined
+		// Source file: resource://app/modules/WindowsPreviewPerTab.jsm
 		var tab = e.originalTarget || e.target;
-		if(!this.isPrivateTab(tab))
-			return;
 		var window = tab.ownerDocument.defaultView;
 		if(
 			window.privateTab._checkLastPrivate
+			&& this.isPrivateTab(tab)
 			&& this.isLastPrivate(tab)
 		) {
 			_log("Closed last private tab");
 			if(this.forbidCloseLastPrivate())
 				this.openNewPrivateTab(window);
 		}
+	},
+	cleanupClosedTab: function(e) {
 		if(prefs.get("rememberClosedPrivateTabs"))
 			return;
+		var tab = e.originalTarget || e.target;
+		if(!this.isPrivateTab(tab))
+			return;
+		var window = tab.ownerDocument.defaultView;
 		_log(
 			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
