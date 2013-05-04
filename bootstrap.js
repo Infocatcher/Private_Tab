@@ -181,6 +181,9 @@ var windowsObserver = {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
 			this.patchTabBrowserDND(window, gBrowser, true);
+			window.setTimeout(function() {
+				this.patchWarnAboutClosingWindow(window, true);
+			}.bind(this), 50);
 		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
@@ -253,6 +256,7 @@ var windowsObserver = {
 		}
 		this.patchBrowsers(gBrowser, false, !force);
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
+		this.patchWarnAboutClosingWindow(window, false, !force);
 		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
 		delete window.privateTab;
 
@@ -382,17 +386,24 @@ var windowsObserver = {
 		}
 	},
 
-	get pbuFake() {
-		delete this.pbuFake;
-		return this.pbuFake = Object.create(PrivateBrowsingUtils, {
+	pbuFake: function(isPrivate) {
+		return Object.create(PrivateBrowsingUtils, {
 			isWindowPrivate: {
 				value: function privateTabWrapper(window) {
-					return true; //~ todo: check call stack?
+					return isPrivate; //~ todo: check call stack?
 				},
 				configurable: true,
 				enumerable: true
 			}
 		});
+	},
+	get pbuFakePrivate() {
+		delete this.pbuFakePrivate;
+		return this.pbuFakePrivate = this.pbuFake(true);
+	},
+	get pbuFakeNonPrivate() {
+		delete this.pbuFakeNonPrivate;
+		return this.pbuFakeNonPrivate = this.pbuFake(false);
 	},
 	patchTabBrowserDND: function(window, gBrowser, applyPatch, skipCheck, forceDestroy) {
 		if(!skipCheck && !prefs.get("dragAndDropTabsBetweenDifferentWindows"))
@@ -412,6 +423,7 @@ var windowsObserver = {
 			gBrowser.tabContainer,
 			"_setEffectAllowedForDataTransfer",
 			"gBrowser.tabContainer._setEffectAllowedForDataTransfer",
+			true,
 			applyPatch,
 			forceDestroy
 		);
@@ -420,6 +432,18 @@ var windowsObserver = {
 			gBrowser,
 			"swapBrowsersAndCloseOther",
 			"gBrowser.swapBrowsersAndCloseOther",
+			true,
+			applyPatch,
+			forceDestroy
+		);
+	},
+	patchWarnAboutClosingWindow: function(window, applyPatch, forceDestroy) {
+		this.overridePrivateBrowsingUtils(
+			window,
+			window,
+			"warnAboutClosingWindow",
+			"window.warnAboutClosingWindow",
+			false,
 			applyPatch,
 			forceDestroy
 		);
@@ -514,14 +538,15 @@ var windowsObserver = {
 			patcher.unwrapFunction(browserProto, "swapDocShells", "browser.swapDocShells", forceDestroy);
 		}
 	},
-	overridePrivateBrowsingUtils: function(window, obj, meth, key, applyPatch, forceDestroy) {
+	overridePrivateBrowsingUtils: function(window, obj, meth, key, isPrivate, applyPatch, forceDestroy) {
 		if(!obj || !(meth in obj)) {
 			Components.utils.reportError(LOG_PREFIX + "!!! Can't find " + key + "()");
 			return;
 		}
 		if(applyPatch) {
+			//_log("Override window.PrivateBrowsingUtils for " + key + ", isPrivate: " + isPrivate);
 			var pbuOrig = PrivateBrowsingUtils;
-			var pbuFake = this.pbuFake;
+			var pbuFake = isPrivate ? this.pbuFakePrivate : this.pbuFakeNonPrivate;
 			var restoreTimer = 0;
 			patcher.wrapFunction(
 				obj, meth, key,
