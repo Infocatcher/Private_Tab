@@ -660,7 +660,11 @@ var windowsObserver = {
 			+ "\nTry don't save it in undo close history"
 		);
 		var silentFail = false;
-		if(tab.hasAttribute("closedownloadtabs-closed")) {
+		if(e.detail) {
+			_log("Tab moved to another window");
+			silentFail = true;
+		}
+		else if(tab.hasAttribute("closedownloadtabs-closed")) {
 			// https://github.com/Infocatcher/Close_Download_Tabs
 			_log('Found "closedownloadtabs-closed" attribute');
 			silentFail = true;
@@ -740,9 +744,11 @@ var windowsObserver = {
 				return;
 			}
 		}
-		!silentFail && Components.utils.reportError(
-			LOG_PREFIX + "!!! Can't forget about closed tab: tab not found, closed tabs count: " + l
-		);
+		var msg = "Can't forget about closed tab: tab not found, closed tabs count: " + l;
+		if(silentFail)
+			_log(msg + ", but all should be OK");
+		else
+			Components.utils.reportError(LOG_PREFIX + "!!! " + msg);
 	},
 	filterSession: function(stateData) {
 		if(!stateData || !(stateData instanceof Components.interfaces.nsISupportsString))
