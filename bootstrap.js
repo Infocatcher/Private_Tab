@@ -442,6 +442,8 @@ var windowsObserver = {
 		);
 	},
 	patchWarnAboutClosingWindow: function(window, applyPatch, forceDestroy) {
+		if(this.isSeaMonkey && !("warnAboutClosingWindow" in window))
+			return;
 		this.overridePrivateBrowsingUtils(
 			window,
 			window,
