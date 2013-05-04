@@ -641,8 +641,6 @@ var windowsObserver = {
 		}
 	},
 	tabCloseHandler: function(e) {
-		if(prefs.get("rememberClosedPrivateTabs"))
-			return;
 		var tab = e.originalTarget || e.target;
 		if(!this.isPrivateTab(tab))
 			return;
@@ -655,6 +653,8 @@ var windowsObserver = {
 			if(this.forbidCloseLastPrivate())
 				this.openNewPrivateTab(window);
 		}
+		if(prefs.get("rememberClosedPrivateTabs"))
+			return;
 		_log(
 			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
