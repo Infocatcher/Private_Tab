@@ -46,8 +46,7 @@ var windowsObserver = {
 		Services.ww.registerNotification(this);
 		Services.obs.addObserver(this, "sessionstore-state-write", false);
 
-		if(prefs.get("patchDownloads"))
-			this.patchPrivateBrowsingUtils(true);
+		this.patchPrivateBrowsingUtils(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -68,8 +67,7 @@ var windowsObserver = {
 
 			this.unloadStyles();
 			this.restoreAppButtonWidth();
-			if(prefs.get("patchDownloads"))
-				this.patchPrivateBrowsingUtils(false);
+			this.patchPrivateBrowsingUtils(false);
 		}
 
 		prefs.destroy();
@@ -382,7 +380,6 @@ var windowsObserver = {
 			}, this);
 		}
 		else if(pName == "patchDownloads") {
-			this.patchPrivateBrowsingUtils(pVal);
 			if(!pVal) this.windows.forEach(function(window) {
 				this.updateDownloadPanel(window, this.isPrivateWindow(window));
 			}, this);
@@ -2403,6 +2400,8 @@ var windowsObserver = {
 						_log("PrivateBrowsingUtils.isWindowPrivate(): override to " + isPrivate);
 						return { value: isPrivate };
 					}
+					if(!prefs.get("patchDownloads"))
+						return false;
 					var stack = new Error().stack;
 					//_log("PrivateBrowsingUtils.isWindowPrivate(): " + stack);
 					if(
