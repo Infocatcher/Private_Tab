@@ -37,6 +37,7 @@ var windowsObserver = {
 		this.initialized = true;
 
 		prefs.init();
+		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
@@ -45,8 +46,6 @@ var windowsObserver = {
 		}, this);
 		Services.ww.registerNotification(this);
 		Services.obs.addObserver(this, "sessionstore-state-write", false);
-
-		this.patchPrivateBrowsingUtils(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -2434,7 +2433,7 @@ var windowsObserver = {
 		return PrivateBrowsingUtils.privacyContextFromWindow(window);
 	},
 	isPrivateWindow: function(window) {
-		return window && PrivateBrowsingUtils.isWindowPrivate(window);
+		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
 	getTabPrivacyContext: function(tab) {
 		return this.getPrivacyContext(tab.linkedBrowser.contentWindow);
