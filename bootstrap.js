@@ -178,6 +178,7 @@ var windowsObserver = {
 		this.loadStyles(window);
 		this.ensureTitleModifier(document);
 		this.patchBrowsers(gBrowser, true);
+		this.patchTabIcons(window, true);
 		window.setTimeout(function() {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
@@ -260,6 +261,7 @@ var windowsObserver = {
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
 		this.patchWarnAboutClosingWindow(window, false, !force);
 		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
+		this.patchTabIcons(window, false, !force);
 
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
@@ -573,6 +575,125 @@ var windowsObserver = {
 		else {
 			patcher.unwrapFunction(obj, meth, key, forceDestroy);
 		}
+	},
+	patchTabIcons: function(window, applyPatch, forceDestroy) {
+		this.patchSetIcon(window, applyPatch, forceDestroy);
+		if(this.isSeaMonkey)
+			this.patchTabSetAttribute(window, applyPatch, forceDestroy);
+	},
+	patchSetIcon: function(window, applyPatch, forceDestroy) {
+		var gBrowser = window.gBrowser;
+		var meth = "setIcon";
+		var key = "gBrowser." + meth;
+		if(applyPatch) {
+			var _this = this;
+			var restore;
+			var restoreTimer = 0;
+			patcher.wrapFunction(
+				gBrowser, meth, key,
+				function before(tab, uri) {
+					if(!uri || _this.isPrivateWindow(window))
+						return;
+					var isPrivate = _this.isPrivateTab(tab);
+					if(!isPrivate)
+						return;
+					_log("[patcher] " + key + "(): isPrivate = " + isPrivate);
+					_this._overrideIsPrivate = isPrivate;
+					window.clearTimeout(restoreTimer);
+					var origSetAttr = Object.getOwnPropertyDescriptor(tab, "setAttribute");
+					tab.setAttribute = _this.setTabAttributeProxy;
+					if(_this.isSeaMonkey) {
+						_log("Override gBrowser.usePrivateBrowsing to " + isPrivate);
+						var origUsePrivateBrowsing = Object.getOwnPropertyDescriptor(gBrowser, "usePrivateBrowsing");
+						Object.defineProperty(gBrowser, "usePrivateBrowsing", {
+							get: function() {
+								return isPrivate;
+							},
+							configurable: true,
+							enumerable: true
+						});
+					}
+					restore = function() {
+						_this._overrideIsPrivate = undefined;
+						if(origSetAttr)
+							Object.defineProperty(tab, "setAttribute", origSetAttr);
+						else
+							delete tab.setAttribute;
+						if(_this.isSeaMonkey) {
+							if(origUsePrivateBrowsing)
+								Object.defineProperty(gBrowser, "usePrivateBrowsing", origUsePrivateBrowsing);
+							else
+								delete gBrowser.usePrivateBrowsing;
+						}
+						restore = null;
+					};
+					restoreTimer = window.setTimeout(restore, 0); // Restore anyway
+				},
+				function after(ret, tab, uri) {
+					if(restore) {
+						window.clearTimeout(restoreTimer);
+						restore();
+					}
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(gBrowser, meth, key, forceDestroy);
+		}
+	},
+	patchTabSetAttribute: function(window, applyPatch, forceDestroy) {
+		var tab = window.gBrowser.tabs[0];
+		var tabProto = Object.getPrototypeOf(tab);
+		if(applyPatch) {
+			tabProto._privateTabOrigSetAttribute = Object.getOwnPropertyDescriptor(tabProto, "setAttribute");
+			tabProto.setAttribute = this.setTabAttributeProxy;
+		}
+		else {
+			var orig = tabProto._privateTabOrigSetAttribute;
+			delete tabProto._privateTabOrigSetAttribute;
+			if(orig)
+				Object.defineProperty(tabProto, "setAttribute", orig);
+			else
+				delete tabProto.setAttribute;
+		}
+		_log("Override tab.setAttribute()");
+	},
+	setTabAttributeProxy: function(attr, val) {
+		var args = arguments;
+		if(attr == "image" && val) {
+			val += ""; // Convert to string
+			if(
+				!val.startsWith("moz-anno:favicon:")
+				&& privateTabInternal.isPrivateTab(this)
+			) {
+				args = Array.slice(args);
+				try {
+					var browser = this.linkedBrowser;
+					var doc = browser.contentDocument;
+					if(doc instanceof doc.defaultView.ImageDocument) {
+						// Will use base64 representation for icons of image documents
+						var req = doc.imageRequest;
+						if(req && req.image) {
+							var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
+							var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+							canvas.width = req.image.width;
+							canvas.height = req.image.height;
+							var ctx = canvas.getContext("2d");
+							ctx.drawImage(img, 0, 0);
+							args[1] = canvas.toDataURL();
+							_log("setTabAttributeProxy() => data:");
+						}
+					}
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+					// Something went wrong, will use cached icon
+					args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+					_log("setTabAttributeProxy() => moz-anno:favicon:");
+				}
+			}
+		}
+		return Object.getPrototypeOf(Object.getPrototypeOf(this)).setAttribute.apply(this, args);
 	},
 
 	tabOpenHandler: function(e) {
@@ -2238,6 +2359,7 @@ var windowsObserver = {
 			}
 		}, 100);
 	},
+	_overrideIsPrivate: undefined,
 	patchPrivateBrowsingUtils: function(applyPatch) {
 		if(applyPatch) {
 			var _this = this;
@@ -2251,6 +2373,11 @@ var windowsObserver = {
 						|| !_this.isTargetWindow(window)
 					)
 						return false;
+					var isPrivate = _this._overrideIsPrivate;
+					if(isPrivate !== undefined) {
+						_log("PrivateBrowsingUtils.isWindowPrivate(): override to " + isPrivate);
+						return { value: isPrivate };
+					}
 					var stack = new Error().stack;
 					//_log("PrivateBrowsingUtils.isWindowPrivate(): " + stack);
 					if(
