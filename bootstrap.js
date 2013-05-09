@@ -183,6 +183,7 @@ var windowsObserver = {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
 			this.patchTabBrowserDND(window, gBrowser, true);
+			this.patchBrowserThumbnails(window, true);
 			window.setTimeout(function() {
 				this.patchWarnAboutClosingWindow(window, true);
 			}.bind(this), 50);
@@ -262,6 +263,7 @@ var windowsObserver = {
 		this.patchWarnAboutClosingWindow(window, false, !force);
 		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
 		this.patchTabIcons(window, false, !force);
+		this.patchBrowserThumbnails(window, false, !force);
 
 		this.unwatchAppButton(window);
 		window.removeEventListener("TabOpen", this, false);
@@ -694,6 +696,29 @@ var windowsObserver = {
 			}
 		}
 		return Object.getPrototypeOf(Object.getPrototypeOf(this)).setAttribute.apply(this, args);
+	},
+	patchBrowserThumbnails: function(window, applyPatch, forceDestroy) {
+		if(!("gBrowserThumbnails" in window)) // SeaMonkey?
+			return;
+		var gBrowserThumbnails = window.gBrowserThumbnails;
+		var meth = "_shouldCapture";
+		var key = "gBrowserThumbnails." + meth;
+		if(applyPatch) {
+			var _this = this;
+			patcher.wrapFunction(
+				gBrowserThumbnails, meth, key,
+				function before(browser) {
+					if(_this.isPrivateWindow(window.content)) {
+						_log(key + ": forbid capturing from " + browser.currentURI.spec.substr(0, 255));
+						return { value: false };
+					}
+					return false;
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(gBrowserThumbnails, meth, key, forceDestroy);
+		}
 	},
 
 	tabOpenHandler: function(e) {
