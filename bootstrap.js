@@ -340,7 +340,7 @@ var windowsObserver = {
 			_log("inheritWindowState(): Ignore already private window");
 			return;
 		}
-		if(!this.isPrivateTab(opener.gBrowser.selectedTab))
+		if(!this.isPrivateWindow(opener.content))
 			return;
 		_log("Inherit private state from current tab of the opener window");
 		this.toggleWindowPrivate(window, true);
@@ -743,7 +743,7 @@ var windowsObserver = {
 		//~ todo: try get real tab owner!
 		var isPrivate;
 		if(!this.isEmptyTab(tab, gBrowser)) {
-			if(this.isPrivateTab(gBrowser.selectedTab))
+			if(this.isPrivateWindow(window.content))
 				isPrivate = true;
 			else if(this.isPrivateWindow(window))
 				isPrivate = false; // Override browser behavior!
@@ -991,7 +991,7 @@ var windowsObserver = {
 	},
 	dragStartHandler: function(e) {
 		var window = e.currentTarget;
-		var sourceNode = this._dndPrivateNode = this.isPrivateTab(window.gBrowser.selectedTab)
+		var sourceNode = this._dndPrivateNode = this.isPrivateWindow(window.content)
 			? e.originalTarget || e.target
 			: null;
 		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> " + sourceNode + " node as private");
@@ -1139,7 +1139,7 @@ var windowsObserver = {
 		var mi = document.getElementById(this.contextId);
 		mi.hidden = noLink;
 
-		var hideNotPrivate = this.isPrivateTab(window.gBrowser.selectedTab);
+		var hideNotPrivate = this.isPrivateWindow(window.content);
 		// Hide "Open Link in New Tab/Window" from page context menu on private tabs:
 		// we inherit private state, so here should be only "Open Link in New Private Tab/Window"
 		var inNewWin = document.getElementById("context-openlink");
@@ -2092,7 +2092,7 @@ var windowsObserver = {
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
 		if(isPrivate === undefined)
-			this.isPrivateTab(gBrowser.selectedTab);
+			this.isPrivateWindow(window.content);
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
 		_log("Make all tabs in window private");
@@ -2273,7 +2273,7 @@ var windowsObserver = {
 	updateWindowTitle: function(gBrowser, isPrivate) {
 		var document = gBrowser.ownerDocument;
 		if(isPrivate === undefined)
-			isPrivate = this.isPrivateTab(gBrowser.selectedTab);
+			isPrivate = this.isPrivateWindow(document.defaultView.content);
 		var root = document.documentElement;
 		var tm = isPrivate
 			? root.getAttribute("titlemodifier_privatebrowsing")
@@ -2411,9 +2411,8 @@ var windowsObserver = {
 						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
 					) try {
 						//_log("PrivateBrowsingUtils.isWindowPrivate(): return state of selected tab");
-						return {
-							value: _this.isPrivateTab(window.gBrowser.selectedTab)
-						};
+						var isPrivate = _this.isPrivateWindow(window.content);
+						return { value: isPrivate };
 					}
 					catch(e) {
 						Components.utils.reportError(e);
