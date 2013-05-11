@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	 xmlns:em="http://www.mozilla.org/2004/em-rdf#">
@@ -30,6 +30,16 @@
 				<em:maxVersion>2.20a1</em:maxVersion>
 			</Description>
 		</em:targetApplication>
+
+		<em:localized>
+			<Description>
+				<em:locale>ca</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Adds private tabs</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Dimas-sc</em:translator>
+			</Description>
+		</em:localized>
 
 		<em:localized>
 			<Description>
