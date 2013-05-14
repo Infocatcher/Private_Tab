@@ -1420,7 +1420,7 @@ var windowsObserver = {
 			var tab = e.originalTarget || e.target;
 			_log("waitForTab(): opened tab");
 			callback(tab);
-		};
+		}
 		window.addEventListener("TabOpen", tabOpen, true);
 		var timer = window.setTimeout(function() {
 			window.removeEventListener("TabOpen", tabOpen, true);
@@ -1467,7 +1467,7 @@ var windowsObserver = {
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
 			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
-				 window.TabScope._updateTitle();
+				window.TabScope._updateTitle();
 		}
 	},
 
@@ -1877,9 +1877,9 @@ var windowsObserver = {
 			}
 			else { // VK_*
 				k.code = Components.interfaces.nsIDOMKeyEvent["DOM_" + key];
-				var char = getVKChar(key);
-				if(char)
-					k._key = char;
+				var chr = getVKChar(key);
+				if(chr)
+					k._key = chr;
 				else
 					k._keyCode = key;
 			}
