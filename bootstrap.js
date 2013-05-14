@@ -730,8 +730,8 @@ var windowsObserver = {
 			delete tab._privateTabIgnore;
 			return;
 		}
-		//_log(e.type + ": new Error().stack:\n" + new Error().stack);
-		//_log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
+		_dbgv && _log(e.type + ":\n" + new Error().stack);
+		//_dbgv && _log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
 		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) {
 			var err = new Error();
 			var curFile = "@" + err.fileName + ":";
@@ -2389,11 +2389,13 @@ var windowsObserver = {
 	},
 	_overrideIsPrivate: undefined,
 	patchPrivateBrowsingUtils: function(applyPatch) {
+		var meth = "isWindowPrivate";
+		var key = "PrivateBrowsingUtils.isWindowPrivate";
 		if(applyPatch) {
 			var _this = this;
 			var pbu = PrivateBrowsingUtils;
 			pbu._privateTabOrigIsWindowPrivate = pbu.isWindowPrivate;
-			patcher.wrapFunction(pbu, "isWindowPrivate", "PrivateBrowsingUtils.isWindowPrivate",
+			patcher.wrapFunction(pbu, meth, key,
 				function before(window) {
 					if(
 						!window
@@ -2403,13 +2405,13 @@ var windowsObserver = {
 						return false;
 					var isPrivate = _this._overrideIsPrivate;
 					if(isPrivate !== undefined) {
-						_log("PrivateBrowsingUtils.isWindowPrivate(): override to " + isPrivate);
+						_log(key + "(): override to " + isPrivate);
 						return { value: isPrivate };
 					}
 					if(!prefs.get("patchDownloads"))
 						return false;
 					var stack = new Error().stack;
-					//_log("PrivateBrowsingUtils.isWindowPrivate(): " + stack);
+					_dbgv && _log(key + "():\n" + stack);
 					if(
 						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
 						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
@@ -2417,8 +2419,8 @@ var windowsObserver = {
 						|| stack.indexOf("@resource://gre/modules/DownloadsCommon.jsm:") != -1
 						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
 					) try {
-						//_log("PrivateBrowsingUtils.isWindowPrivate(): return state of selected tab");
 						var isPrivate = _this.isPrivateWindow(window.content);
+						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
 						return { value: isPrivate };
 					}
 					catch(e) {
@@ -2429,7 +2431,7 @@ var windowsObserver = {
 			);
 		}
 		else {
-			patcher.unwrapFunction(PrivateBrowsingUtils, "isWindowPrivate", "PrivateBrowsingUtils.isWindowPrivate");
+			patcher.unwrapFunction(PrivateBrowsingUtils, meth, key);
 			delete PrivateBrowsingUtils._privateTabOrigIsWindowPrivate;
 		}
 		_log("patchPrivateBrowsingUtils(" + applyPatch + ")");
