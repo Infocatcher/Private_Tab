@@ -36,3 +36,4 @@ pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.patchDownloads", true);
 
 pref("extensions.privateTab.debug", false);
+pref("extensions.privateTab.debug.verbose", false);

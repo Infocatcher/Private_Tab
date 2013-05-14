@@ -37,6 +37,9 @@ var windowsObserver = {
 		this.initialized = true;
 
 		prefs.init();
+		_dbg = prefs.get("debug", false);
+		_dbgv = prefs.get("debug.verbose", false);
+
 		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
@@ -388,6 +391,10 @@ var windowsObserver = {
 				this.patchTabBrowserLoadURI(window, window.gBrowser, !pVal, true);
 			}, this);
 		}
+		else if(pName == "debug")
+			_dbg = pVal;
+		else if(pName == "debug.verbose")
+			_dbgv = pVal;
 	},
 
 	pbuFake: function(isPrivate) {
@@ -2738,13 +2745,14 @@ var prefs = {
 
 // Be careful, loggers always works until prefs aren't initialized
 // (and if "debug" preference has default value)
+var _dbg = true, _dbgv = true;
 function ts() {
 	var d = new Date();
 	var ms = d.getMilliseconds();
 	return d.toLocaleFormat("%M:%S:") + "000".substr(String(ms).length) + ms + " ";
 }
 function _log(s) {
-	if(!prefs.get("debug", true))
+	if(!_dbg)
 		return;
 	var msg = LOG_PREFIX + ts() + s;
 	Services.console.logStringMessage(msg);
