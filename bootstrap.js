@@ -302,7 +302,13 @@ var windowsObserver = {
 		return windows;
 	},
 	isTargetWindow: function(window) {
-		var winType = window.document.documentElement.getAttribute("windowtype");
+		var document = window.document;
+		var rs = document.readyState;
+		// We can't touch document.documentElement in not yet loaded window!
+		// See https://github.com/Infocatcher/Private_Tab/issues/61
+		if(rs != "interactive" && rs != "complete")
+			return false;
+		var winType = document.documentElement.getAttribute("windowtype");
 		return winType == "navigator:browser"
 			|| winType == "navigator:private"; // SeaMonkey >= 2.19a1 (2013-03-27)
 	},
