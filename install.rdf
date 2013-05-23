@@ -33,6 +33,15 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>en-US</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Adds private tabs</em:description>
+				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>ca</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>Afegeix pestanyes privades</em:description>
