@@ -883,15 +883,16 @@ var windowsObserver = {
 		var ps = Services.prompt;
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=345067
 		// confirmEx always returns 1 if the user closes the window using the close button in the titlebar
+		var single = privateTabs == 1 ? "Single" : "";
 		var closeTabs = ps.confirmEx(
 			Services.ww.activeWindow,
-			this.getLocalized("dialogTitle"),
-			this.getLocalized("dialogQuestion").replace("%S", privateTabs),
+			this.getLocalized("dialogTitle" + single),
+			this.getLocalized("dialogQuestion" + single).replace("%S", privateTabs),
 			  ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_0_DEFAULT,
-			this.getLocalized("dialogClose"),
-			this.getLocalized("dialogRestore"),
+			this.getLocalized("dialogClose" + single),
+			this.getLocalized("dialogRestore" + single),
 			"",
 			null, {}
 		) != 1;
