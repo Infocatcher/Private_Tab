@@ -817,8 +817,13 @@ var windowsObserver = {
 			&& this.isLastPrivate(tab)
 		) {
 			_log("Closed last private tab");
-			if(this.forbidCloseLastPrivate())
-				this.openNewPrivateTab(window);
+			if(this.forbidCloseLastPrivate()) {
+				var newTab = this.openNewPrivateTab(window);
+				var pos = "_tPos" in tab
+					? tab._tPos
+					: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
+				window.gBrowser.moveTabTo(newTab, pos);
+			}
 		}
 	},
 	cleanupClosedTab: function(e) {
