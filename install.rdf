@@ -142,6 +142,16 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>pt-BR</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Cria abas de navegação privativa</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Marcelo Ghelman (ghelman.net)</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>ru</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>Добавляет приватные вкладки</em:description>

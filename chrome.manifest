@@ -11,6 +11,7 @@ locale privatetab hu    locale/hu/
 locale privatetab it    locale/it/
 locale privatetab ja    locale/ja/
 locale privatetab pl    locale/pl/
+locale privatetab pt-BR locale/pt-BR/
 locale privatetab ru    locale/ru/
 locale privatetab sr    locale/sr/
 locale privatetab vi    locale/vi/
