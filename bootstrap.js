@@ -1174,6 +1174,17 @@ var windowsObserver = {
 		var tab = document.tooltipNode;
 		var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
 		var label = document.getElementById(this.tabTipId);
+		if(!label && !hide) {
+			var tabTip = this.getTabTooltip(document);
+			if(tabTip && "_privateTabLabel" in tabTip) {
+				label = tabTip._privateTabLabel;
+				delete tabTip._privateTabLabel;
+				tabTip.insertBefore(
+					label,
+					tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
+				);
+			}
+		}
 		if(label)
 			label.hidden = hide;
 	},
@@ -1651,10 +1662,7 @@ var windowsObserver = {
 			tabTipLabel.setAttribute("value", this.getLocalized("privateTabTip"));
 			tabTipLabel.setAttribute("privateTab-command", "<nothing>");
 			tabTipLabel.hidden = true;
-			tabTip.insertBefore(
-				tabTipLabel,
-				tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
-			);
+			tabTip._privateTabLabel = tabTipLabel; // => updateTabTooltip() => tabTip.insertBefore()
 
 			var tabScope = document.getElementById("tabscope-popup");
 			if(tabScope && "TabScope" in window && "_updateTitle" in window.TabScope) {
@@ -1782,7 +1790,10 @@ var windowsObserver = {
 			this.destroyNodes(tabContext, force);
 
 		var tabTip = this.getTabTooltip(document);
-		tabTip && tabTip.removeEventListener("popupshowing", this, false);
+		if(tabTip) {
+			delete tabTip._privateTabLabel;
+			tabTip.removeEventListener("popupshowing", this, false);
+		}
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
