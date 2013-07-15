@@ -337,31 +337,48 @@ var windowsObserver = {
 		}
 		vsPageDesc instanceof Components.interfaces.nsISHEntry;
 		opener.gBrowser.browsers.some(function(browser, i) {
+			var content = getSourceWindow(browser.contentWindow);
+			if(!content)
+				return false;
+			_log(
+				"setViewSourcePrivacy(): found source tab #" + i + ":\n" + browser.currentURI.spec
+				+ (content == browser.contentWindow ? "" : "\n=> " + content.location.href)
+			);
+			var isPrivate = this.isPrivateWindow(content);
+			var privacyContext = this.getPrivacyContext(window);
+			if(privacyContext.usePrivateBrowsing != isPrivate) {
+				_log("setViewSourcePrivacy(): make window " + (isPrivate ? "private" : "not private"));
+				privacyContext.usePrivateBrowsing = isPrivate;
+			}
+			return true;
+		}, this);
+		function getSourceWindow(win) {
+			if(isSourceWindow(win))
+				return win;
+			var frames = win.frames;
+			if(frames) for(var i = 0, l = frames.length; i < l; ++i) {
+				var sourceWin = getSourceWindow(frames[i]);
+				if(sourceWin)
+					return sourceWin;
+			}
+			return null;
+		}
+		function isSourceWindow(win) {
 			try {
-				var pageDesc = browser.webNavigation
+				var pageDesc = win
+					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIWebNavigation)
 					.QueryInterface(Components.interfaces.nsIWebPageDescriptor)
 					.currentDescriptor;
 			}
 			catch(e) { // Throws for not yet loaded (pending) tabs
 			}
-			if(
-				pageDesc
+			return pageDesc
 				&& pageDesc instanceof Components.interfaces.nsISHEntry
 				&& pageDesc.ID && pageDesc.ID == vsPageDesc.ID
 				&& pageDesc.docshellID && pageDesc.docshellID == vsPageDesc.docshellID
-				&& browser.currentURI.spec == vsURI
-			) {
-				_log("setViewSourcePrivacy(): found source tab #" + i + ": " + browser.currentURI.spec);
-				var isPrivate = this.isPrivateWindow(browser.contentWindow);
-				var privacyContext = this.getPrivacyContext(window);
-				if(privacyContext.usePrivateBrowsing != isPrivate) {
-					_log("setViewSourcePrivacy(): make window " + (isPrivate ? "private" : "not private"));
-					privacyContext.usePrivateBrowsing = isPrivate;
-				}
-				return true;
-			}
-			return false;
-		}, this);
+				&& win.location.href == vsURI;
+		}
 	},
 	inheritWindowState: function(window) {
 		var args = window.arguments || undefined;
