@@ -1734,9 +1734,13 @@ var windowsObserver = {
 
 			var tabScope = document.getElementById("tabscope-popup");
 			if(tabScope && "TabScope" in window && "_updateTitle" in window.TabScope) {
+				var tsTitle = document.getElementById("tabscope-title");
+				var tsContainer = tsTitle && tsTitle.parentNode
+					|| document.getElementById("tabscope-container")
+					|| tabScope;
 				var tsTipLabel = tabTipLabel.cloneNode(true);
 				tsTipLabel.id = this.tabScopeTipId;
-				tabScope.appendChild(tsTipLabel);
+				tsContainer.appendChild(tsTipLabel);
 				var _this = this;
 				patcher.wrapFunction(
 					window.TabScope, "_updateTitle", "TabScope._updateTitle",
