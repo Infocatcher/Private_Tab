@@ -800,8 +800,11 @@ var windowsObserver = {
 
 	tabOpenHandler: function(e) {
 		var tab = e.originalTarget || e.target;
+		var window = tab.ownerDocument.defaultView;
 		if("_privateTabIgnore" in tab) {
-			delete tab._privateTabIgnore;
+			window.setTimeout(function() { // Wait for possible following "SSTabRestoring"
+				delete tab._privateTabIgnore;
+			}, 0);
 			return;
 		}
 		_dbgv && _log(e.type + ":\n" + new Error().stack);
@@ -820,7 +823,6 @@ var windowsObserver = {
 			}
 		}
 		var gBrowser = this.getTabBrowser(tab);
-		var window = tab.ownerDocument.defaultView;
 		//~ todo: try get real tab owner!
 		var isPrivate;
 		if(!this.isEmptyTab(tab, gBrowser)) {
@@ -853,6 +855,7 @@ var windowsObserver = {
 		var tab = e.originalTarget || e.target;
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
+			this.setTabState(tab); // Restore private attribute
 			return;
 		}
 		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
