@@ -322,7 +322,10 @@ var windowsObserver = {
 		var vsURI      = args && args[0];
 		var vsPageDesc = args && args[2];
 		if(!vsURI || !vsPageDesc) {
-			_log("setViewSourcePrivacy(): can't get arguments of view source window");
+			_log(
+				"setViewSourcePrivacy(): view source window was opened with unusable arguments:\n"
+				 + (args && Array.map(args, String).join("\n"))
+			);
 			return;
 		}
 		var opener = window.opener || window.__privateTabOpener;
