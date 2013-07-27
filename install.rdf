@@ -181,6 +181,16 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>uk</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Adds private tabs</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>dbv92</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>vi</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>Duyệt web riêng tư theo thẻ</em:description>
