@@ -212,7 +212,10 @@ var windowsObserver = {
 			this.updateWindowTitle(gBrowser);
 		}.bind(this), 0);
 
-		window.addEventListener("TabOpen", this, false);
+		// See https://github.com/Infocatcher/Private_Tab/issues/83
+		// It's better to handle "TabOpen" before other extensions, but after our waitForTab()
+		// with window.addEventListener("TabOpen", ..., true);
+		document.addEventListener("TabOpen", this, true);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
 		window.addEventListener("TabClose", this, true);
@@ -241,11 +244,11 @@ var windowsObserver = {
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 		_log("destroyWindow()");
+		var document = window.document;
 		var gBrowser = window.gBrowser;
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
-			var document = window.document;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
@@ -268,7 +271,7 @@ var windowsObserver = {
 		this.patchBrowserThumbnails(window, false, !force);
 
 		this.unwatchAppButton(window);
-		window.removeEventListener("TabOpen", this, false);
+		document.removeEventListener("TabOpen", this, true);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
 		window.removeEventListener("dragstart", this, true);
