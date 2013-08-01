@@ -892,11 +892,12 @@ var windowsObserver = {
 		) {
 			_log("Closed last private tab");
 			if(this.forbidCloseLastPrivate()) {
-				var newTab = this.openNewPrivateTab(window);
 				var pos = "_tPos" in tab
 					? tab._tPos
 					: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
-				window.gBrowser.moveTabTo(newTab, pos);
+				this.openNewPrivateTab(window, function(newTab) {
+					newTab && window.gBrowser.moveTabTo(newTab, pos);
+				});
 			}
 		}
 	},
@@ -1484,29 +1485,35 @@ var windowsObserver = {
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab", openAsChild);
 		return tab;
 	},
-	openNewPrivateTab: function(window) {
+	openNewPrivateTab: function(window, callback) {
 		var w = this.getNotPopupWindow(window);
 		if(w && w != window) {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
-		var gBrowser = window.gBrowser;
-		this.readyToOpenPrivateTab(window);
-		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
-		if("focusAndSelectUrlBar" in window)
-			window.setTimeout(window.focusAndSelectUrlBar, 0);
-		else if("WindowFocusTimerCallback" in window) // SeaMonkey
-			window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
-
-		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
-		return tab;
+		this.readyToOpenPrivateTab(window, function(tab) {
+			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
+			callback && callback(tab);
+		}.bind(this));
+		if("BrowserOpenTab" in window)
+			window.BrowserOpenTab();
+		else {
+			_log("openNewPrivateTab(): BrowserOpenTab() not found, will open manually");
+			var gBrowser = window.gBrowser;
+			gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
+			if("focusAndSelectUrlBar" in window)
+				window.setTimeout(window.focusAndSelectUrlBar, 0);
+			else if("WindowFocusTimerCallback" in window) // SeaMonkey
+				window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
+		}
 	},
-	readyToOpenPrivateTab: function(window) {
+	readyToOpenPrivateTab: function(window, callback) {
 		this.waitForTab(window, function(tab) {
-			if(!tab)
-				return;
-			tab._privateTabIgnore = true;
-			this.toggleTabPrivate(tab, true);
+			if(tab) {
+				tab._privateTabIgnore = true;
+				this.toggleTabPrivate(tab, true);
+			}
+			callback && callback(tab);
 		}.bind(this));
 	},
 	waitForTab: function(window, callback) {
