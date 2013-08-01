@@ -755,7 +755,7 @@ var windowsObserver = {
 				try {
 					var browser = this.linkedBrowser;
 					var doc = browser.contentDocument;
-					if(doc instanceof doc.defaultView.ImageDocument) {
+					if(doc instanceof Components.interfaces.nsIImageDocument) {
 						// Will use base64 representation for icons of image documents
 						var req = doc.imageRequest;
 						if(req && req.image) {
