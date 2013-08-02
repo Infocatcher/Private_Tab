@@ -1468,6 +1468,7 @@ var windowsObserver = {
 						}
 					}
 				}
+				_log("Owner tab: " + (ownerTab && (ownerTab.getAttribute("label") || "").substr(0, 255)));
 			}
 		}
 
