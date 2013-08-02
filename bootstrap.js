@@ -1567,8 +1567,13 @@ var windowsObserver = {
 			this.fixTabState(tab, isPrivate);
 		else if(prefs.get("toggleTabPrivateAutoReload")) {
 			var browser = tab.linkedBrowser;
-			if(!browser.webProgress.isLoadingDocument)
+			if(!browser.webProgress.isLoadingDocument) {
+				var typed = browser.userTypedValue;
 				browser.reload();
+				if(typed != null) window.setTimeout(function() {
+					browser.userTypedValue = typed;
+				}, 0);
+			}
 		}
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
