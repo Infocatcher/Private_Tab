@@ -1445,6 +1445,7 @@ var windowsObserver = {
 			window = w;
 		}
 		var gBrowser = window.gBrowser;
+		var ownerTab;
 
 		if(openAsChild) {
 			// http://piro.sakura.ne.jp/xul/_treestyletab.html.en#api
@@ -1454,6 +1455,20 @@ var windowsObserver = {
 			// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
 			if("tabkit" in window)
 				window.tabkit.addingTab("related");
+			if(sourceDocument) {
+				var sourceWindow = sourceDocument.defaultView.top;
+				if("_getTabForContentWindow" in gBrowser)
+					ownerTab = gBrowser._getTabForContentWindow(sourceWindow);
+				else { // SeaMonkey
+					var browsers = gBrowser.browsers;
+					for(var i = 0, l = browsers.length; i < l; ++i) {
+						if(browsers[i].contentWindow == sourceWindow) {
+							ownerTab = gBrowser.tabs[i];
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		var referer = null;
@@ -1470,7 +1485,7 @@ var windowsObserver = {
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: referer,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
-			ownerTab: gBrowser.selectedTab,
+			ownerTab: ownerTab,
 			relatedToCurrent: relatedToCurrent
 		});
 
