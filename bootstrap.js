@@ -1568,7 +1568,7 @@ var windowsObserver = {
 		else if(prefs.get("toggleTabPrivateAutoReload")) {
 			var browser = tab.linkedBrowser;
 			if(!browser.webProgress.isLoadingDocument)
-				tab.linkedBrowser.reload();
+				browser.reload();
 		}
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
