@@ -1455,7 +1455,7 @@ var windowsObserver = {
 			// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
 			if("tabkit" in window)
 				window.tabkit.addingTab("related");
-			if(sourceDocument) {
+			if(sourceDocument && prefs.get("rememberOwnerTab")) {
 				var sourceWindow = sourceDocument.defaultView.top;
 				if("_getTabForContentWindow" in gBrowser)
 					ownerTab = gBrowser._getTabForContentWindow(sourceWindow);

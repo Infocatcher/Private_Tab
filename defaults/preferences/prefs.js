@@ -32,6 +32,7 @@ pref("extensions.privateTab.sendRefererHeader", 2);
 pref("extensions.privateTab.toggleTabPrivateAutoReload", true);
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
+pref("extensions.privateTab.rememberOwnerTab", false);
 pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.patchDownloads", true);
 
