@@ -2692,7 +2692,8 @@ var windowsObserver = {
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
-				.tabbrowser-tab[' + this.privateAttr + '] {\n\
+				.tabbrowser-tab[' + this.privateAttr + '],\n\
+				.bookmark-item[scheme="private"] {\n\
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
 					' + prefix + 'text-decoration-style: dashed !important;\n\
@@ -2708,6 +2709,15 @@ var windowsObserver = {
 					color: -moz-nativehyperlinktext;\n\
 					text-align: center;\n\
 					margin: 1px;\n\
+				}\n\
+			}\n\
+			@-moz-document url("chrome://browser/content/bookmarks/bookmarksPanel.xul"),\n\
+				url("chrome://browser/content/places/places.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bm-panel.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bookmarksManager.xul") {\n\
+				treechildren::-moz-tree-cell-text(private) {\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
+					margin-bottom: 1px !important;\n\
 				}\n\
 			}\n\
 			@-moz-document url("' + document.documentURI + '"),\n\
