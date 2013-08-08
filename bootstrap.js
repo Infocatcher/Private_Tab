@@ -40,6 +40,8 @@ var windowsObserver = {
 		_dbg = prefs.get("debug", false);
 		_dbgv = prefs.get("debug.verbose", false);
 
+		this.initPrivateProtocol();
+
 		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
@@ -54,6 +56,8 @@ var windowsObserver = {
 		if(!this.initialized)
 			return;
 		this.initialized = false;
+
+		this.destroyPrivateProtocol();
 
 		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
@@ -163,6 +167,21 @@ var windowsObserver = {
 		window.removeEventListener("SSWindowClosing", this, true);
 		window.removeEventListener("close", this, false);
 		window.removeEventListener("beforeunload", this, false);
+	},
+
+	initPrivateProtocol: function() {
+		if("privateProtocol" in this)
+			return;
+		var tmp = {};
+		Services.scriptloader.loadSubScript("chrome://privatetab/content/protocol.js", tmp, "UTF-8");
+		var privateProtocol = this.privateProtocol = tmp.privateProtocol;
+		privateProtocol.init();
+	},
+	destroyPrivateProtocol: function() {
+		if("privateProtocol" in this) {
+			this.privateProtocol.destroy();
+			delete this.privateProtocol;
+		}
 	},
 
 	initWindow: function(window, reason) {

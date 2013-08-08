@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8" />
+<title>Private Tab: Redirect…</title>
+<script>
+try {
+	var spec = location.hash.substr(1);
+	if(!spec)
+		throw new Error("No URI");
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
+
+	try {
+		var iconURL = uri.scheme + "://" + uri.hostPort + "/favicon.ico";
+		var icon = document.createElement("link");
+		icon.rel = "shortcut icon";
+		icon.href = iconURL;
+		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
+	}
+	catch(e2) {
+	}
+
+	try {
+		var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+			.getService(Components.interfaces.inIDOMUtils);
+		var browser = dwu.getParentForNode(document, true);
+		if(
+			!(browser instanceof Components.interfaces.nsIDOMXULElement)
+			|| browser.localName.toLowerCase() != "browser"
+		)
+			throw new Error("Can't get XUL browser");
+		var doc = browser.ownerDocument;
+		var win = doc.defaultView;
+		var gBrowser = win.gBrowser;
+
+		// Link may be loaded in current tab, so we should send notification
+		var tab;
+		if("_getTabForBrowser" in gBrowser)
+			tab = gBrowser._getTabForBrowser(browser);
+		else { // SeaMonkey
+			for(var i = 0, tabs = gBrowser.tabs, l = tabs.length; i < l; ++i) {
+				if(tabs[i].linkedBrowser == browser) {
+					tab = tabs[i];
+					break;
+				}
+			}
+		}
+		if(tab) {
+			var evt = doc.createEvent("UIEvent");
+			evt.initUIEvent("PrivateTab:PrivateChanged", true, false, win, 1);
+			tab.dispatchEvent(evt);
+		}
+
+		//win.setTimeout(function() {
+		//	gBrowser.setTabTitleLoading(tab);
+		//}, 0);
+		var getString = function(id) {
+			try {
+				return gBrowser.mStringBundle.getString(id);
+			}
+			catch(e) {
+			}
+			return undefined;
+		}
+		document.title = getString("tabs.connecting")
+			|| getString("tabs.loading") // SeaMonkey
+			|| spec;
+	}
+	catch(e2) {
+		document.title = spec;
+		Components.utils.reportError(e2);
+	}
+	location.replace(spec);
+}
+catch(e) {
+	document.title = "Private Tab: Can't redirect";
+	throw e;
+}
+</script>
