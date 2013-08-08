@@ -35,6 +35,7 @@ pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);
 pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.patchDownloads", true);
+pref("extensions.privateTab.enablePrivateProtocol", true);
 
 pref("extensions.privateTab.debug", false);
 pref("extensions.privateTab.debug.verbose", false);

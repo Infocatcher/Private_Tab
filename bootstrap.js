@@ -40,7 +40,8 @@ var windowsObserver = {
 		_dbg = prefs.get("debug", false);
 		_dbgv = prefs.get("debug.verbose", false);
 
-		this.initPrivateProtocol();
+		if(prefs.get("enablePrivateProtocol"))
+			this.initPrivateProtocol();
 
 		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
@@ -489,6 +490,13 @@ var windowsObserver = {
 			this.windows.forEach(function(window) {
 				this.patchTabBrowserLoadURI(window, window.gBrowser, !pVal, true);
 			}, this);
+		}
+		else if(pName == "enablePrivateProtocol") {
+			if(pVal)
+				this.initPrivateProtocol();
+			else
+				this.destroyPrivateProtocol();
+			this.reloadStyles();
 		}
 		else if(pName == "debug")
 			_dbg = pVal;
@@ -2660,6 +2668,14 @@ var windowsObserver = {
 		if(sss.sheetRegistered(this.cssURI, sss.USER_SHEET))
 			sss.unregisterSheet(this.cssURI, sss.USER_SHEET);
 	},
+	reloadStyles: function(window) {
+		window = window
+			|| Services.wm.getMostRecentWindow("navigator:browser")
+			|| Services.wm.getMostRecentWindow("navigator:private"); // SeaMonkey >= 2.19a1 (2013-03-27)
+		this.unloadStyles();
+		if(window)
+			this.loadStyles(window);
+	},
 	get sss() {
 		delete this.sss;
 		return this.sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
@@ -2692,8 +2708,7 @@ var windowsObserver = {
 		var cssStr = '\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
-				.tabbrowser-tab[' + this.privateAttr + '],\n\
-				.bookmark-item[scheme="private"] {\n\
+				.tabbrowser-tab[' + this.privateAttr + '] {\n\
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
 					' + prefix + 'text-decoration-style: dashed !important;\n\
@@ -2711,15 +2726,6 @@ var windowsObserver = {
 					margin: 1px;\n\
 				}\n\
 			}\n\
-			@-moz-document url("chrome://browser/content/bookmarks/bookmarksPanel.xul"),\n\
-				url("chrome://browser/content/places/places.xul"),\n\
-				url("chrome://communicator/content/bookmarks/bm-panel.xul"),\n\
-				url("chrome://communicator/content/bookmarks/bookmarksManager.xul") {\n\
-				treechildren::-moz-tree-cell-text(private) {\n\
-					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
-					margin-bottom: 1px !important;\n\
-				}\n\
-			}\n\
 			@-moz-document url("' + document.documentURI + '"),\n\
 				url("chrome://global/content/customizeToolbar.xul") {\n\
 				#' + this.toolbarButtonId + ' {\n\
@@ -2730,6 +2736,25 @@ var windowsObserver = {
 					list-style-image: url("chrome://privatetab/content/privacy-16.png") !important;\n\
 				}\n\
 			}';
+		if(prefs.get("enablePrivateProtocol")) {
+			cssStr += '\n\
+			@-moz-document url("' + document.documentURI + '") {\n\
+				.bookmark-item[scheme="private"] {\n\
+					text-decoration: underline !important;\n\
+					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
+					' + prefix + 'text-decoration-style: dashed !important;\n\
+				}\n\
+			}\n\
+			@-moz-document url("chrome://browser/content/bookmarks/bookmarksPanel.xul"),\n\
+				url("chrome://browser/content/places/places.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bm-panel.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bookmarksManager.xul") {\n\
+				treechildren::-moz-tree-cell-text(private) {\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
+					margin-bottom: 1px !important;\n\
+				}\n\
+			}';
+		}
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
 	},
 
