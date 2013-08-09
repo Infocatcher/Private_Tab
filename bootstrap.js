@@ -1938,11 +1938,7 @@ var windowsObserver = {
 
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
-	get createNode() {
-		delete this.createNode;
-		return this.createNode = this._createNode.bind(this);
-	},
-	_createNode: function(document, nodeName, id, attrs) {
+	createNode: function(document, nodeName, id, attrs) {
 		var mi = document.createElement(nodeName);
 		mi.id = id;
 		for(var name in attrs)
