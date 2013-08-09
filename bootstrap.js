@@ -1628,6 +1628,7 @@ var windowsObserver = {
 
 	cmdAttr: "privateTab-command",
 	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
+	afterTabsButtonId: "privateTab-afterTabs-openNewPrivateTab",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
@@ -1672,6 +1673,19 @@ var windowsObserver = {
 			tooltiptext: this.getLocalized("openNewPrivateTabTip"),
 			"privateTab-command": "openNewPrivateTab"
 		});
+
+		var newTabBtn = document.getAnonymousElementByAttribute(
+			document.defaultView.gBrowser.tabContainer,
+			"class",
+			"tabs-newtab-button"
+		);
+		if(newTabBtn) {
+			var tb2 = tb.cloneNode(true);
+			tb2.id = this.afterTabsButtonId;
+			tb2.className = "tabs-newtab-button";
+			this.initNodeEvents(tb2);
+			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
+		}
 
 		var toolbars = document.getElementsByTagName("toolbar");
 		function isSep(id) {
@@ -1913,6 +1927,7 @@ var windowsObserver = {
 		var document = window.document;
 		this.destroyNodes(document, force);
 		this.destroyNode(this.getPaletteButton(window), force);
+		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
@@ -1943,9 +1958,16 @@ var windowsObserver = {
 		mi.id = id;
 		for(var name in attrs)
 			mi.setAttribute(name, attrs[name]);
-		mi.addEventListener("command", this, false);
-		mi.addEventListener("click", this, false);
+		this.initNodeEvents(mi);
 		return mi;
+	},
+	initNodeEvents: function(node) {
+		node.addEventListener("command", this, false);
+		node.addEventListener("click", this, false);
+	},
+	destroyNodeEvents: function(node) {
+		node.removeEventListener("command", this, false);
+		node.removeEventListener("click", this, false);
 	},
 	insertNode: function(node, parent, insertAfter) {
 		if(!parent)
@@ -1971,8 +1993,7 @@ var windowsObserver = {
 	destroyNode: function(node, force) {
 		if(!node)
 			return;
-		node.removeEventListener("command", this, false);
-		node.removeEventListener("click", this, false);
+		this.destroyNodeEvents(node);
 		force && node.parentNode.removeChild(node);
 	},
 
@@ -2724,12 +2745,35 @@ var windowsObserver = {
 			}\n\
 			@-moz-document url("' + document.documentURI + '"),\n\
 				url("chrome://global/content/customizeToolbar.xul") {\n\
-				#' + this.toolbarButtonId + ' {\n\
+				#' + this.toolbarButtonId + ',\n\
+				#' + this.afterTabsButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-24.png") !important;\n\
 					-moz-image-region: auto !important;\n\
 				}\n\
-				toolbar[iconsize="small"] #' + this.toolbarButtonId + ' {\n\
+				toolbar[iconsize="small"] #' + this.toolbarButtonId + ',\n\
+				toolbar[iconsize="small"] #' + this.afterTabsButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-16.png") !important;\n\
+				}\n\
+				#' + this.afterTabsButtonId + ' > .toolbarbutton-icon {\n\
+					margin: 0 !important;\n\
+				}\n\
+				\/* Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab] */\n\
+				#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #' + this.toolbarButtonId + ',\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #' + this.toolbarButtonId + ' {\n\
+					visibility: collapse !important;\n\
+				}\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#' + this.afterTabsButtonId + ' {\n\
+					visibility: visible !important;\n\
 				}\n\
 			}';
 		if(prefs.get("enablePrivateProtocol")) {
