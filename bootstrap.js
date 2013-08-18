@@ -2621,6 +2621,12 @@ var windowsObserver = {
 		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
 	getTabPrivacyContext: function(tab) {
+		if(!tab.linkedBrowser) {
+			Components.utils.reportError(
+				LOG_PREFIX + "getTabPrivacyContext() called for already destroyed tab, call stack:\n"
+				+ new Error().stack
+			);
+		}
 		return this.getPrivacyContext(tab.linkedBrowser.contentWindow);
 	},
 	isPrivateTab: function(tab) {
