@@ -1340,7 +1340,7 @@ var windowsObserver = {
 		else if(cmd == "openNewPrivateTab")
 			this.openNewPrivateTab(window);
 		else if(cmd == "toggleTabPrivate")
-			this.toggleContextTabPrivate(window);
+			this.toggleContextTabPrivate(window, shifted);
 		else if(cmd == "openPlacesInNewPrivateTab")
 			this.openPlaceInNewPrivateTab(window, shifted, e);
 		else {
@@ -1602,20 +1602,25 @@ var windowsObserver = {
 		}
 		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
-	toggleContextTabPrivate: function(window) {
+	toggleContextTabPrivate: function(window, toggleReload) {
 		var tab = this.getContextTab(window, true)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
 		if(this.isPendingTab(tab))
 			this.fixTabState(tab, isPrivate);
-		else if(prefs.get("toggleTabPrivateAutoReload")) {
-			var browser = tab.linkedBrowser;
-			if(!browser.webProgress.isLoadingDocument) {
-				var typed = browser.userTypedValue;
-				browser.reload();
-				if(typed != null) window.setTimeout(function() {
-					browser.userTypedValue = typed;
-				}, 0);
+		else {
+			var autoReload = prefs.get("toggleTabPrivateAutoReload");
+			if(toggleReload)
+				autoReload = !autoReload;
+			if(autoReload) {
+				var browser = tab.linkedBrowser;
+				if(!browser.webProgress.isLoadingDocument) {
+					var typed = browser.userTypedValue;
+					browser.reload();
+					if(typed != null) window.setTimeout(function() {
+						browser.userTypedValue = typed;
+					}, 0);
+				}
 			}
 		}
 		if(tab == this.getTabBrowser(tab).selectedTab) {
