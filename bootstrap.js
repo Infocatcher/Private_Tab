@@ -880,7 +880,8 @@ var windowsObserver = {
 			this.toggleTabPrivate(tab, isPrivate);
 		else {
 			window.setTimeout(function() {
-				this.setTabState(tab);
+				if(tab.parentNode) // Handle only not yet closed tabs
+					this.setTabState(tab);
 			}.bind(this), 0);
 		}
 	},
@@ -1098,7 +1099,7 @@ var windowsObserver = {
 		window.setTimeout(function() {
 			// Someone may change "usePrivateBrowsing"...
 			// It's good to show real state
-			if(tab.parentNode) // Ignore removed tabs
+			if(tab.parentNode) // Handle only not yet closed tabs
 				this.setTabState(tab);
 		}.bind(this), 50);
 	},
