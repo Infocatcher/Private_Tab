@@ -118,7 +118,8 @@ var windowsObserver = {
 			case "SSWindowStateReady":        this.setWindowBusy(e, false);  break;
 			case "close":
 			case "beforeunload":
-			case "SSWindowClosing":           this.windowClosingHandler(e);
+			case "SSWindowClosing":           this.windowClosingHandler(e);  break;
+			case "aftercustomization":        this.updateToolbars(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -301,6 +302,7 @@ var windowsObserver = {
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
+		window.removeEventListener("aftercustomization", this, false);
 		if(reason != WINDOW_CLOSED) {
 			// See resource:///modules/sessionstore/SessionStore.jsm
 			// "domwindowclosed" => onClose() => "SSWindowClosing"
@@ -1651,6 +1653,13 @@ var windowsObserver = {
 			.getElementsByAttribute("id", this.toolbarButtonId);
 		return btns.length && btns[0];
 	},
+	getNewTabButton: function(window) {
+		return window.document.getAnonymousElementByAttribute(
+			window.gBrowser.tabContainer,
+			"command",
+			"cmd_newNavigatorTab"
+		);
+	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -1670,6 +1679,7 @@ var windowsObserver = {
 		return tabTip;
 	},
 	initToolbarButton: function(document) {
+		var window = document.defaultView;
 		var tbId = this.toolbarButtonId;
 		var tb = this.createNode(document, "toolbarbutton", tbId, {
 			id: tbId,
@@ -1680,17 +1690,14 @@ var windowsObserver = {
 			"privateTab-command": "openNewPrivateTab"
 		});
 
-		var newTabBtn = document.getAnonymousElementByAttribute(
-			document.defaultView.gBrowser.tabContainer,
-			"class",
-			"tabs-newtab-button"
-		);
+		var newTabBtn = this.getNewTabButton(window);
 		if(newTabBtn) {
 			var tb2 = tb.cloneNode(true);
 			tb2.id = this.afterTabsButtonId;
 			tb2.className = "tabs-newtab-button";
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
+			window.addEventListener("aftercustomization", this, false);
 		}
 
 		var toolbars = document.getElementsByTagName("toolbar");
@@ -1740,13 +1747,32 @@ var windowsObserver = {
 				break;
 			}
 			toolbar.insertBefore(tb, insPos);
+			if(newTabBtn && insPos && insPos.id == "new-tab-button")
+				newTabBtn.parentNode.insertBefore(newTabBtn, tb2.nextSibling);
 			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
 			return;
 		}
 
-		this.getToolbox(document.defaultView)
+		this.getToolbox(window)
 			.palette
 			.appendChild(tb);
+	},
+	updateToolbars: function(e) {
+		var window = e.currentTarget;
+		var document = window.document;
+		var tbBtn = document.getElementById(this.toolbarButtonId);
+		if(!tbBtn)
+			return;
+		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
+		var newTabBtn = this.getNewTabButton(window);
+		if(tbBtn.nextSibling && tbBtn.nextSibling.id == "new-tab-button") {
+			_log('Move "New Tab" button after "New Private Tab" button');
+			newTabBtn.parentNode.insertBefore(newTabBtn, afterTabsBtn.nextSibling);
+		}
+		else {
+			_log('Move "New Private Tab" button after "New Tab" button');
+			newTabBtn.parentNode.insertBefore(afterTabsBtn, newTabBtn.nextSibling);
+		}
 	},
 	initControls: function(document) {
 		var window = document.defaultView;
