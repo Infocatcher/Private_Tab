@@ -287,7 +287,8 @@ var windowsObserver = {
 		this.patchBrowsers(gBrowser, false, !force);
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
 		this.patchWarnAboutClosingWindow(window, false, !force);
-		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
+		if(!prefs.get("allowOpenExternalLinksInPrivateTabs"))
+			this.patchBrowserLoadURI(window, false, !force);
 		this.patchTabIcons(window, false, !force);
 		this.patchBrowserThumbnails(window, false, !force);
 
@@ -490,7 +491,7 @@ var windowsObserver = {
 		}
 		else if(pName == "allowOpenExternalLinksInPrivateTabs") {
 			this.windows.forEach(function(window) {
-				this.patchTabBrowserLoadURI(window, window.gBrowser, !pVal, true);
+				this.patchBrowserLoadURI(window, !pVal);
 			}, this);
 		}
 		else if(pName == "enablePrivateProtocol") {
@@ -570,40 +571,59 @@ var windowsObserver = {
 			forceDestroy
 		);
 	},
-	ensureTabBrowserLoadURIPatched: function(window) {
-		if(
-			!prefs.get("allowOpenExternalLinksInPrivateTabs")
-			&& !patcher.isWrapped(window.gBrowser, "gBrowser.loadURIWithFlags")
-		)
-			this.patchTabBrowserLoadURI(window, window.gBrowser, true, true);
-	},
-	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, skipCheck, forceDestroy) {
-		if(!skipCheck && prefs.get("allowOpenExternalLinksInPrivateTabs"))
+	patchBrowserLoadURI: function(window, applyPatch, forceDestroy) {
+		var gBrowser = window.gBrowser;
+		var browser = gBrowser.browsers && gBrowser.browsers[0];
+		if(!browser) {
+			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.loadURIWithFlags()");
 			return;
-
+		}
+		var browserProto = Object.getPrototypeOf(browser);
+		if(!browserProto || !("loadURIWithFlags" in browserProto)) {
+			_log("Can't patch browser: no loadURIWithFlags() method");
+			return;
+		}
 		if(applyPatch) {
 			var _this = this;
 			patcher.wrapFunction(
-				gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags",
+				browserProto, "loadURIWithFlags", "browser.loadURIWithFlags",
 				function before(aURI, aFlags, aReferrerURI, aCharset, aPostData) {
 					if(
 						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
-						&& _this.isPrivateTab(this.selectedTab)
+						&& _this.isPrivateWindow(this.contentWindow)
 					) {
-						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
 						// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
-						var tab = this.loadOneTab(aURI || "about:blank", {
+						var stack = new Error().stack;
+						_dbgv && _log("loadURIWithFlags(), stack:\n" + stack);
+						if(
+							stack.indexOf("addTab@chrome:") != -1
+							|| stack.indexOf("loadOneTab@chrome:") != -1
+						) {
+							var tab = _this.getTabForBrowser(this);
+							if(tab) {
+								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => make tab not private");
+								_this.toggleTabPrivate(tab, false);
+							}
+							else {
+								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag, tab not found!");
+							}
+							return false;
+						}
+						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
+						_this.readyToOpenTab(window, false);
+						var tab = gBrowser.loadOneTab(aURI || "about:blank", {
 							referrerURI: aReferrerURI,
 							fromExternal: true,
 							inBackground: prefs.getPref("browser.tabs.loadDivertedInBackground")
 						});
 						return !!tab;
 					}
+					return false;
 				}
 			);
 		}
 		else {
-			patcher.unwrapFunction(gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags", forceDestroy);
+			patcher.unwrapFunction(browserProto, "loadURIWithFlags", "browser.loadURIWithFlags", forceDestroy);
 		}
 	},
 	patchBrowsers: function(gBrowser, applyPatch, forceDestroy) {
@@ -843,20 +863,6 @@ var windowsObserver = {
 			return;
 		}
 		_dbgv && _log(e.type + ":\n" + new Error().stack);
-		//_dbgv && _log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
-		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) {
-			var err = new Error();
-			var curFile = "@" + err.fileName + ":";
-			var stack = err.stack.trimRight().split("\n");
-			if( // this.handleEvent() => this.tabOpenHandler()
-				stack.length == 2 && stack.every(function(line) {
-					return line.indexOf(curFile) != -1;
-				})
-			) {
-				_log("Looks like tab, opened from external application, ignore");
-				return;
-			}
-		}
 		var gBrowser = this.getTabBrowser(tab);
 		//~ todo: try get real tab owner!
 		var isPrivate;
@@ -1512,7 +1518,7 @@ var windowsObserver = {
 				referer = sourceDocument.documentURIObject;
 		}
 
-		this.readyToOpenPrivateTab(window);
+		this.readyToOpenTab(window, true);
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: referer,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
@@ -1540,7 +1546,7 @@ var windowsObserver = {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
-		this.readyToOpenPrivateTab(window, function(tab) {
+		this.readyToOpenTab(window, true, function(tab) {
 			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
 			callback && callback(tab);
 		}.bind(this));
@@ -1556,11 +1562,12 @@ var windowsObserver = {
 				window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
 		}
 	},
-	readyToOpenPrivateTab: function(window, callback) {
+	readyToOpenTab: function(window, isPrivate, callback) {
 		this.waitForTab(window, function(tab) {
 			if(tab) {
+				_log("readyToOpenTab(): make tab " + (isPrivate ? "private" : "not private"));
 				tab._privateTabIgnore = true;
-				this.toggleTabPrivate(tab, true);
+				this.toggleTabPrivate(tab, isPrivate);
 			}
 			callback && callback(tab);
 		}.bind(this));
@@ -2889,9 +2896,12 @@ API.prototype = {
 	_onFirstPrivateTab: function(window, tab) {
 		this._onFirstPrivateTab = function() {};
 		_log("First private tab in window");
-		if(!privateTabInternal.isPrivateWindow(window)) {
+		if(
+			!prefs.get("allowOpenExternalLinksInPrivateTabs")
+			&& !privateTabInternal.isPrivateWindow(window)
+		) {
 			window.setTimeout(function() {
-				privateTabInternal.ensureTabBrowserLoadURIPatched(window);
+				privateTabInternal.patchBrowserLoadURI(window, true);
 			}, 50);
 		}
 	},
@@ -2905,12 +2915,7 @@ API.prototype = {
 		return isPrivate;
 	},
 	readyToOpenTab: function privateTab_readyToOpenTab(isPrivate) {
-		privateTabInternal.waitForTab(this.window, function(tab) {
-			if(!tab)
-				return;
-			tab._privateTabIgnore = true;
-			privateTabInternal.toggleTabPrivate(tab, isPrivate);
-		}.bind(this));
+		privateTabInternal.readyToOpenTab(this.window, isPrivate);
 	},
 	readyToOpenTabs: function privateTab_readyToOpenTabs(isPrivate) {
 		this._openNewTabsPrivate = isPrivate;
