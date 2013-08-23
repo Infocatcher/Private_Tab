@@ -2769,14 +2769,20 @@ var windowsObserver = {
 				#' + this.afterTabsButtonId + ' > .toolbarbutton-icon {\n\
 					margin: 0 !important;\n\
 				}\n\
-				\/* Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab] */\n\
+				/*\n\
+				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
+				And also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
+				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
-					~ #' + this.toolbarButtonId + ' {\n\
+					~ #' + this.toolbarButtonId + ',\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #new-tab-button {\n\
 					visibility: collapse !important;\n\
 				}\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
@@ -2784,7 +2790,10 @@ var windowsObserver = {
 					#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
-					#' + this.afterTabsButtonId + ' {\n\
+					#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
 				}\n\
 			}';
