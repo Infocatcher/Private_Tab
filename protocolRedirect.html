@@ -6,6 +6,9 @@
 	Usage example: <a href="private:///#https://addons.mozilla.org/">private:///#https://addons.mozilla.org/</a>
 </div>
 <script>
+window.onhashchange = function() {
+	location.reload(); // Allow open "Usage example" link in current tab
+};
 try {
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	var spec = location.hash.substr(1);
