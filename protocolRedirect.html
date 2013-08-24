@@ -1,6 +1,10 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8" />
 <title>Private Tab: Redirect…</title>
+<div id="output"></div>
+<div id="usage" style="display: none;">
+	Usage example: <a href="private:///#https://addons.mozilla.org/">private:///#https://addons.mozilla.org/</a>
+</div>
 <script>
 try {
 	var spec = location.hash.substr(1);
@@ -80,6 +84,13 @@ try {
 }
 catch(e) {
 	document.title = "Private Tab: Can't redirect";
+	var out;
+	if(!spec)
+		out = "Missing URI";
+	else if(!uri)
+		out = "Malformed URI: " + spec;
+	out && document.getElementById("output").appendChild(document.createTextNode(out));
+	document.getElementById("usage").style.display = "";
 	throw e;
 }
 </script>
