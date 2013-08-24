@@ -30,7 +30,12 @@ try {
 				}
 			}
 		}
-		if(tab) {
+		if(
+			tab
+			&& !tab.hasAttribute("privateTab-isPrivate")
+			&& "PrivateBrowsingUtils" in win
+			&& win.PrivateBrowsingUtils.isWindowPrivate(window)
+		) {
 			var evt = doc.createEvent("UIEvent");
 			evt.initUIEvent("PrivateTab:PrivateChanged", true, false, win, 1);
 			tab.dispatchEvent(evt);
