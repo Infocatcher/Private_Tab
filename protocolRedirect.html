@@ -4,20 +4,6 @@
 <script>
 try {
 	var spec = location.hash.substr(1);
-	if(!spec)
-		throw new Error("No URI");
-	Components.utils.import("resource://gre/modules/Services.jsm");
-	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
-
-	try {
-		var iconURL = uri.scheme + "://" + uri.hostPort + "/favicon.ico";
-		var icon = document.createElement("link");
-		icon.rel = "shortcut icon";
-		icon.href = iconURL;
-		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
-	}
-	catch(e2) {
-	}
 
 	try {
 		var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
@@ -57,7 +43,7 @@ try {
 			try {
 				return gBrowser.mStringBundle.getString(id);
 			}
-			catch(e) {
+			catch(e3) {
 			}
 			return undefined;
 		}
@@ -69,6 +55,22 @@ try {
 		document.title = spec;
 		Components.utils.reportError(e2);
 	}
+
+	if(!spec)
+		throw new Error("No URI");
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
+
+	try {
+		var iconURL = uri.scheme + "://" + uri.hostPort + "/favicon.ico";
+		var icon = document.createElement("link");
+		icon.rel = "shortcut icon";
+		icon.href = iconURL;
+		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
+	}
+	catch(e2) {
+	}
+
 	location.replace(spec);
 }
 catch(e) {
