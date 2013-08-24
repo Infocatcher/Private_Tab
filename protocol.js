@@ -61,18 +61,12 @@ var privateProtocol = {
 	newChannel: function(uri) {
 		var spec = uri.spec;
 		_log("[protocol] newChannel(): spec = " + spec);
-		if(!spec || !spec.startsWith(P_SCHEME + ":"))
-			return null;
-		var newSpec = spec.replace(/^private:\/*#?/i, "");
+		var newSpec = "";
+		var schemePrefix = P_SCHEME + ":";
+		// Example: private:///#https://addons.mozilla.org/
+		if(spec && spec.startsWith(schemePrefix))
+			newSpec = spec.substr(0, schemePrefix.length).replace(/^\/*#?/, "");
 		_log("[protocol] newChannel(): newSpec = " + newSpec);
-		try {
-			Services.io.newURI(newSpec, null, null);
-		}
-		catch(e) {
-			_log("[protocol] newChannel(): malformed URI");
-			Components.utils.reportError(e);
-			return null;
-		}
 
 		// We can't use newChannel(newSpec, ...) here - strange things happens
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
