@@ -74,11 +74,7 @@ try {
 	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
 
 	try {
-		var iconURL = uri.scheme + "://" + uri.hostPort + "/favicon.ico";
-		var icon = document.createElement("link");
-		icon.rel = "shortcut icon";
-		icon.href = iconURL;
-		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
+		setFavicon(uri.scheme + "://" + uri.hostPort + "/favicon.ico");
 	}
 	catch(e2) {
 	}
@@ -90,12 +86,25 @@ catch(e) {
 	var out;
 	if(!("Services" in window)) // We can open this file directly using jar:file:///...
 		out = "Not enough permissions";
-	else if(!spec)
-		out = "Missing URI";
-	else if(!uri)
-		out = "Malformed URI: " + spec;
+	else {
+		setFavicon("chrome://global/skin/icons/warning-16.png");
+		if(!spec)
+			out = "Missing URI";
+		else if(!uri)
+			out = "Malformed URI: " + spec;
+	}
 	out && document.getElementById("output").appendChild(document.createTextNode(out));
 	document.getElementById("usage").style.display = "";
 	throw e;
+}
+
+function setFavicon(iconURL) {
+	var icon = "__icon" in setFavicon && setFavicon.__icon;
+	if(!icon) {
+		icon = document.createElement("link");
+		icon.rel = "shortcut icon";
+		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
+	}
+	icon.href = iconURL;
 }
 </script>
