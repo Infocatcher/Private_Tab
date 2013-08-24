@@ -7,6 +7,7 @@
 </div>
 <script>
 try {
+	Components.utils.import("resource://gre/modules/Services.jsm");
 	var spec = location.hash.substr(1);
 
 	try {
@@ -67,7 +68,6 @@ try {
 
 	if(!spec)
 		throw new Error("No URI");
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
 
 	try {
@@ -85,7 +85,9 @@ try {
 catch(e) {
 	document.title = "Private Tab: Can't redirect";
 	var out;
-	if(!spec)
+	if(!("Services" in window)) // We can open this file directly using jar:file:///...
+		out = "Not enough permissions";
+	else if(!spec)
 		out = "Missing URI";
 	else if(!uri)
 		out = "Malformed URI: " + spec;
