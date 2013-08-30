@@ -2804,16 +2804,26 @@ var windowsObserver = {
 				}\n\
 				/*\n\
 				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
-				And also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
+				and also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
+				Includes "tabmixScrollBox" for Tab Mix Plus https://addons.mozilla.org/addon/tab-mix-plus/
 				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,new-tab-button,' + this.toolbarButtonId + '"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #' + this.toolbarButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + '"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #' + this.toolbarButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #new-tab-button,\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + ',new-tab-button"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #new-tab-button {\n\
 					visibility: collapse !important;\n\
@@ -2821,10 +2831,19 @@ var windowsObserver = {
 				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					.tabs-newtab-button[command="cmd_newNavigatorTab"],\n\
+				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + ',new-tab-button"]:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
