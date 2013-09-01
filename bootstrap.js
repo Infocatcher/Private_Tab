@@ -2805,7 +2805,7 @@ var windowsObserver = {
 				/*\n\
 				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
 				and also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
-				Includes "tabmixScrollBox" for Tab Mix Plus https://addons.mozilla.org/addon/tab-mix-plus/
+				Includes "tabmixScrollBox" for Tab Mix Plus https://addons.mozilla.org/addon/tab-mix-plus/\n\
 				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]\n\
