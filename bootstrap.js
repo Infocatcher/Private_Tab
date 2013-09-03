@@ -236,9 +236,10 @@ var windowsObserver = {
 		}
 		if(init) {
 			var _getString = this.getLocalized.bind(this);
+			var sm = this.isSeaMonkey ? "SM" : "";
 			var ptEntry = {
-				get title()       _getString("taskBarOpenNewPrivateTab"),
-				get description() _getString("taskBarOpenNewPrivateTabDesc"),
+				get title()       _getString("taskBarOpenNewPrivateTab" + sm),
+				get description() _getString("taskBarOpenNewPrivateTabDesc" + sm),
 				args:             taskArgs,
 				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
 				open:             true,
