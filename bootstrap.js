@@ -41,7 +41,7 @@ var windowsObserver = {
 		_dbgv = prefs.get("debug.verbose", false);
 
 		if(prefs.get("enablePrivateProtocol"))
-			this.initPrivateProtocol();
+			this.initPrivateProtocol(reason);
 
 		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
@@ -58,7 +58,7 @@ var windowsObserver = {
 			return;
 		this.initialized = false;
 
-		this.destroyPrivateProtocol();
+		this.destroyPrivateProtocol(reason);
 
 		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
@@ -96,6 +96,11 @@ var windowsObserver = {
 			this.destroyWindow(subject, WINDOW_CLOSED);
 		else if(topic == "sessionstore-state-write")
 			this.filterSession(subject);
+		else if(topic == "browser-delayed-startup-finished") {
+			_log(topic + " => setupJumpLists()");
+			this.setupJumpListsLazy(false);
+			this.setupJumpLists(true, true);
+		}
 	},
 
 	handleEvent: function(e) {
@@ -171,19 +176,103 @@ var windowsObserver = {
 		window.removeEventListener("beforeunload", this, false);
 	},
 
-	initPrivateProtocol: function() {
+	initPrivateProtocol: function(reason) {
 		if("privateProtocol" in this)
 			return;
 		var tmp = {};
 		Services.scriptloader.loadSubScript("chrome://privatetab/content/protocol.js", tmp, "UTF-8");
 		var privateProtocol = this.privateProtocol = tmp.privateProtocol;
 		privateProtocol.init();
+
+		if(reason == APP_STARTUP)
+			this.setupJumpListsLazy(true);
+		else
+			this.setupJumpLists(true);
 	},
-	destroyPrivateProtocol: function() {
-		if("privateProtocol" in this) {
-			this.privateProtocol.destroy();
-			delete this.privateProtocol;
+	destroyPrivateProtocol: function(reason) {
+		if(!("privateProtocol" in this))
+			return;
+		this.privateProtocol.destroy();
+		delete this.privateProtocol;
+
+		this.setupJumpListsLazy(false);
+		this.setupJumpLists(false);
+	},
+
+	get hasJumpLists() {
+		delete this.hasJumpLists;
+		return this.hasJumpLists = "@mozilla.org/windows-taskbar;1" in Components.classes
+			&& Components.classes["@mozilla.org/windows-taskbar;1"]
+				.getService(Components.interfaces.nsIWinTaskbar)
+				.available;
+	},
+	_jumpListsInitialized: false,
+	setupJumpLists: function(init, lazy) {
+		if(
+			!this.hasJumpLists
+			|| !init ^ this._jumpListsInitialized
+		)
+			return;
+		this._jumpListsInitialized = init;
+
+		var global = Components.utils.import("resource:///modules/WindowsJumpLists.jsm", {});
+		if(!("tasksCfg" in global)) {
+			_log('setupJumpLists() failed: "tasksCfg" not found in WindowsJumpLists.jsm');
+			return;
 		}
+		var tasksCfg = global.tasksCfg;
+		var taskArgs = "-new-tab private:///#about:blank";
+		function getEntryIndex(args) {
+			for(var i = 0, l = tasksCfg.length; i < l; ++i) {
+				var entry = tasksCfg[i];
+				if(entry.args == args)
+					return i;
+			}
+			return -1;
+		}
+		if(init) {
+			var _getString = this.getLocalized.bind(this);
+			var ptEntry = {
+				get title()       _getString("openNewPrivateTab"),
+				get description() _getString("openNewPrivateTabTip"),
+				args:             taskArgs,
+				iconIndex:        4, // Private browsing mode icon
+				open:             true,
+				close:            true
+			};
+			var i = getEntryIndex("-new-tab about:blank");
+			if(i != -1) {
+				tasksCfg.splice(i + 1, 0, ptEntry);
+				_log('setupJumpLists(): add new item after "Open new tab"');
+			}
+			else {
+				tasksCfg.push(ptEntry);
+				_log("setupJumpLists(): add new item at end");
+			}
+		}
+		else {
+			var i = getEntryIndex(taskArgs);
+			if(i != -1) {
+				tasksCfg.splice(i, 1);
+				_log("setupJumpLists(): remove item");
+			}
+			else {
+				_log("setupJumpLists(): item not found and can't be removed");
+			}
+		}
+		if(!lazy)
+			global.WinTaskbarJumpList.update();
+	},
+	_hasDelayedStartupObserver: false,
+	setupJumpListsLazy: function(init) {
+		if(!init ^ this._hasDelayedStartupObserver)
+			return;
+		this._hasDelayedStartupObserver = init;
+		// Like _onFirstWindowLoaded() from resource://app/components/nsBrowserGlue.js
+		if(init)
+			Services.obs.addObserver(this, "browser-delayed-startup-finished", false);
+		else
+			Services.obs.removeObserver(this, "browser-delayed-startup-finished");
 	},
 
 	initWindow: function(window, reason) {
