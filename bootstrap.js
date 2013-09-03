@@ -184,10 +184,12 @@ var windowsObserver = {
 		var privateProtocol = this.privateProtocol = tmp.privateProtocol;
 		privateProtocol.init();
 
-		if(reason == APP_STARTUP)
-			this.setupJumpListsLazy(true);
-		else
-			this.setupJumpLists(true);
+		if(prefs.get("showItemInTaskBarJumpList")) {
+			if(reason == APP_STARTUP)
+				this.setupJumpListsLazy(true);
+			else
+				this.setupJumpLists(true);
+		}
 	},
 	destroyPrivateProtocol: function(reason) {
 		if(!("privateProtocol" in this))
@@ -195,8 +197,10 @@ var windowsObserver = {
 		this.privateProtocol.destroy();
 		delete this.privateProtocol;
 
-		this.setupJumpListsLazy(false);
-		this.setupJumpLists(false);
+		if(prefs.get("showItemInTaskBarJumpList")) {
+			this.setupJumpListsLazy(false);
+			this.setupJumpLists(false);
+		}
 	},
 
 	get hasJumpLists() {
@@ -594,6 +598,10 @@ var windowsObserver = {
 			else
 				this.destroyPrivateProtocol();
 			this.reloadStyles();
+		}
+		else if(pName == "showItemInTaskBarJumpList") {
+			if(prefs.get("enablePrivateProtocol"))
+				this.setupJumpLists(pVal);
 		}
 		else if(pName == "debug")
 			_dbg = pVal;
