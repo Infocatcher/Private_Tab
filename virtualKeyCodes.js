@@ -25,8 +25,8 @@ function getVKChar(vk) {
 		case "VK_PERCENT":             return "%"; //165
 		case "VK_AMPERSAND":           return "&"; //166
 		case "VK_UNDERSCORE":          return "_"; //167
-		case "OPEN_PAREN":             return "("; //168
-		case "CLOSE_PAREN":            return ")"; //169
+		case "VK_OPEN_PAREN":          return "("; //168
+		case "VK_CLOSE_PAREN":         return ")"; //169
 		case "VK_ASTERISK":            return "*"; //170
 		case "VK_PLUS":                return "+"; //171
 		case "VK_PIPE":                return "|"; //172
