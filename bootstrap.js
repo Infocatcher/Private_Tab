@@ -233,8 +233,8 @@ var windowsObserver = {
 		if(init) {
 			var _getString = this.getLocalized.bind(this);
 			var ptEntry = {
-				get title()       _getString("openNewPrivateTab"),
-				get description() _getString("openNewPrivateTabTip"),
+				get title()       _getString("taskBarOpenNewPrivateTab"),
+				get description() _getString("taskBarOpenNewPrivateTabDesc"),
 				args:             taskArgs,
 				iconIndex:        4, // Private browsing mode icon
 				open:             true,
