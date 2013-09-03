@@ -99,7 +99,7 @@ var windowsObserver = {
 		else if(topic == "browser-delayed-startup-finished") {
 			_log(topic + " => setupJumpLists()");
 			this.setupJumpListsLazy(false);
-			this.setupJumpLists(true, subject);
+			this.setupJumpLists(true, true);
 		}
 	},
 
@@ -211,7 +211,7 @@ var windowsObserver = {
 				.available;
 	},
 	_jumpListsInitialized: false,
-	setupJumpLists: function(init, window) {
+	setupJumpLists: function(init, lazy) {
 		if(
 			!this.hasJumpLists
 			|| !init ^ this._jumpListsInitialized
@@ -265,13 +265,21 @@ var windowsObserver = {
 				_log("setupJumpLists(): item not found and can't be removed");
 			}
 		}
-		function update() {
-			global.WinTaskbarJumpList.update();
-		}
-		if(window)
-			window.setTimeout(update, 100);
-		else
-			update();
+
+		var WinTaskbarJumpList = global.WinTaskbarJumpList;
+		var pending = WinTaskbarJumpList._pendingStatements;
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		var stopWait = Date.now() + 5e3;
+		timer.init(function() {
+			for(var statement in pending) {
+				if(Date.now() > stopWait)
+					timer.cancel();
+				return;
+			}
+			timer.cancel();
+			WinTaskbarJumpList.update();
+		}.bind(this), lazy ? 150 : 50, timer.TYPE_REPEATING_SLACK);
 	},
 	_hasDelayedStartupObserver: false,
 	setupJumpListsLazy: function(init) {
