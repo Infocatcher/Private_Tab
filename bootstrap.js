@@ -240,7 +240,7 @@ var windowsObserver = {
 				get title()       _getString("taskBarOpenNewPrivateTab"),
 				get description() _getString("taskBarOpenNewPrivateTabDesc"),
 				args:             taskArgs,
-				iconIndex:        4, // Private browsing mode icon
+				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
 				open:             true,
 				close:            true
 			};
