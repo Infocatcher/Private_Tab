@@ -974,8 +974,9 @@ var windowsObserver = {
 			_log("Make new empty tab private");
 			isPrivate = true;
 		}
+		var tabLabel = tab.getAttribute("label") || "";
 		_log(
-			"Tab opened: " + (tab.getAttribute("label") || "").substr(0, 256)
+			"Tab opened: " + tabLabel.substr(0, 256)
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
@@ -984,6 +985,19 @@ var windowsObserver = {
 			window.setTimeout(function() {
 				if(tab.parentNode) // Handle only not yet closed tabs
 					this.setTabState(tab);
+			}.bind(this), 0);
+		}
+
+		if( // Focus URL bar, if opened empty private tab becomes selected
+			tabLabel == "private:///#about:blank"
+			|| tabLabel == "private:///#" + window.BROWSER_NEW_TAB_URL
+		) {
+			window.setTimeout(function() {
+				if(tab.getAttribute("selected") != "true")
+					return;
+				if("gURLBar" in window)
+					window.gURLBar.value = "";
+				this.focusAndSelectUrlBar(window);
 			}.bind(this), 0);
 		}
 	},
@@ -1650,11 +1664,15 @@ var windowsObserver = {
 			_log("openNewPrivateTab(): BrowserOpenTab() not found, will open manually");
 			var gBrowser = window.gBrowser;
 			gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
-			if("focusAndSelectUrlBar" in window)
-				window.setTimeout(window.focusAndSelectUrlBar, 0);
-			else if("WindowFocusTimerCallback" in window) // SeaMonkey
-				window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
+			this.focusAndSelectUrlBar(window);
 		}
+	},
+	focusAndSelectUrlBar: function(window) {
+		if("focusAndSelectUrlBar" in window)
+			window.setTimeout(window.focusAndSelectUrlBar, 0);
+		else if("WindowFocusTimerCallback" in window) // SeaMonkey
+			window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
+
 	},
 	readyToOpenTab: function(window, isPrivate, callback) {
 		this.waitForTab(window, function(tab) {
