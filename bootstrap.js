@@ -99,7 +99,7 @@ var windowsObserver = {
 		else if(topic == "browser-delayed-startup-finished") {
 			_log(topic + " => setupJumpLists()");
 			this.setupJumpListsLazy(false);
-			this.setupJumpLists(true, true);
+			this.setupJumpLists(true, subject);
 		}
 	},
 
@@ -207,7 +207,7 @@ var windowsObserver = {
 				.available;
 	},
 	_jumpListsInitialized: false,
-	setupJumpLists: function(init, lazy) {
+	setupJumpLists: function(init, window) {
 		if(
 			!this.hasJumpLists
 			|| !init ^ this._jumpListsInitialized
@@ -260,8 +260,13 @@ var windowsObserver = {
 				_log("setupJumpLists(): item not found and can't be removed");
 			}
 		}
-		if(!lazy)
+		function update() {
 			global.WinTaskbarJumpList.update();
+		}
+		if(window)
+			window.setTimeout(update, 100);
+		else
+			update();
 	},
 	_hasDelayedStartupObserver: false,
 	setupJumpListsLazy: function(init) {
