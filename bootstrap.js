@@ -197,7 +197,7 @@ var windowsObserver = {
 		this.privateProtocol.destroy();
 		delete this.privateProtocol;
 
-		if(prefs.get("showItemInTaskBarJumpList")) {
+		if(reason != APP_SHUTDOWN && prefs.get("showItemInTaskBarJumpList")) {
 			this.setupJumpListsLazy(false);
 			this.setupJumpLists(false);
 		}
