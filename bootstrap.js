@@ -2969,6 +2969,7 @@ var windowsObserver = {
 				/*\n\
 				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
 				and also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
+				+ check for Tab Mix Plus https://addons.mozilla.org/addon/tab-mix-plus/ options ("newtab_side" attribute)\n\
 				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
@@ -2979,10 +2980,10 @@ var windowsObserver = {
 					~ #new-tab-button {\n\
 					visibility: collapse;\n\
 				}\n\
-				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"]):not([newtab_side])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"]):not([newtab_side])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
