@@ -1773,6 +1773,7 @@ var windowsObserver = {
 	cmdAttr: "privateTab-command",
 	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
 	afterTabsButtonId: "privateTab-afterTabs-openNewPrivateTab",
+	showAfterTabsAttr: "privateTab-showButtonAfterTabs",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
@@ -1883,8 +1884,9 @@ var windowsObserver = {
 				break;
 			}
 			toolbar.insertBefore(tb, insPos);
-			if(newTabBtn && insPos && insPos.id == "new-tab-button")
+			if(newTabBtn && insPos && this.hasNodeAfter(tb, "new-tab-button"))
 				newTabBtn.parentNode.insertBefore(newTabBtn, tb2.nextSibling);
+			this.updateShowAfterTabs(tb, document);
 			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
 			return;
 		}
@@ -1893,15 +1895,48 @@ var windowsObserver = {
 			.palette
 			.appendChild(tb);
 	},
+	hasNodeAfter: function(node, id) {
+		for(var ns = node.nextSibling; ns; ns = ns.nextSibling)
+			if(ns.id == id)
+				return true;
+		return false;
+	},
+	updateShowAfterTabs: function(tbb, document) {
+		if(this.showAfterTabs(tbb))
+			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
+		else {
+			var tabsToolbar = document.getElementById("TabsToolbar");
+			if(tabsToolbar)
+				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
+		}
+	},
+	showAfterTabs: function(tbb, document) {
+		if(
+			!tbb
+			|| !tbb.parentNode
+			|| tbb.parentNode.id != "TabsToolbar"
+		)
+			return false;
+		for(var ps = tbb.previousSibling; ps; ps = ps.previousSibling) {
+			var id = ps.id;
+			if(id == "new-tab-button" || id == "tabmixScrollBox")
+				continue;
+			if(id == "tabbrowser-tabs")
+				break;
+			return false;
+		}
+		return true;
+	},
 	updateToolbars: function(e) {
 		var window = e.currentTarget;
 		var document = window.document;
 		var tbBtn = document.getElementById(this.toolbarButtonId);
+		this.updateShowAfterTabs(tbBtn, document);
 		if(!tbBtn)
 			return;
 		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
 		var newTabBtn = this.getNewTabButton(window);
-		if(tbBtn.nextSibling && tbBtn.nextSibling.id == "new-tab-button") {
+		if(this.hasNodeAfter(tbBtn, "new-tab-button")) {
 			_log('Move "New Tab" button after "New Private Tab" button');
 			newTabBtn.parentNode.insertBefore(newTabBtn, afterTabsBtn.nextSibling);
 		}
@@ -2934,45 +2969,20 @@ var windowsObserver = {
 				/*\n\
 				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
 				and also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
-				Includes "tabmixScrollBox" for Tab Mix Plus https://addons.mozilla.org/addon/tab-mix-plus/\n\
 				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,new-tab-button,' + this.toolbarButtonId + '"]\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					~ #' + this.toolbarButtonId + ',\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					~ #' + this.toolbarButtonId + ',\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + '"]\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					~ #' + this.toolbarButtonId + ',\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					~ #new-tab-button,\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + ',new-tab-button"]\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #new-tab-button {\n\
-					visibility: collapse !important;\n\
+					visibility: collapse;\n\
 				}\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,new-tab-button,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + '"]:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[currentset*="tabbrowser-tabs,' + this.toolbarButtonId + ',new-tab-button"]:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
-					.tabs-newtab-button[command="cmd_newNavigatorTab"],\n\
-				#TabsToolbar[currentset*="tabmixScrollBox,' + this.toolbarButtonId + ',new-tab-button"]:not([customizing="true"])\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
