@@ -1922,10 +1922,10 @@ var windowsObserver = {
 			if(id == "new-tab-button" || id == "tabmixScrollBox")
 				continue;
 			if(id == "tabbrowser-tabs")
-				break;
+				return true;
 			return false;
 		}
-		return true;
+		return false;
 	},
 	updateToolbars: function(e) {
 		var window = e.currentTarget;
