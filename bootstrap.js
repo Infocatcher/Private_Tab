@@ -2076,12 +2076,13 @@ var windowsObserver = {
 		if(mp.id != "placesContext")
 			return;
 
-		var nodes = mp.getElementsByAttribute("id", this.placesContextId);
-		var placesItem = nodes.length && nodes[0];
-		placesItem && placesItem.parentNode.removeChild(placesItem);
+		if(mp.getElementsByAttribute("id", this.placesContextId).length) {
+			_log("initPlacesContext(): already initialized");
+			return;
+		}
 
 		var document = mp.ownerDocument;
-		placesItem = this.createNode(document, "menuitem", this.placesContextId, {
+		var placesItem = this.createNode(document, "menuitem", this.placesContextId, {
 			label:     this.getLocalized("openPlacesInNewPrivateTab"),
 			accesskey: this.getLocalized("openPlacesInNewPrivateTabAccesskey"),
 			selection: "link",
@@ -2113,13 +2114,14 @@ var windowsObserver = {
 
 		// Easy way to remove added items from all documents :)
 		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode are already null
+		var _this = this;
 		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
 			if(e.originalTarget != mp)
 				return;
 			mp.removeEventListener(e.type, destroyPlacesContext, true);
 			window.removeEventListener("command", waitForTab, true);
 			window.setTimeout(function() {
-				mp.removeChild(placesItem);
+				_this.destroyNodes(mp, true);
 				delete mp._privateTabTriggerNode;
 				_log("Remove item from places context: " + document.documentURI);
 			}, 0);
