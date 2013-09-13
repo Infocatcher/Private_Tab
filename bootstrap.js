@@ -1599,8 +1599,33 @@ var windowsObserver = {
 		// <menuitem id="placesContext_openContainer:tabs">, <menuitem id="placesContext_openLinks:tabs">
 		var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
 		var pt = top.privateTab;
+		// Current tab may be reused
+		//~ todo: try use progress listener
+		var tab = top.gBrowser.selectedTab;
+		var browser = tab.linkedBrowser;
+		var loadURIWithFlags = browser.loadURIWithFlags;
+		var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
+		browser.loadURIWithFlags = function privateTabWrapper() {
+			_log("openPlacesInPrivateTabs(): browser.loadURIWithFlags() => toggleTabPrivate()");
+			pt.toggleTabPrivate(tab, true);
+			destroyLoadURIWrapper();
+			return loadURIWithFlags.apply(this, arguments);
+		};
+		function destroyLoadURIWrapper() {
+			if(loadURIWithFlagsDesc) {
+				_log("openPlacesInPrivateTabs(): remove wrapper for browser.loadURIWithFlags()");
+				Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
+				loadURIWithFlagsDesc = undefined;
+			}
+			else {
+				delete browser.loadURIWithFlags;
+			}
+		}
+		_log("openPlacesInPrivateTabs(): readyToOpenTabs()");
 		pt.readyToOpenTabs(true);
 		top.setTimeout(function() {
+			_log("openPlacesInPrivateTabs(): stopToOpenTabs()");
+			destroyLoadURIWrapper();
 			pt.stopToOpenTabs();
 		}, 0);
 		view.controller.openSelectionInTabs(e);
@@ -3093,8 +3118,10 @@ API.prototype = {
 		this.window = null;
 	},
 	handleEvent: function(e) {
-		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined)
+		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined) {
+			_log("Used readyToOpenTabs(), make tab private");
 			privateTabInternal.toggleTabPrivate(e.originalTarget || e.target, this._openNewTabsPrivate);
+		}
 	},
 	_onFirstPrivateTab: function(window, tab) {
 		this._onFirstPrivateTab = function() {};
