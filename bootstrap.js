@@ -1477,6 +1477,10 @@ var windowsObserver = {
 			this.toggleContextTabPrivate(window, shifted);
 		else if(cmd == "openPlacesInNewPrivateTab")
 			this.openPlaceInNewPrivateTab(window, shifted, e);
+		else if(cmd == "openPlacesInPrivateTabs")
+			this.openPlacesInPrivateTabs(window, e, false);
+		else if(cmd == "openPlacesContainerInPrivateTabs")
+			this.openPlacesInPrivateTabs(window, e, true);
 		else {
 			var caller = Components.stack.caller;
 			throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
@@ -1592,6 +1596,19 @@ var windowsObserver = {
 			loadInBackgroundPref: prefs.getPref(loadInBackgroundPref) != undefined && loadInBackgroundPref,
 			openAsChild: window.top == top.content
 		});
+	},
+	openPlacesInPrivateTabs: function(window, e, isContainer) {
+		var top = this.getTopWindow(window.top);
+		var document = window.document;
+		// See view-source:chrome://browser/content/places/placesOverlay.xul
+		// <menuitem id="placesContext_openContainer:tabs">, <menuitem id="placesContext_openLinks:tabs">
+		var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
+		var pt = top.privateTab;
+		pt.readyToOpenTabs(true);
+		top.setTimeout(function() {
+			pt.stopToOpenTabs();
+		}, 0);
+		view.controller.openSelectionInTabs(e);
 	},
 	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
 		var toggleInBackground = "toggleInBackground" in options && options.toggleInBackground;
@@ -1781,6 +1798,8 @@ var windowsObserver = {
 	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
 	tabScopeTipId: "privateTab-tabScope-isPrivateTabLabel",
 	placesContextId: "privateTab-places-openInNewPrivateTab",
+	placesContextMultipleId: "privateTab-places-openInPrivateTabs",
+	placesContextContainerId: "privateTab-places-openContainerInPrivateTabs",
 	getToolbox: function(window) {
 		return window.gNavToolbox || window.getNavToolbox();
 	},
@@ -2092,6 +2111,25 @@ var windowsObserver = {
 		var inNewTab = mp.getElementsByAttribute("id", "placesContext_open:newtab")[0];
 		this.insertNode(placesItem, mp, [inNewTab]);
 
+		var openInTabsLabel = this.getLocalized("openPlacesInPrivateTabs");
+		var openInTabsAccesskey = this.getLocalized("openPlacesInPrivateTabsAccesskey");
+		var placesItemMultiple = this.createNode(document, "menuitem", this.placesContextMultipleId, {
+			label:     openInTabsLabel,
+			accesskey: openInTabsAccesskey,
+			selection: "link",
+			selectiontype: "multiple",
+			"privateTab-command": "openPlacesInPrivateTabs"
+		});
+		this.insertNode(placesItemMultiple, mp, ["#placesContext_openLinks\\:tabs"]);
+		var placesItemContainer = this.createNode(document, "menuitem", this.placesContextContainerId, {
+			label:     openInTabsLabel,
+			accesskey: openInTabsAccesskey,
+			selection: "folder|host|query",
+			selectiontype: "single",
+			"privateTab-command": "openPlacesContainerInPrivateTabs"
+		});
+		this.insertNode(placesItemContainer, mp, ["#placesContext_openContainer\\:tabs"]);
+
 		var waitForTab = function(e) {
 			var trg = e.target;
 			_log(e.type + ": " + trg.nodeName + "#" + trg.id);
@@ -2123,7 +2161,7 @@ var windowsObserver = {
 			window.setTimeout(function() {
 				_this.destroyNodes(mp, true);
 				delete mp._privateTabTriggerNode;
-				_log("Remove item from places context: " + document.documentURI);
+				_log("Remove items from places context: " + document.documentURI);
 			}, 0);
 		}, true);
 	},
