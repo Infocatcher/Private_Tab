@@ -1469,21 +1469,16 @@ var windowsObserver = {
 	},
 	handleCommand: function(window, cmd, shifted, closeMenus, e) {
 		_log("handleCommand: " + cmd);
-		if(cmd == "openInNewPrivateTab")
-			this.openInNewPrivateTab(window, shifted);
-		else if(cmd == "openNewPrivateTab")
-			this.openNewPrivateTab(window);
-		else if(cmd == "toggleTabPrivate")
-			this.toggleContextTabPrivate(window, shifted);
-		else if(cmd == "openPlacesInNewPrivateTab")
-			this.openPlaceInNewPrivateTab(window, shifted, e);
-		else if(cmd == "openPlacesInPrivateTabs")
-			this.openPlacesInPrivateTabs(window, e, false);
-		else if(cmd == "openPlacesContainerInPrivateTabs")
-			this.openPlacesInPrivateTabs(window, e, true);
-		else {
-			var caller = Components.stack.caller;
-			throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
+		switch(cmd) {
+			case "openInNewPrivateTab":              this.openInNewPrivateTab(window, shifted);         break;
+			case "openNewPrivateTab":                this.openNewPrivateTab(window);                    break;
+			case "toggleTabPrivate":                 this.toggleContextTabPrivate(window, shifted);     break;
+			case "openPlacesInNewPrivateTab":        this.openPlaceInNewPrivateTab(window, shifted, e); break;
+			case "openPlacesInPrivateTabs":          this.openPlacesInPrivateTabs(window, e, false);    break;
+			case "openPlacesContainerInPrivateTabs": this.openPlacesInPrivateTabs(window, e, true);     break;
+			default:
+				var caller = Components.stack.caller;
+				throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
 		}
 	},
 	keypressHandler: function(e) {
