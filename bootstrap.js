@@ -2115,7 +2115,8 @@ var windowsObserver = {
 			selectiontype: "multiple",
 			"privateTab-command": "openPlacesInPrivateTabs"
 		});
-		this.insertNode(placesItemMultiple, mp, ["#placesContext_openLinks\\:tabs"]);
+		var linksInNewTabs = mp.getElementsByAttribute("id", "placesContext_openLinks:tabs")[0];
+		this.insertNode(placesItemMultiple, mp, [linksInNewTabs]);
 		var placesItemContainer = this.createNode(document, "menuitem", this.placesContextContainerId, {
 			label:     openInTabsLabel,
 			accesskey: openInTabsAccesskey,
@@ -2123,7 +2124,15 @@ var windowsObserver = {
 			selectiontype: "single",
 			"privateTab-command": "openPlacesContainerInPrivateTabs"
 		});
-		this.insertNode(placesItemContainer, mp, ["#placesContext_openContainer\\:tabs"]);
+		var containerInNewTabs = mp.getElementsByAttribute("id", "placesContext_openContainer:tabs")[0];
+		this.insertNode(placesItemContainer, mp, [containerInNewTabs]);
+		mp.addEventListener("popupshowing", function initItems(e) {
+			mp.removeEventListener(e.type, initItems, false);
+			if(linksInNewTabs && linksInNewTabs.disabled)
+				placesItemMultiple.disabled = true;
+			if(containerInNewTabs && containerInNewTabs.disabled)
+				placesItemContainer.disabled = true;
+		}, false);
 
 		var waitForTab = function(e) {
 			var trg = e.target;
