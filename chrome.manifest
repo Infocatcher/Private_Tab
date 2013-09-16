@@ -1,15 +1,22 @@
 content privatetab ./
 
 locale privatetab en-US locale/en-US/
+locale privatetab ar    locale/ar/
 locale privatetab ca    locale/ca/
 locale privatetab de    locale/de/
 locale privatetab el    locale/el/
 locale privatetab es    locale/es/
 locale privatetab et    locale/et/
 locale privatetab fr    locale/fr/
+locale privatetab hu    locale/hu/
+locale privatetab id    locale/id/
+locale privatetab it    locale/it/
 locale privatetab ja    locale/ja/
 locale privatetab pl    locale/pl/
+locale privatetab pt-BR locale/pt-BR/
 locale privatetab ru    locale/ru/
+locale privatetab sr    locale/sr/
+locale privatetab uk    locale/uk/
 locale privatetab vi    locale/vi/
 locale privatetab zh-CN locale/zh-CN/
 locale privatetab zh-TW locale/zh-TW/

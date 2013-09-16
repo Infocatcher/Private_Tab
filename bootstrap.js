@@ -40,6 +40,9 @@ var windowsObserver = {
 		_dbg = prefs.get("debug", false);
 		_dbgv = prefs.get("debug.verbose", false);
 
+		if(prefs.get("enablePrivateProtocol"))
+			this.initPrivateProtocol(reason);
+
 		this.patchPrivateBrowsingUtils(true);
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
@@ -54,6 +57,8 @@ var windowsObserver = {
 		if(!this.initialized)
 			return;
 		this.initialized = false;
+
+		this.destroyPrivateProtocol(reason);
 
 		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
@@ -91,6 +96,11 @@ var windowsObserver = {
 			this.destroyWindow(subject, WINDOW_CLOSED);
 		else if(topic == "sessionstore-state-write")
 			this.filterSession(subject);
+		else if(topic == "browser-delayed-startup-finished") {
+			_log(topic + " => setupJumpLists()");
+			this.setupJumpListsLazy(false);
+			this.setupJumpLists(true, true);
+		}
 	},
 
 	handleEvent: function(e) {
@@ -113,7 +123,8 @@ var windowsObserver = {
 			case "SSWindowStateReady":        this.setWindowBusy(e, false);  break;
 			case "close":
 			case "beforeunload":
-			case "SSWindowClosing":           this.windowClosingHandler(e);
+			case "SSWindowClosing":           this.windowClosingHandler(e);  break;
+			case "aftercustomization":        this.updateToolbars(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -165,8 +176,127 @@ var windowsObserver = {
 		window.removeEventListener("beforeunload", this, false);
 	},
 
+	initPrivateProtocol: function(reason) {
+		if("privateProtocol" in this)
+			return;
+		var tmp = {};
+		Services.scriptloader.loadSubScript("chrome://privatetab/content/protocol.js", tmp, "UTF-8");
+		var privateProtocol = this.privateProtocol = tmp.privateProtocol;
+		privateProtocol.init();
+
+		if(prefs.get("showItemInTaskBarJumpList")) {
+			if(reason == APP_STARTUP)
+				this.setupJumpListsLazy(true);
+			else
+				this.setupJumpLists(true);
+		}
+	},
+	destroyPrivateProtocol: function(reason) {
+		if(!("privateProtocol" in this))
+			return;
+		this.privateProtocol.destroy();
+		delete this.privateProtocol;
+
+		if(reason != APP_SHUTDOWN && prefs.get("showItemInTaskBarJumpList")) {
+			this.setupJumpListsLazy(false);
+			this.setupJumpLists(false);
+		}
+	},
+
+	get hasJumpLists() {
+		delete this.hasJumpLists;
+		return this.hasJumpLists = "@mozilla.org/windows-taskbar;1" in Components.classes
+			&& Components.classes["@mozilla.org/windows-taskbar;1"]
+				.getService(Components.interfaces.nsIWinTaskbar)
+				.available;
+	},
+	_jumpListsInitialized: false,
+	setupJumpLists: function(init, lazy) {
+		if(
+			!this.hasJumpLists
+			|| !init ^ this._jumpListsInitialized
+		)
+			return;
+		this._jumpListsInitialized = init;
+
+		var global = Components.utils.import("resource:///modules/WindowsJumpLists.jsm", {});
+		if(!("tasksCfg" in global)) {
+			_log('setupJumpLists() failed: "tasksCfg" not found in WindowsJumpLists.jsm');
+			return;
+		}
+		var tasksCfg = global.tasksCfg;
+		var taskArgs = "-new-tab private:///#about:blank";
+		function getEntryIndex(args) {
+			for(var i = 0, l = tasksCfg.length; i < l; ++i) {
+				var entry = tasksCfg[i];
+				if(entry.args == args)
+					return i;
+			}
+			return -1;
+		}
+		if(init) {
+			var _getString = this.getLocalized.bind(this);
+			var sm = this.isSeaMonkey ? "SM" : "";
+			var ptEntry = {
+				get title()       _getString("taskBarOpenNewPrivateTab" + sm),
+				get description() _getString("taskBarOpenNewPrivateTabDesc" + sm),
+				args:             taskArgs,
+				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
+				open:             true,
+				close:            true
+			};
+			var i = getEntryIndex("-new-tab about:blank");
+			if(i != -1) {
+				tasksCfg.splice(i + 1, 0, ptEntry);
+				_log('setupJumpLists(): add new item after "Open new tab"');
+			}
+			else {
+				tasksCfg.push(ptEntry);
+				_log("setupJumpLists(): add new item at end");
+			}
+		}
+		else {
+			var i = getEntryIndex(taskArgs);
+			if(i != -1) {
+				tasksCfg.splice(i, 1);
+				_log("setupJumpLists(): remove item");
+			}
+			else {
+				_log("setupJumpLists(): item not found and can't be removed");
+			}
+		}
+
+		var WinTaskbarJumpList = global.WinTaskbarJumpList;
+		var pending = WinTaskbarJumpList._pendingStatements;
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		var stopWait = Date.now() + 5e3;
+		timer.init(function() {
+			for(var statement in pending) {
+				if(Date.now() > stopWait)
+					timer.cancel();
+				return;
+			}
+			timer.cancel();
+			WinTaskbarJumpList.update();
+		}.bind(this), lazy ? 150 : 50, timer.TYPE_REPEATING_SLACK);
+	},
+	_hasDelayedStartupObserver: false,
+	setupJumpListsLazy: function(init) {
+		if(!init ^ this._hasDelayedStartupObserver)
+			return;
+		this._hasDelayedStartupObserver = init;
+		// Like _onFirstWindowLoaded() from resource://app/components/nsBrowserGlue.js
+		if(init)
+			Services.obs.addObserver(this, "browser-delayed-startup-finished", false);
+		else
+			Services.obs.removeObserver(this, "browser-delayed-startup-finished");
+	},
+
 	initWindow: function(window, reason) {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window)) {
+			if(this.isViewSourceWindow(window))
+				this.setViewSourcePrivacy(window);
 			delete window.__privateTabOpener;
 			return;
 		}
@@ -210,7 +340,10 @@ var windowsObserver = {
 			this.updateWindowTitle(gBrowser);
 		}.bind(this), 0);
 
-		window.addEventListener("TabOpen", this, false);
+		// See https://github.com/Infocatcher/Private_Tab/issues/83
+		// It's better to handle "TabOpen" before other extensions, but after our waitForTab()
+		// with window.addEventListener("TabOpen", ..., true);
+		document.addEventListener("TabOpen", this, true);
 		window.addEventListener("SSTabRestoring", this, false);
 		window.addEventListener("TabSelect", this, false);
 		window.addEventListener("TabClose", this, true);
@@ -239,11 +372,11 @@ var windowsObserver = {
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 		_log("destroyWindow()");
+		var document = window.document;
 		var gBrowser = window.gBrowser;
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
-			var document = window.document;
 			var isPrivateWindow = this.isPrivateWindow(window);
 			Array.forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
@@ -261,12 +394,13 @@ var windowsObserver = {
 		this.patchBrowsers(gBrowser, false, !force);
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
 		this.patchWarnAboutClosingWindow(window, false, !force);
-		this.patchTabBrowserLoadURI(window, gBrowser, false, false, !force);
+		if(!prefs.get("allowOpenExternalLinksInPrivateTabs"))
+			this.patchBrowserLoadURI(window, false, !force);
 		this.patchTabIcons(window, false, !force);
 		this.patchBrowserThumbnails(window, false, !force);
 
 		this.unwatchAppButton(window);
-		window.removeEventListener("TabOpen", this, false);
+		document.removeEventListener("TabOpen", this, true);
 		window.removeEventListener("SSTabRestoring", this, false);
 		window.removeEventListener("TabSelect", this, false);
 		window.removeEventListener("dragstart", this, true);
@@ -276,6 +410,7 @@ var windowsObserver = {
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
+		window.removeEventListener("aftercustomization", this, false);
 		if(reason != WINDOW_CLOSED) {
 			// See resource:///modules/sessionstore/SessionStore.jsm
 			// "domwindowclosed" => onClose() => "SSWindowClosing"
@@ -311,6 +446,75 @@ var windowsObserver = {
 		var winType = document.documentElement.getAttribute("windowtype");
 		return winType == "navigator:browser"
 			|| winType == "navigator:private"; // SeaMonkey >= 2.19a1 (2013-03-27)
+	},
+	isViewSourceWindow: function(window) {
+		return window.location.href == "chrome://global/content/viewSource.xul";
+	},
+	setViewSourcePrivacy: function(window) {
+		var args = window.arguments;
+		var vsURI      = args && args[0];
+		var vsPageDesc = args && args[2];
+		if(!vsURI || !vsPageDesc) {
+			_log(
+				"setViewSourcePrivacy(): view source window was opened with unusable arguments:\n"
+				 + (args && Array.map(args, String).join("\n"))
+			);
+			return;
+		}
+		var opener = window.opener || window.__privateTabOpener;
+		if(
+			!opener
+			|| opener.closed
+			|| !opener.gBrowser
+			|| !opener.gBrowser.browsers
+		) {
+			_log("setViewSourcePrivacy(): can't get (or wrong) opener window");
+			return;
+		}
+		vsPageDesc instanceof Components.interfaces.nsISHEntry;
+		opener.gBrowser.browsers.some(function(browser, i) {
+			var content = getSourceWindow(browser.contentWindow);
+			if(!content)
+				return false;
+			_log(
+				"setViewSourcePrivacy(): found source tab #" + i + ":\n" + browser.currentURI.spec
+				+ (content == browser.contentWindow ? "" : "\n=> " + content.location.href)
+			);
+			var isPrivate = this.isPrivateWindow(content);
+			var privacyContext = this.getPrivacyContext(window);
+			if(privacyContext.usePrivateBrowsing != isPrivate) {
+				_log("setViewSourcePrivacy(): make window " + (isPrivate ? "private" : "not private"));
+				privacyContext.usePrivateBrowsing = isPrivate;
+			}
+			return true;
+		}, this);
+		function getSourceWindow(win) {
+			if(isSourceWindow(win))
+				return win;
+			var frames = win.frames;
+			if(frames) for(var i = 0, l = frames.length; i < l; ++i) {
+				var sourceWin = getSourceWindow(frames[i]);
+				if(sourceWin)
+					return sourceWin;
+			}
+			return null;
+		}
+		function isSourceWindow(win) {
+			try {
+				var pageDesc = win
+					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIWebNavigation)
+					.QueryInterface(Components.interfaces.nsIWebPageDescriptor)
+					.currentDescriptor;
+			}
+			catch(e) { // Throws for not yet loaded (pending) tabs
+			}
+			return pageDesc
+				&& pageDesc instanceof Components.interfaces.nsISHEntry
+				&& pageDesc.ID && pageDesc.ID == vsPageDesc.ID
+				&& pageDesc.docshellID && pageDesc.docshellID == vsPageDesc.docshellID
+				&& win.location.href == vsURI;
+		}
 	},
 	inheritWindowState: function(window) {
 		var args = window.arguments || undefined;
@@ -394,8 +598,19 @@ var windowsObserver = {
 		}
 		else if(pName == "allowOpenExternalLinksInPrivateTabs") {
 			this.windows.forEach(function(window) {
-				this.patchTabBrowserLoadURI(window, window.gBrowser, !pVal, true);
+				this.patchBrowserLoadURI(window, !pVal);
 			}, this);
+		}
+		else if(pName == "enablePrivateProtocol") {
+			if(pVal)
+				this.initPrivateProtocol();
+			else
+				this.destroyPrivateProtocol();
+			this.reloadStyles();
+		}
+		else if(pName == "showItemInTaskBarJumpList") {
+			if(prefs.get("enablePrivateProtocol"))
+				this.setupJumpLists(pVal);
 		}
 		else if(pName == "debug")
 			_dbg = pVal;
@@ -467,40 +682,59 @@ var windowsObserver = {
 			forceDestroy
 		);
 	},
-	ensureTabBrowserLoadURIPatched: function(window) {
-		if(
-			!prefs.get("allowOpenExternalLinksInPrivateTabs")
-			&& !patcher.isWrapped(window.gBrowser, "gBrowser.loadURIWithFlags")
-		)
-			this.patchTabBrowserLoadURI(window, window.gBrowser, true, true);
-	},
-	patchTabBrowserLoadURI: function(window, gBrowser, applyPatch, skipCheck, forceDestroy) {
-		if(!skipCheck && prefs.get("allowOpenExternalLinksInPrivateTabs"))
+	patchBrowserLoadURI: function(window, applyPatch, forceDestroy) {
+		var gBrowser = window.gBrowser;
+		var browser = gBrowser.browsers && gBrowser.browsers[0];
+		if(!browser) {
+			Components.utils.reportError(LOG_PREFIX + "!!! Can't find browser to patch browser.loadURIWithFlags()");
 			return;
-
+		}
+		var browserProto = Object.getPrototypeOf(browser);
+		if(!browserProto || !("loadURIWithFlags" in browserProto)) {
+			_log("Can't patch browser: no loadURIWithFlags() method");
+			return;
+		}
 		if(applyPatch) {
 			var _this = this;
 			patcher.wrapFunction(
-				gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags",
+				browserProto, "loadURIWithFlags", "browser.loadURIWithFlags",
 				function before(aURI, aFlags, aReferrerURI, aCharset, aPostData) {
 					if(
 						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
-						&& _this.isPrivateTab(this.selectedTab)
+						&& _this.isPrivateWindow(this.contentWindow)
 					) {
-						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
 						// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
-						var tab = this.loadOneTab(aURI || "about:blank", {
+						var stack = new Error().stack;
+						_dbgv && _log("loadURIWithFlags(), stack:\n" + stack);
+						if(
+							stack.indexOf("addTab@chrome:") != -1
+							|| stack.indexOf("loadOneTab@chrome:") != -1
+						) {
+							var tab = _this.getTabForBrowser(this);
+							if(tab) {
+								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => make tab not private");
+								_this.toggleTabPrivate(tab, false);
+							}
+							else {
+								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag, tab not found!");
+							}
+							return false;
+						}
+						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
+						_this.readyToOpenTab(window, false);
+						var tab = gBrowser.loadOneTab(aURI || "about:blank", {
 							referrerURI: aReferrerURI,
 							fromExternal: true,
 							inBackground: prefs.getPref("browser.tabs.loadDivertedInBackground")
 						});
 						return !!tab;
 					}
+					return false;
 				}
 			);
 		}
 		else {
-			patcher.unwrapFunction(gBrowser, "loadURIWithFlags", "gBrowser.loadURIWithFlags", forceDestroy);
+			patcher.unwrapFunction(browserProto, "loadURIWithFlags", "browser.loadURIWithFlags", forceDestroy);
 		}
 	},
 	patchBrowsers: function(gBrowser, applyPatch, forceDestroy) {
@@ -681,7 +915,7 @@ var windowsObserver = {
 				try {
 					var browser = this.linkedBrowser;
 					var doc = browser.contentDocument;
-					if(doc instanceof doc.defaultView.ImageDocument) {
+					if(doc instanceof Components.interfaces.nsIImageDocument) {
 						// Will use base64 representation for icons of image documents
 						var req = doc.imageRequest;
 						if(req && req.image) {
@@ -732,27 +966,15 @@ var windowsObserver = {
 
 	tabOpenHandler: function(e) {
 		var tab = e.originalTarget || e.target;
+		var window = tab.ownerDocument.defaultView;
 		if("_privateTabIgnore" in tab) {
-			delete tab._privateTabIgnore;
+			window.setTimeout(function() { // Wait for possible following "SSTabRestoring"
+				delete tab._privateTabIgnore;
+			}, 0);
 			return;
 		}
 		_dbgv && _log(e.type + ":\n" + new Error().stack);
-		//_dbgv && _log(e.type + ": Components.stack:\n" + JSON.stringify(Components.stack, null, "\t"));
-		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) {
-			var err = new Error();
-			var curFile = "@" + err.fileName + ":";
-			var stack = err.stack.trimRight().split("\n");
-			if( // this.handleEvent() => this.tabOpenHandler()
-				stack.length == 2 && stack.every(function(line) {
-					return line.indexOf(curFile) != -1;
-				})
-			) {
-				_log("Looks like tab, opened from external application, ignore");
-				return;
-			}
-		}
 		var gBrowser = this.getTabBrowser(tab);
-		var window = tab.ownerDocument.defaultView;
 		//~ todo: try get real tab owner!
 		var isPrivate;
 		if(!this.isEmptyTab(tab, gBrowser)) {
@@ -769,15 +991,30 @@ var windowsObserver = {
 			_log("Make new empty tab private");
 			isPrivate = true;
 		}
+		var tabLabel = tab.getAttribute("label") || "";
 		_log(
-			"Tab opened: " + (tab.getAttribute("label") || "").substr(0, 256)
+			"Tab opened: " + tabLabel.substr(0, 256)
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
 			this.toggleTabPrivate(tab, isPrivate);
 		else {
 			window.setTimeout(function() {
-				this.setTabState(tab);
+				if(tab.parentNode) // Handle only not yet closed tabs
+					this.setTabState(tab);
+			}.bind(this), 0);
+		}
+
+		if( // Focus URL bar, if opened empty private tab becomes selected
+			tabLabel == "private:///#about:blank"
+			|| tabLabel == "private:///#" + window.BROWSER_NEW_TAB_URL
+		) {
+			window.setTimeout(function() {
+				if(tab.getAttribute("selected") != "true")
+					return;
+				if("gURLBar" in window)
+					window.gURLBar.value = "";
+				this.focusAndSelectUrlBar(window);
 			}.bind(this), 0);
 		}
 	},
@@ -785,6 +1022,7 @@ var windowsObserver = {
 		var tab = e.originalTarget || e.target;
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
+			this.setTabState(tab); // Restore private attribute
 			return;
 		}
 		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
@@ -817,8 +1055,14 @@ var windowsObserver = {
 			&& this.isLastPrivate(tab)
 		) {
 			_log("Closed last private tab");
-			if(this.forbidCloseLastPrivate())
-				this.openNewPrivateTab(window);
+			if(this.forbidCloseLastPrivate()) {
+				var pos = "_tPos" in tab
+					? tab._tPos
+					: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
+				this.openNewPrivateTab(window, function(newTab) {
+					newTab && window.gBrowser.moveTabTo(newTab, pos);
+				});
+			}
 		}
 	},
 	cleanupClosedTab: function(e) {
@@ -988,7 +1232,7 @@ var windowsObserver = {
 		window.setTimeout(function() {
 			// Someone may change "usePrivateBrowsing"...
 			// It's good to show real state
-			if(tab.parentNode) // Ignore removed tabs
+			if(tab.parentNode) // Handle only not yet closed tabs
 				this.setTabState(tab);
 		}.bind(this), 50);
 	},
@@ -1169,6 +1413,17 @@ var windowsObserver = {
 		var tab = document.tooltipNode;
 		var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
 		var label = document.getElementById(this.tabTipId);
+		if(!label && !hide) {
+			var tabTip = this.getTabTooltip(document);
+			if(tabTip && "_privateTabLabel" in tabTip) {
+				label = tabTip._privateTabLabel;
+				delete tabTip._privateTabLabel;
+				tabTip.insertBefore(
+					label,
+					tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
+				);
+			}
+		}
 		if(label)
 			label.hidden = hide;
 	},
@@ -1214,17 +1469,16 @@ var windowsObserver = {
 	},
 	handleCommand: function(window, cmd, shifted, closeMenus, e) {
 		_log("handleCommand: " + cmd);
-		if(cmd == "openInNewPrivateTab")
-			this.openInNewPrivateTab(window, shifted);
-		else if(cmd == "openNewPrivateTab")
-			this.openNewPrivateTab(window);
-		else if(cmd == "toggleTabPrivate")
-			this.toggleContextTabPrivate(window);
-		else if(cmd == "openPlacesInNewPrivateTab")
-			this.openPlaceInNewPrivateTab(window, shifted, e);
-		else {
-			var caller = Components.stack.caller;
-			throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
+		switch(cmd) {
+			case "openInNewPrivateTab":              this.openInNewPrivateTab(window, shifted);         break;
+			case "openNewPrivateTab":                this.openNewPrivateTab(window);                    break;
+			case "toggleTabPrivate":                 this.toggleContextTabPrivate(window, shifted);     break;
+			case "openPlacesInNewPrivateTab":        this.openPlaceInNewPrivateTab(window, shifted, e); break;
+			case "openPlacesInPrivateTabs":          this.openPlacesInPrivateTabs(window, e, false);    break;
+			case "openPlacesContainerInPrivateTabs": this.openPlacesInPrivateTabs(window, e, true);     break;
+			default:
+				var caller = Components.stack.caller;
+				throw new Error(LOG_PREFIX + 'Unknown command: "' + cmd + '"', caller.filename, caller.lineNumber);
 		}
 	},
 	keypressHandler: function(e) {
@@ -1338,6 +1592,44 @@ var windowsObserver = {
 			openAsChild: window.top == top.content
 		});
 	},
+	openPlacesInPrivateTabs: function(window, e, isContainer) {
+		var top = this.getTopWindow(window.top);
+		var document = window.document;
+		// See view-source:chrome://browser/content/places/placesOverlay.xul
+		// <menuitem id="placesContext_openContainer:tabs">, <menuitem id="placesContext_openLinks:tabs">
+		var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
+		var pt = top.privateTab;
+		// Current tab may be reused
+		//~ todo: try use progress listener
+		var tab = top.gBrowser.selectedTab;
+		var browser = tab.linkedBrowser;
+		var loadURIWithFlags = browser.loadURIWithFlags;
+		var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
+		browser.loadURIWithFlags = function privateTabWrapper() {
+			_log("openPlacesInPrivateTabs(): browser.loadURIWithFlags() => toggleTabPrivate()");
+			pt.toggleTabPrivate(tab, true);
+			destroyLoadURIWrapper();
+			return loadURIWithFlags.apply(this, arguments);
+		};
+		function destroyLoadURIWrapper() {
+			if(loadURIWithFlagsDesc) {
+				_log("openPlacesInPrivateTabs(): remove wrapper for browser.loadURIWithFlags()");
+				Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
+				loadURIWithFlagsDesc = undefined;
+			}
+			else {
+				delete browser.loadURIWithFlags;
+			}
+		}
+		_log("openPlacesInPrivateTabs(): readyToOpenTabs()");
+		pt.readyToOpenTabs(true);
+		top.setTimeout(function() {
+			_log("openPlacesInPrivateTabs(): stopToOpenTabs()");
+			destroyLoadURIWrapper();
+			pt.stopToOpenTabs();
+		}, 0);
+		view.controller.openSelectionInTabs(e);
+	},
 	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
 		var toggleInBackground = "toggleInBackground" in options && options.toggleInBackground;
 		var loadInBackgroundPref = options.loadInBackgroundPref || "browser.tabs.loadInBackground";
@@ -1351,6 +1643,7 @@ var windowsObserver = {
 			window = w;
 		}
 		var gBrowser = window.gBrowser;
+		var ownerTab;
 
 		if(openAsChild) {
 			// http://piro.sakura.ne.jp/xul/_treestyletab.html.en#api
@@ -1360,6 +1653,21 @@ var windowsObserver = {
 			// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
 			if("tabkit" in window)
 				window.tabkit.addingTab("related");
+			if(sourceDocument && prefs.get("rememberOwnerTab")) {
+				var sourceWindow = sourceDocument.defaultView.top;
+				if("_getTabForContentWindow" in gBrowser)
+					ownerTab = gBrowser._getTabForContentWindow(sourceWindow);
+				else { // SeaMonkey
+					var browsers = gBrowser.browsers;
+					for(var i = 0, l = browsers.length; i < l; ++i) {
+						if(browsers[i].contentWindow == sourceWindow) {
+							ownerTab = gBrowser.tabs[i];
+							break;
+						}
+					}
+				}
+				_log("Owner tab: " + (ownerTab && (ownerTab.getAttribute("label") || "").substr(0, 255)));
+			}
 		}
 
 		var referer = null;
@@ -1372,11 +1680,11 @@ var windowsObserver = {
 				referer = sourceDocument.documentURIObject;
 		}
 
-		this.readyToOpenPrivateTab(window);
+		this.readyToOpenTab(window, true);
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: referer,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
-			ownerTab: gBrowser.selectedTab,
+			ownerTab: ownerTab,
 			relatedToCurrent: relatedToCurrent
 		});
 
@@ -1394,29 +1702,40 @@ var windowsObserver = {
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab", openAsChild);
 		return tab;
 	},
-	openNewPrivateTab: function(window) {
+	openNewPrivateTab: function(window, callback) {
 		var w = this.getNotPopupWindow(window);
 		if(w && w != window) {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
-		var gBrowser = window.gBrowser;
-		this.readyToOpenPrivateTab(window);
-		var tab = gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
+		this.readyToOpenTab(window, true, function(tab) {
+			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
+			callback && callback(tab);
+		}.bind(this));
+		if("BrowserOpenTab" in window)
+			window.BrowserOpenTab();
+		else {
+			_log("openNewPrivateTab(): BrowserOpenTab() not found, will open manually");
+			var gBrowser = window.gBrowser;
+			gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
+			this.focusAndSelectUrlBar(window);
+		}
+	},
+	focusAndSelectUrlBar: function(window) {
 		if("focusAndSelectUrlBar" in window)
 			window.setTimeout(window.focusAndSelectUrlBar, 0);
 		else if("WindowFocusTimerCallback" in window) // SeaMonkey
 			window.setTimeout(window.WindowFocusTimerCallback, 0, window.gURLBar);
 
-		this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
-		return tab;
 	},
-	readyToOpenPrivateTab: function(window) {
+	readyToOpenTab: function(window, isPrivate, callback) {
 		this.waitForTab(window, function(tab) {
-			if(!tab)
-				return;
-			tab._privateTabIgnore = true;
-			this.toggleTabPrivate(tab, true);
+			if(tab) {
+				_log("readyToOpenTab(): make tab " + (isPrivate ? "private" : "not private"));
+				tab._privateTabIgnore = true;
+				this.toggleTabPrivate(tab, isPrivate);
+			}
+			callback && callback(tab);
 		}.bind(this));
 	},
 	waitForTab: function(window, callback) {
@@ -1459,16 +1778,26 @@ var windowsObserver = {
 		}
 		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
-	toggleContextTabPrivate: function(window) {
+	toggleContextTabPrivate: function(window, toggleReload) {
 		var tab = this.getContextTab(window, true)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
 		if(this.isPendingTab(tab))
 			this.fixTabState(tab, isPrivate);
-		else if(prefs.get("toggleTabPrivateAutoReload")) {
-			var browser = tab.linkedBrowser;
-			if(!browser.webProgress.isLoadingDocument)
-				tab.linkedBrowser.reload();
+		else {
+			var autoReload = prefs.get("toggleTabPrivateAutoReload");
+			if(toggleReload)
+				autoReload = !autoReload;
+			if(autoReload) {
+				var browser = tab.linkedBrowser;
+				if(!browser.webProgress.isLoadingDocument) {
+					var typed = browser.userTypedValue;
+					browser.reload();
+					if(typed != null) window.setTimeout(function() {
+						browser.userTypedValue = typed;
+					}, 0);
+				}
+			}
 		}
 		if(tab == this.getTabBrowser(tab).selectedTab) {
 			this.updateTabContext(window);
@@ -1480,6 +1809,8 @@ var windowsObserver = {
 
 	cmdAttr: "privateTab-command",
 	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
+	afterTabsButtonId: "privateTab-afterTabs-openNewPrivateTab",
+	showAfterTabsAttr: "privateTab-showButtonAfterTabs",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
@@ -1487,6 +1818,8 @@ var windowsObserver = {
 	tabTipId: "privateTab-tooltip-isPrivateTabLabel",
 	tabScopeTipId: "privateTab-tabScope-isPrivateTabLabel",
 	placesContextId: "privateTab-places-openInNewPrivateTab",
+	placesContextMultipleId: "privateTab-places-openInPrivateTabs",
+	placesContextContainerId: "privateTab-places-openContainerInPrivateTabs",
 	getToolbox: function(window) {
 		return window.gNavToolbox || window.getNavToolbox();
 	},
@@ -1495,6 +1828,13 @@ var windowsObserver = {
 			.palette
 			.getElementsByAttribute("id", this.toolbarButtonId);
 		return btns.length && btns[0];
+	},
+	getNewTabButton: function(window) {
+		return window.document.getAnonymousElementByAttribute(
+			window.gBrowser.tabContainer,
+			"command",
+			"cmd_newNavigatorTab"
+		);
 	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
@@ -1515,6 +1855,7 @@ var windowsObserver = {
 		return tabTip;
 	},
 	initToolbarButton: function(document) {
+		var window = document.defaultView;
 		var tbId = this.toolbarButtonId;
 		var tb = this.createNode(document, "toolbarbutton", tbId, {
 			id: tbId,
@@ -1524,6 +1865,16 @@ var windowsObserver = {
 			tooltiptext: this.getLocalized("openNewPrivateTabTip"),
 			"privateTab-command": "openNewPrivateTab"
 		});
+
+		var newTabBtn = this.getNewTabButton(window);
+		if(newTabBtn) {
+			var tb2 = tb.cloneNode(true);
+			tb2.id = this.afterTabsButtonId;
+			tb2.className = "tabs-newtab-button";
+			this.initNodeEvents(tb2);
+			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
+			window.addEventListener("aftercustomization", this, false);
+		}
 
 		var toolbars = document.getElementsByTagName("toolbar");
 		function isSep(id) {
@@ -1572,13 +1923,66 @@ var windowsObserver = {
 				break;
 			}
 			toolbar.insertBefore(tb, insPos);
+			if(newTabBtn && insPos && this.hasNodeAfter(tb, "new-tab-button"))
+				newTabBtn.parentNode.insertBefore(newTabBtn, tb2.nextSibling);
+			this.updateShowAfterTabs(tb, document);
 			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
 			return;
 		}
 
-		this.getToolbox(document.defaultView)
+		this.getToolbox(window)
 			.palette
 			.appendChild(tb);
+	},
+	hasNodeAfter: function(node, id) {
+		for(var ns = node.nextSibling; ns; ns = ns.nextSibling)
+			if(ns.id == id)
+				return true;
+		return false;
+	},
+	updateShowAfterTabs: function(tbb, document) {
+		if(this.showAfterTabs(tbb))
+			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
+		else {
+			var tabsToolbar = document.getElementById("TabsToolbar");
+			if(tabsToolbar)
+				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
+		}
+	},
+	showAfterTabs: function(tbb, document) {
+		if(
+			!tbb
+			|| !tbb.parentNode
+			|| tbb.parentNode.id != "TabsToolbar"
+		)
+			return false;
+		for(var ps = tbb.previousSibling; ps; ps = ps.previousSibling) {
+			var id = ps.id;
+			if(id == "new-tab-button" || id == "tabmixScrollBox")
+				continue;
+			if(id == "tabbrowser-tabs")
+				return true;
+			return false;
+		}
+		return false;
+	},
+	updateToolbars: function(e) {
+		var window = e.currentTarget;
+		var document = window.document;
+		var tbBtn = document.getElementById(this.toolbarButtonId);
+		this.updateShowAfterTabs(tbBtn, document);
+		if(!tbBtn)
+			return;
+		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
+		var newTabBtn = this.getNewTabButton(window);
+		if(this.hasNodeAfter(tbBtn, "new-tab-button")) {
+			_log('Move "New Tab" button after "New Private Tab" button');
+			newTabBtn.parentNode.insertBefore(newTabBtn, afterTabsBtn.nextSibling);
+		}
+		else {
+			_log('Move "New Private Tab" button after "New Tab" button');
+			newTabBtn.parentNode.insertBefore(afterTabsBtn, newTabBtn.nextSibling);
+		}
 	},
 	initControls: function(document) {
 		var window = document.defaultView;
@@ -1646,16 +2050,17 @@ var windowsObserver = {
 			tabTipLabel.setAttribute("value", this.getLocalized("privateTabTip"));
 			tabTipLabel.setAttribute("privateTab-command", "<nothing>");
 			tabTipLabel.hidden = true;
-			tabTip.insertBefore(
-				tabTipLabel,
-				tabTip.firstChild != tabTip.lastChild ? tabTip.lastChild : null
-			);
+			tabTip._privateTabLabel = tabTipLabel; // => updateTabTooltip() => tabTip.insertBefore()
 
 			var tabScope = document.getElementById("tabscope-popup");
 			if(tabScope && "TabScope" in window && "_updateTitle" in window.TabScope) {
+				var tsTitle = document.getElementById("tabscope-title");
+				var tsContainer = tsTitle && tsTitle.parentNode
+					|| document.getElementById("tabscope-container")
+					|| tabScope;
 				var tsTipLabel = tabTipLabel.cloneNode(true);
 				tsTipLabel.id = this.tabScopeTipId;
-				tabScope.appendChild(tsTipLabel);
+				tsContainer.appendChild(tsTipLabel);
 				var _this = this;
 				patcher.wrapFunction(
 					window.TabScope, "_updateTitle", "TabScope._updateTitle",
@@ -1710,12 +2115,13 @@ var windowsObserver = {
 		if(mp.id != "placesContext")
 			return;
 
-		var nodes = mp.getElementsByAttribute("id", this.placesContextId);
-		var placesItem = nodes.length && nodes[0];
-		placesItem && placesItem.parentNode.removeChild(placesItem);
+		if(mp.getElementsByAttribute("id", this.placesContextId).length) {
+			_log("initPlacesContext(): already initialized");
+			return;
+		}
 
 		var document = mp.ownerDocument;
-		placesItem = this.createNode(document, "menuitem", this.placesContextId, {
+		var placesItem = this.createNode(document, "menuitem", this.placesContextId, {
 			label:     this.getLocalized("openPlacesInNewPrivateTab"),
 			accesskey: this.getLocalized("openPlacesInNewPrivateTabAccesskey"),
 			selection: "link",
@@ -1724,6 +2130,34 @@ var windowsObserver = {
 		});
 		var inNewTab = mp.getElementsByAttribute("id", "placesContext_open:newtab")[0];
 		this.insertNode(placesItem, mp, [inNewTab]);
+
+		var openInTabsLabel = this.getLocalized("openPlacesInPrivateTabs");
+		var openInTabsAccesskey = this.getLocalized("openPlacesInPrivateTabsAccesskey");
+		var placesItemMultiple = this.createNode(document, "menuitem", this.placesContextMultipleId, {
+			label:     openInTabsLabel,
+			accesskey: openInTabsAccesskey,
+			selection: "link",
+			selectiontype: "multiple",
+			"privateTab-command": "openPlacesInPrivateTabs"
+		});
+		var linksInNewTabs = mp.getElementsByAttribute("id", "placesContext_openLinks:tabs")[0];
+		this.insertNode(placesItemMultiple, mp, [linksInNewTabs]);
+		var placesItemContainer = this.createNode(document, "menuitem", this.placesContextContainerId, {
+			label:     openInTabsLabel,
+			accesskey: openInTabsAccesskey,
+			selection: "folder|host|query",
+			selectiontype: "single",
+			"privateTab-command": "openPlacesContainerInPrivateTabs"
+		});
+		var containerInNewTabs = mp.getElementsByAttribute("id", "placesContext_openContainer:tabs")[0];
+		this.insertNode(placesItemContainer, mp, [containerInNewTabs]);
+		mp.addEventListener("popupshowing", function initItems(e) {
+			mp.removeEventListener(e.type, initItems, false);
+			if(linksInNewTabs && linksInNewTabs.disabled)
+				placesItemMultiple.disabled = true;
+			if(containerInNewTabs && containerInNewTabs.disabled)
+				placesItemContainer.disabled = true;
+		}, false);
 
 		var waitForTab = function(e) {
 			var trg = e.target;
@@ -1747,15 +2181,16 @@ var windowsObserver = {
 
 		// Easy way to remove added items from all documents :)
 		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode are already null
+		var _this = this;
 		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
 			if(e.originalTarget != mp)
 				return;
 			mp.removeEventListener(e.type, destroyPlacesContext, true);
 			window.removeEventListener("command", waitForTab, true);
 			window.setTimeout(function() {
-				mp.removeChild(placesItem);
+				_this.destroyNodes(mp, true);
 				delete mp._privateTabTriggerNode;
-				_log("Remove item from places context: " + document.documentURI);
+				_log("Remove items from places context: " + document.documentURI);
 			}, 0);
 		}, true);
 	},
@@ -1764,6 +2199,7 @@ var windowsObserver = {
 		var document = window.document;
 		this.destroyNodes(document, force);
 		this.destroyNode(this.getPaletteButton(window), force);
+		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
@@ -1777,7 +2213,10 @@ var windowsObserver = {
 			this.destroyNodes(tabContext, force);
 
 		var tabTip = this.getTabTooltip(document);
-		tabTip && tabTip.removeEventListener("popupshowing", this, false);
+		if(tabTip) {
+			delete tabTip._privateTabLabel;
+			tabTip.removeEventListener("popupshowing", this, false);
+		}
 		var tabTipLabel = document.getElementById(this.tabTipId);
 		if(tabTipLabel) // In SeaMonkey we can't simple get anonymous nodes by attribute
 			tabTipLabel.parentNode.removeChild(tabTipLabel);
@@ -1786,18 +2225,21 @@ var windowsObserver = {
 
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
-	get createNode() {
-		delete this.createNode;
-		return this.createNode = this._createNode.bind(this);
-	},
-	_createNode: function(document, nodeName, id, attrs) {
+	createNode: function(document, nodeName, id, attrs) {
 		var mi = document.createElement(nodeName);
 		mi.id = id;
 		for(var name in attrs)
 			mi.setAttribute(name, attrs[name]);
-		mi.addEventListener("command", this, false);
-		mi.addEventListener("click", this, false);
+		this.initNodeEvents(mi);
 		return mi;
+	},
+	initNodeEvents: function(node) {
+		node.addEventListener("command", this, false);
+		node.addEventListener("click", this, false);
+	},
+	destroyNodeEvents: function(node) {
+		node.removeEventListener("command", this, false);
+		node.removeEventListener("click", this, false);
 	},
 	insertNode: function(node, parent, insertAfter) {
 		if(!parent)
@@ -1823,8 +2265,7 @@ var windowsObserver = {
 	destroyNode: function(node, force) {
 		if(!node)
 			return;
-		node.removeEventListener("command", this, false);
-		node.removeEventListener("click", this, false);
+		this.destroyNodeEvents(node);
 		force && node.parentNode.removeChild(node);
 	},
 
@@ -1997,6 +2438,7 @@ var windowsObserver = {
 			|| tabLabel == "chrome://fvd.speeddial/content/fvd_about_blank.html"
 			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
 			|| tabLabel == "chrome://superstart/content/index.html"
+			|| tabLabel == "chrome://fastdial/content/fastdial.html"
 		)
 			return true;
 		if(/^\w+:\S*$/.test(tabLabel))
@@ -2451,6 +2893,12 @@ var windowsObserver = {
 		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
 	getTabPrivacyContext: function(tab) {
+		if(!tab.linkedBrowser) {
+			Components.utils.reportError(
+				LOG_PREFIX + "getTabPrivacyContext() called for already destroyed tab, call stack:\n"
+				+ new Error().stack
+			);
+		}
 		return this.getPrivacyContext(tab.linkedBrowser.contentWindow);
 	},
 	isPrivateTab: function(tab) {
@@ -2515,6 +2963,14 @@ var windowsObserver = {
 		if(sss.sheetRegistered(this.cssURI, sss.USER_SHEET))
 			sss.unregisterSheet(this.cssURI, sss.USER_SHEET);
 	},
+	reloadStyles: function(window) {
+		window = window
+			|| Services.wm.getMostRecentWindow("navigator:browser")
+			|| Services.wm.getMostRecentWindow("navigator:private"); // SeaMonkey >= 2.19a1 (2013-03-27)
+		this.unloadStyles();
+		if(window)
+			this.loadStyles(window);
+	},
 	get sss() {
 		delete this.sss;
 		return this.sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
@@ -2567,14 +3023,59 @@ var windowsObserver = {
 			}\n\
 			@-moz-document url("' + document.documentURI + '"),\n\
 				url("chrome://global/content/customizeToolbar.xul") {\n\
-				#' + this.toolbarButtonId + ' {\n\
+				#' + this.toolbarButtonId + ',\n\
+				#' + this.afterTabsButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-24.png") !important;\n\
 					-moz-image-region: auto !important;\n\
 				}\n\
-				toolbar[iconsize="small"] #' + this.toolbarButtonId + ' {\n\
+				toolbar[iconsize="small"] #' + this.toolbarButtonId + ',\n\
+				toolbar[iconsize="small"] #' + this.afterTabsButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-16.png") !important;\n\
 				}\n\
+				#' + this.afterTabsButtonId + ' > .toolbarbutton-icon {\n\
+					margin: 0 !important;\n\
+				}\n\
+				/*\n\
+				Show button after last tab for [Tabs][New Tab][New Private Tab] and [Tabs][New Private Tab]\n\
+				and also show "New Tab" after last tab for [Tabs][New Private Tab][New Tab]\n\
+				*/\n\
+				#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #' + this.toolbarButtonId + ',\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					~ #new-tab-button {\n\
+					visibility: collapse;\n\
+				}\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#' + this.afterTabsButtonId + ',\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
+					> #tabbrowser-tabs:not([overflow="true"])\n\
+					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
+					visibility: visible !important;\n\
+				}\n\
 			}';
+		if(prefs.get("enablePrivateProtocol")) {
+			cssStr += '\n\
+			@-moz-document url("' + document.documentURI + '") {\n\
+				.bookmark-item[scheme="private"] {\n\
+					text-decoration: underline !important;\n\
+					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
+					' + prefix + 'text-decoration-style: dashed !important;\n\
+				}\n\
+			}\n\
+			@-moz-document url("chrome://browser/content/bookmarks/bookmarksPanel.xul"),\n\
+				url("chrome://browser/content/places/places.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bm-panel.xul"),\n\
+				url("chrome://communicator/content/bookmarks/bookmarksManager.xul") {\n\
+				treechildren::-moz-tree-cell-text(private) {\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
+					margin-bottom: 1px !important;\n\
+				}\n\
+			}';
+		}
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
 	},
 
@@ -2616,15 +3117,20 @@ API.prototype = {
 		this.window = null;
 	},
 	handleEvent: function(e) {
-		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined)
+		if(e.type == "TabOpen" && this._openNewTabsPrivate !== undefined) {
+			_log("Used readyToOpenTabs(), make tab private");
 			privateTabInternal.toggleTabPrivate(e.originalTarget || e.target, this._openNewTabsPrivate);
+		}
 	},
 	_onFirstPrivateTab: function(window, tab) {
 		this._onFirstPrivateTab = function() {};
 		_log("First private tab in window");
-		if(!privateTabInternal.isPrivateWindow(window)) {
+		if(
+			!prefs.get("allowOpenExternalLinksInPrivateTabs")
+			&& !privateTabInternal.isPrivateWindow(window)
+		) {
 			window.setTimeout(function() {
-				privateTabInternal.ensureTabBrowserLoadURIPatched(window);
+				privateTabInternal.patchBrowserLoadURI(window, true);
 			}, 50);
 		}
 	},
@@ -2638,12 +3144,7 @@ API.prototype = {
 		return isPrivate;
 	},
 	readyToOpenTab: function privateTab_readyToOpenTab(isPrivate) {
-		privateTabInternal.waitForTab(this.window, function(tab) {
-			if(!tab)
-				return;
-			tab._privateTabIgnore = true;
-			privateTabInternal.toggleTabPrivate(tab, isPrivate);
-		}.bind(this));
+		privateTabInternal.readyToOpenTab(this.window, isPrivate);
 	},
 	readyToOpenTabs: function privateTab_readyToOpenTabs(isPrivate) {
 		this._openNewTabsPrivate = isPrivate;

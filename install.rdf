@@ -7,7 +7,7 @@
 		<em:type>2</em:type>
 		<em:bootstrap>true</em:bootstrap>
 		<em:name>Private Tab</em:name>
-		<em:version>0.1.2</em:version>
+		<em:version>0.1.5</em:version>
 		<em:description>Adds private tabs</em:description>
 		<em:creator>Infocatcher</em:creator>
 		<em:updateURL>http://infocatcher.ucoz.net/ext/fx/private_tab/update.rdf</em:updateURL>
@@ -19,7 +19,7 @@
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>20.0a1</em:minVersion>
-				<em:maxVersion>24.0a1</em:maxVersion>
+				<em:maxVersion>26.0a1</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 
@@ -27,7 +27,7 @@
 			<Description>
 				<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
 				<em:minVersion>2.17a1</em:minVersion>
-				<em:maxVersion>2.21a1</em:maxVersion>
+				<em:maxVersion>2.23a1</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 
@@ -37,6 +37,16 @@
 				<em:name>Private Tab</em:name>
 				<em:description>Adds private tabs</em:description>
 				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>ar</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Adds private tabs</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>infinity</em:translator>
 			</Description>
 		</em:localized>
 
@@ -102,6 +112,36 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>hu</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Privát lapok használata</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Norbert Evenich</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>id</em:locale>
+				<em:name>Tab penjelajahan pribadi</em:name>
+				<em:description>Menambahkan tab mode penjelajahan pribadi</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Muhammad Anwar Ramadhan (Daisuke Dan)</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>it</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>La navigazione anonima su schede</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>moretti</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>ja</em:locale>
 				<em:name>プライベートタブ</em:name>
 				<em:description>プライベートタブを追加します</em:description>
@@ -122,10 +162,40 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>pt-BR</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Cria abas de navegação privativa</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Marcelo Ghelman (ghelman.net)</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>ru</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>Добавляет приватные вкладки</em:description>
 				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>sr</em:locale>
+				<em:name>Приватни језичак</em:name>
+				<em:description>Додаје приватни језичак</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>ДакСРБИЈА</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>uk</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Додає приватні вкладки</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>dbv92</em:translator>
 			</Description>
 		</em:localized>
 

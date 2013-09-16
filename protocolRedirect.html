@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8" />
+<title>Private Tab: Redirect…</title>
+<div id="output"></div>
+<div id="usage" style="display: none;">
+	Usage example: <a href="private:///#https://addons.mozilla.org/">private:///#https://addons.mozilla.org/</a>
+</div>
+<script>
+window.onhashchange = function() {
+	location.reload(); // Allow open "Usage example" link in current tab
+};
+try {
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	var spec = location.hash.substr(1);
+
+	try {
+		var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+			.getService(Components.interfaces.inIDOMUtils);
+		var browser = dwu.getParentForNode(document, true);
+		if(
+			!(browser instanceof Components.interfaces.nsIDOMXULElement)
+			|| browser.localName.toLowerCase() != "browser"
+		)
+			throw new Error("Can't get XUL browser");
+		var doc = browser.ownerDocument;
+		var win = doc.defaultView;
+		var gBrowser = win.gBrowser;
+
+		// Link may be loaded in current tab, so we should send notification
+		var tab;
+		if("_getTabForBrowser" in gBrowser)
+			tab = gBrowser._getTabForBrowser(browser);
+		else { // SeaMonkey
+			for(var i = 0, tabs = gBrowser.tabs, l = tabs.length; i < l; ++i) {
+				if(tabs[i].linkedBrowser == browser) {
+					tab = tabs[i];
+					break;
+				}
+			}
+		}
+		if(
+			tab
+			&& !tab.hasAttribute("privateTab-isPrivate")
+			&& "PrivateBrowsingUtils" in win
+			&& win.PrivateBrowsingUtils.isWindowPrivate(window)
+		) {
+			var evt = doc.createEvent("UIEvent");
+			evt.initUIEvent("PrivateTab:PrivateChanged", true, false, win, 1);
+			tab.dispatchEvent(evt);
+		}
+
+		//win.setTimeout(function() {
+		//	gBrowser.setTabTitleLoading(tab);
+		//}, 0);
+		var getString = function(id) {
+			try {
+				return gBrowser.mStringBundle.getString(id);
+			}
+			catch(e3) {
+			}
+			return undefined;
+		}
+		document.title = getString("tabs.connecting")
+			|| getString("tabs.loading") // SeaMonkey
+			|| spec;
+	}
+	catch(e2) {
+		document.title = spec;
+		Components.utils.reportError(e2);
+	}
+
+	if(!spec)
+		throw new Error("No URI");
+	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
+
+	try {
+		setFavicon(uri.scheme + "://" + uri.hostPort + "/favicon.ico");
+	}
+	catch(e2) {
+	}
+
+	location.replace(spec);
+}
+catch(e) {
+	document.title = "Private Tab: Can't redirect";
+	var out;
+	if(!("Services" in window)) // We can open this file directly using jar:file:///...
+		out = "Not enough permissions";
+	else {
+		setFavicon("chrome://global/skin/icons/warning-16.png");
+		if(!spec)
+			out = "Missing URI";
+		else if(!uri)
+			out = "Malformed URI: " + spec;
+	}
+	out && document.getElementById("output").appendChild(document.createTextNode(out));
+	document.getElementById("usage").style.display = "";
+	throw e;
+}
+
+function setFavicon(iconURL) {
+	var icon = "__icon" in setFavicon && setFavicon.__icon;
+	if(!icon) {
+		icon = document.createElement("link");
+		icon.rel = "shortcut icon";
+		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
+	}
+	icon.href = iconURL;
+}
+</script>
