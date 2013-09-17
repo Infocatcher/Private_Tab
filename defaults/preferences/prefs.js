@@ -13,7 +13,7 @@ pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if s
 // You can also create alias for hotkey using extensions.privateTab.key.%command%#%alias_name%, example:
 // pref("extensions.privateTab.key.openNewPrivateTab#2", "VK_F8")
 pref("extensions.privateTab.key.openNewPrivateTab", "control alt VK_P");
-pref("extensions.privateTab.key.toggleTabPrivate", "control alt VK_V");
+pref("extensions.privateTab.key.toggleTabPrivate", "control alt VK_T");
 
 pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 0 - make new (or target) tab private, if source or target are private
