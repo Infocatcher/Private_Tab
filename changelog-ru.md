@@ -6,7 +6,7 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
-`*` Улучшена совместимость с <a href="https://addons.mozilla.org/addon/tab-mix-plus/">Tab Mix Plus</a> (большое спасибо <a href="https://addons.mozilla.org/user/onemen/">onemen</a>'у за исправления со стороны Tab Mix Plus) (#95, #96)<br>
+`*` Улучшена совместимость с <a href="https://addons.mozilla.org/addon/tab-mix-plus/">Tab Mix Plus</a> (большое спасибо <a href="https://addons.mozilla.org/user/onemen/">onemen</a>'у за исправления со стороны Tab Mix Plus) (<a href="https://github.com/Infocatcher/Private_Tab/issues/95">#95</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/96">#96</a>)<br>
 `+` В контекстное меню кнопки на панели задач добавлен пункт «новая приватная вкладка» (только Windows 7 и выше) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
 `+` Добавлен пункт контекстного меню для открытия нескольких закладок/элементов истории в приватных вкладках (<a href="https://github.com/Infocatcher/Private_Tab/issues/99">#99</a>)<br>
 `*` Изменено сочетание клавиш по умолчанию для переключения приватности текущей вкладки с Ctrl+Alt+<strong>V</strong> на Ctr+Alt+<strong>T</strong> (установите <em>extensions.privateTab.key.toggleTabPrivate</em> = «control alt VK_V» для восстановления старого сочетания) (<a href="https://github.com/Infocatcher/Private_Tab/issues/105">#105</a>)<br>
