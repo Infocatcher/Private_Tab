@@ -256,6 +256,8 @@ var windowsObserver = {
 				tasksCfg.push(ptEntry);
 				_log("setupJumpLists(): add new item at end");
 			}
+			this.updateJumpList = updateJumpList;
+			Services.prefs.addObserver("browser.newtab.url", updateJumpList, false);
 		}
 		else {
 			var i = getEntryIndex(function(entry) {
@@ -268,22 +270,27 @@ var windowsObserver = {
 			else {
 				_log("setupJumpLists(): item not found and can't be removed");
 			}
+			Services.prefs.removeObserver("browser.newtab.url", this.updateJumpList);
+			delete this.updateJumpList;
 		}
-
-		var WinTaskbarJumpList = global.WinTaskbarJumpList;
-		var pending = WinTaskbarJumpList._pendingStatements;
-		var timer = Components.classes["@mozilla.org/timer;1"]
-			.createInstance(Components.interfaces.nsITimer);
-		var stopWait = Date.now() + 5e3;
-		timer.init(function() {
-			for(var statement in pending) {
-				if(Date.now() > stopWait)
-					timer.cancel();
-				return;
-			}
-			timer.cancel();
-			WinTaskbarJumpList.update();
-		}.bind(this), lazy ? 150 : 50, timer.TYPE_REPEATING_SLACK);
+		function updateJumpList() {
+			var WinTaskbarJumpList = global.WinTaskbarJumpList;
+			var pending = WinTaskbarJumpList._pendingStatements;
+			var timer = Components.classes["@mozilla.org/timer;1"]
+				.createInstance(Components.interfaces.nsITimer);
+			var stopWait = Date.now() + 5e3;
+			timer.init(function() {
+				for(var statement in pending) {
+					if(Date.now() > stopWait)
+						timer.cancel();
+					return;
+				}
+				timer.cancel();
+				WinTaskbarJumpList.update();
+				_log("WinTaskbarJumpList.update()");
+			}, lazy ? 150 : 50, timer.TYPE_REPEATING_SLACK);
+		}
+		updateJumpList();
 	},
 	_hasDelayedStartupObserver: false,
 	setupJumpListsLazy: function(init) {
