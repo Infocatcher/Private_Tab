@@ -225,11 +225,10 @@ var windowsObserver = {
 			return;
 		}
 		var tasksCfg = global.tasksCfg;
-		var taskArgs = "-new-tab private:///#about:blank";
-		function getEntryIndex(args) {
+		function getEntryIndex(check) {
 			for(var i = 0, l = tasksCfg.length; i < l; ++i) {
 				var entry = tasksCfg[i];
-				if(entry.args == args)
+				if(check(entry))
 					return i;
 			}
 			return -1;
@@ -240,12 +239,15 @@ var windowsObserver = {
 			var ptEntry = {
 				get title()       _getString("taskBarOpenNewPrivateTab" + sm),
 				get description() _getString("taskBarOpenNewPrivateTabDesc" + sm),
-				args:             taskArgs,
+				get args()        "-new-tab private:///#" + (prefs.getPref("browser.newtab.url") || "about:blank"),
 				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
 				open:             true,
-				close:            true
+				close:            true,
+				_privateTab:      true
 			};
-			var i = getEntryIndex("-new-tab about:blank");
+			var i = getEntryIndex(function(entry) {
+				return entry.args == "-new-tab about:blank";
+			});
 			if(i != -1) {
 				tasksCfg.splice(i + 1, 0, ptEntry);
 				_log('setupJumpLists(): add new item after "Open new tab"');
@@ -256,7 +258,9 @@ var windowsObserver = {
 			}
 		}
 		else {
-			var i = getEntryIndex(taskArgs);
+			var i = getEntryIndex(function(entry) {
+				return "_privateTab" in entry;
+			});
 			if(i != -1) {
 				tasksCfg.splice(i, 1);
 				_log("setupJumpLists(): remove item");
