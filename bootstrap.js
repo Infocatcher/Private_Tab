@@ -537,17 +537,14 @@ var windowsObserver = {
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
 		var isEmptyWindow = args && !(3 in args);
-		if((!opener || isEmptyWindow) && prefs.get("makeNewEmptyWindowsPrivate")) {
+		var makeEmptyWindowPrivate = prefs.get("makeNewEmptyWindowsPrivate");
+		if((!opener || isEmptyWindow) && makeEmptyWindowPrivate == 1) {
 			_log("Make new empty window private");
 			this.toggleWindowPrivate(window, true);
 			return;
 		}
 		if(!opener || opener.closed || !this.isTargetWindow(opener) || !opener.gBrowser)
 			return;
-		if(isEmptyWindow) {
-			_log("inheritWindowState(): Looks like new empty window, ignore");
-			return;
-		}
 		// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
 		// newWindow = openDialog(getBrowserURL(), "_blank", "all,dialog=no", url, null, null, null);
 		if(
@@ -559,6 +556,14 @@ var windowsObserver = {
 		) {
 			_log("Looks like window, opened from external application, ignore");
 			return;
+		}
+		if(isEmptyWindow) {
+			if(makeEmptyWindowPrivate == -1)
+				_log("Inherit private state for new empty window");
+			else {
+				_log("inheritWindowState(): Looks like new empty window, ignore");
+				return;
+			}
 		}
 		if(this.isPrivateWindow(window)) {
 			_log("inheritWindowState(): Ignore already private window");
@@ -592,14 +597,15 @@ var windowsObserver = {
 			}, this);
 		}
 		else if(pName == "makeNewEmptyTabsPrivate") {
+			var hide = pVal == 1;
 			this.windows.forEach(function(window) {
 				var document = window.document;
 				var menuItem = document.getElementById(this.newTabMenuId);
 				if(menuItem)
-					menuItem.hidden = pVal;
+					menuItem.hidden = hide;
 				var appMenuItem = document.getElementById(this.newTabAppMenuId);
 				if(appMenuItem)
-					appMenuItem.hidden = pVal;
+					appMenuItem.hidden = hide;
 			}, this);
 		}
 		else if(pName == "patchDownloads") {
@@ -988,16 +994,20 @@ var windowsObserver = {
 		var gBrowser = this.getTabBrowser(tab);
 		//~ todo: try get real tab owner!
 		var isPrivate;
-		if(!this.isEmptyTab(tab, gBrowser)) {
+		var makeEmptyTabPrivate = prefs.get("makeNewEmptyTabsPrivate");
+		var isEmpty = this.isEmptyTab(tab, gBrowser);
+		if(!isEmpty || makeEmptyTabPrivate == -1) {
+			if(isEmpty)
+				_log("Inherit private state for new empty tab");
 			if(this.isPrivateWindow(window.content))
 				isPrivate = true;
 			else if(this.isPrivateWindow(window))
 				isPrivate = false; // Override browser behavior!
 		}
 		else if(
-			window.privateTab
+			makeEmptyTabPrivate == 1
+			&& window.privateTab
 			&& !window.privateTab._ssWindowBusy
-			&& prefs.get("makeNewEmptyTabsPrivate")
 		) {
 			_log("Make new empty tab private");
 			isPrivate = true;
@@ -2016,7 +2026,7 @@ var windowsObserver = {
 			accesskey: this.getLocalized("openNewPrivateTab" + shortLabel + "Accesskey"),
 			"privateTab-command": "openNewPrivateTab"
 		});
-		if(prefs.get("makeNewEmptyTabsPrivate"))
+		if(prefs.get("makeNewEmptyTabsPrivate") == 1)
 			menuItem.hidden = true;
 		if(PrivateBrowsingUtils.permanentPrivateBrowsing)
 			menuItem.collapsed = true;
@@ -2035,7 +2045,7 @@ var windowsObserver = {
 				class: "menuitem-iconic",
 				"privateTab-command": "openNewPrivateTab"
 			});
-			if(prefs.get("makeNewEmptyTabsPrivate"))
+			if(prefs.get("makeNewEmptyTabsPrivate") == 1)
 				appMenuItem.hidden = true;
 			appMenuItem._privateTabPreviousSibling = appMenuItemParent.lastChild;
 			appMenuItemParent.appendChild(appMenuItem);
@@ -2562,7 +2572,7 @@ var windowsObserver = {
 			this.isPrivateWindow(window.content);
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
-		_log("Make all tabs in window private");
+		_log("Make all tabs in window " + (isPrivate ? "private" : "not private"));
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.toggleTabPrivate(tab, isPrivate);
 		}, this);

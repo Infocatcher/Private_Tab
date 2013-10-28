@@ -22,8 +22,11 @@ pref("extensions.privateTab.dragAndDropBehavior", 0);
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
 pref("extensions.privateTab.savePrivateTabsInSessions", false);
-pref("extensions.privateTab.makeNewEmptyTabsPrivate", false);
-pref("extensions.privateTab.makeNewEmptyWindowsPrivate", false); // Note: make single empty tab in new window private
+pref("extensions.privateTab.makeNewEmptyTabsPrivate", 0);
+pref("extensions.privateTab.makeNewEmptyWindowsPrivate", 0);
+// -1 - inherit private state from owner tab
+// 0  - ignore new empty tabs (windows)
+// 1  - make new empty tabs private (make single empty tab in new empty windows private)
 pref("extensions.privateTab.allowOpenExternalLinksInPrivateTabs", false);
 pref("extensions.privateTab.sendRefererHeader", 2);
 // 0 - don't send
