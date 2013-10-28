@@ -3179,12 +3179,19 @@ API.prototype = {
 
 var prefs = {
 	ns: "extensions.privateTab.",
+	version: 1,
 	initialized: false,
 	init: function() {
 		if(this.initialized)
 			return;
 		this.initialized = true;
 
+		var curVersion = this.getPref(this.ns + "prefsVersion", 0);
+		if(curVersion < this.version) {
+			_log("Migrate prefs: " + curVersion + " => " + this.version);
+			this.migratePrefs(curVersion);
+			this.setPref(this.ns + "prefsVersion", this.version);
+		}
 		//~ todo: add condition when https://bugzilla.mozilla.org/show_bug.cgi?id=564675 will be fixed
 		this.loadDefaultPrefs();
 		if(windowsObserver.isSeaMonkey) {
@@ -3200,6 +3207,17 @@ var prefs = {
 		this.initialized = false;
 
 		Services.prefs.removeObserver(this.ns, this);
+	},
+	migratePrefs: function(version) {
+		var boolean = function(pName) { // true -> 1
+			if(this.getPref(pName) === true) {
+				_log("migratePrefs(): set " + pName + " = 1");
+				Services.prefs.deleteBranch(pName);
+				this.setPref(pName, 1);
+			}
+		}.bind(this);
+		boolean(this.ns + "makeNewEmptyTabsPrivate");
+		boolean(this.ns + "makeNewEmptyWindowsPrivate");
 	},
 	observe: function(subject, topic, pName) {
 		if(topic != "nsPref:changed")
