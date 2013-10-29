@@ -1196,7 +1196,7 @@ var windowsObserver = {
 		//_log("filterSession():\n" + stateString);
 		if(
 			prefs.get("savePrivateTabsInSessions")
-			|| stateString.indexOf('"privateTab-isPrivate":"true"') == -1 // Should be faster, than JSON.parse()
+			|| stateString.indexOf('"' + this.privateAttr + '":"true"') == -1 // Should be faster, than JSON.parse()
 		)
 			return;
 		var state = JSON.parse(stateString);
