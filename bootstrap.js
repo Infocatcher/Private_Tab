@@ -2684,6 +2684,7 @@ var windowsObserver = {
 			if(pl >= 0 && pr >= 0) {
 				_log("Fix App button width:\npadding-left: " + pl + "px\npadding-right: " + pr + "px");
 				cssStr = '\
+					/* Private Tab: fix App button width */\n\
 					@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 					@-moz-document url("' + document.documentURI + '") {\n\
 						#main-window[privatebrowsingmode="temporary"] #appmenu-button {\n\
@@ -2697,6 +2698,7 @@ var windowsObserver = {
 			var maxWidth = Math.max(pbWidth, npbWidth);
 			_log("Fix App button width:\nmin-width: " + maxWidth + "px");
 			cssStr = '\
+				/* Private Tab: fix App button width */\n\
 				@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 				@-moz-document url("' + document.documentURI + '") {\n\
 					#appmenu-button {\n\
@@ -2704,9 +2706,7 @@ var windowsObserver = {
 					}\n\
 				}';
 		}
-		var cssURI = this.appButtonCssURI = Services.io.newURI(
-			"data:text/css," + encodeURIComponent(cssStr), null, null
-		);
+		var cssURI = this.appButtonCssURI = this.newCssURI(cssStr);
 		var sss = this.sss;
 		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
@@ -2965,6 +2965,14 @@ var windowsObserver = {
 			|| Components.classes["@mozilla.org/suite/sessionstore;1"]
 		).getService(Components.interfaces.nsISessionStore);
 	},
+	newCssURI: function(cssStr) {
+		cssStr = this.trimCSSString(cssStr);
+		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
+	},
+	trimCSSString: function(s) {
+		var spaces = s.match(/^[ \t]*/)[0];
+		return s.replace(new RegExp("^" + spaces, "mg"), "");
+	},
 
 	_stylesLoaded: false,
 	loadStyles: function(window) {
@@ -2972,7 +2980,7 @@ var windowsObserver = {
 			return;
 		this._stylesLoaded = true;
 		var sss = this.sss;
-		var cssURI = this.cssURI = this.makeCSSURI(window);
+		var cssURI = this.cssURI = this.makeCssURI(window);
 		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
 	},
@@ -2997,7 +3005,7 @@ var windowsObserver = {
 		return this.sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
 			.getService(Components.interfaces.nsIStyleSheetService);
 	},
-	makeCSSURI: function(window) {
+	makeCssURI: function(window) {
 		var document = window.document;
 		var s = document.documentElement.style;
 		var prefix = "textDecorationColor" in s && "textDecorationStyle" in s
@@ -3022,6 +3030,7 @@ var windowsObserver = {
 			}
 		}
 		var cssStr = '\
+			/* Private Tab: main styles */\n\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '] {\n\
@@ -3097,7 +3106,7 @@ var windowsObserver = {
 				}\n\
 			}';
 		}
-		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
+		return this.newCssURI(cssStr);
 	},
 
 	get bundle() {
