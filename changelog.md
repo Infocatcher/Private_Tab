@@ -10,6 +10,7 @@
 `+` Added “new private tab” item to task bar context menu (only Windows 7 and higher) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
 `+` Added context menu item to open multiple bookmarks/history items in private tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/99">#99</a>)<br>
 `*` Changed default hotkey for toggle private state of current tab from Ctrl+Alt+<strong>V</strong> to Ctr+Alt+<strong>T</strong> (set <em>extensions.privateTab.key.toggleTabPrivate</em> = “control alt VK_V” to restore old hotkey) (<a href="https://github.com/Infocatcher/Private_Tab/issues/105">#105</a>)<br>
+`+` Added ability to inherit private state for new empty tabs and windows (set <em>extensions.privateTab.makeNewEmptyTabsPrivate</em>/<em>extensions.privateTab.makeNewEmptyWindowsPrivate</em> to `-1`) (<a href="https://github.com/Infocatcher/Private_Tab/issues/111">#111</a>)<br>
 
 ##### 0.1.5 (2013-08-24)
 `*` Added ability to show buttons “New Private Tab” and “New Tab” after last tab (<a href="https://github.com/Infocatcher/Private_Tab/issues/92">#92</a>)<br>

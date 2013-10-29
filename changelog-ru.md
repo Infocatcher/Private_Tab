@@ -10,6 +10,7 @@
 `+` В контекстное меню кнопки на панели задач добавлен пункт «новая приватная вкладка» (только Windows 7 и выше) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
 `+` Добавлен пункт контекстного меню для открытия нескольких закладок/элементов истории в приватных вкладках (<a href="https://github.com/Infocatcher/Private_Tab/issues/99">#99</a>)<br>
 `*` Изменено сочетание клавиш по умолчанию для переключения приватности текущей вкладки с Ctrl+Alt+<strong>V</strong> на Ctr+Alt+<strong>T</strong> (установите <em>extensions.privateTab.key.toggleTabPrivate</em> = «control alt VK_V» для восстановления старого сочетания) (<a href="https://github.com/Infocatcher/Private_Tab/issues/105">#105</a>)<br>
+`+` Добавлена возможность наследования приватного состояния для новых пустых вкладок и окон (установите <em>extensions.privateTab.makeNewEmptyTabsPrivate</em>/<em>extensions.privateTab.makeNewEmptyWindowsPrivate</em> в `-1`) (<a href="https://github.com/Infocatcher/Private_Tab/issues/111">#111</a>)<br>
 
 ##### 0.1.5 (2013-08-24)
 `*` Добавлена возможность отображения кнопок «Новая приватная вкладка» и «Новая вкладка» после последней вкладки (<a href="https://github.com/Infocatcher/Private_Tab/issues/92">#92</a>)<br>
