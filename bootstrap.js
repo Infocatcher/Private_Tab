@@ -2965,14 +2965,6 @@ var windowsObserver = {
 			|| Components.classes["@mozilla.org/suite/sessionstore;1"]
 		).getService(Components.interfaces.nsISessionStore);
 	},
-	newCssURI: function(cssStr) {
-		cssStr = this.trimCSSString(cssStr);
-		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
-	},
-	trimCSSString: function(s) {
-		var spaces = s.match(/^[ \t]*/)[0];
-		return s.replace(new RegExp("^" + spaces, "mg"), "");
-	},
 
 	_stylesLoaded: false,
 	loadStyles: function(window) {
@@ -3107,6 +3099,14 @@ var windowsObserver = {
 			}';
 		}
 		return this.newCssURI(cssStr);
+	},
+	newCssURI: function(cssStr) {
+		cssStr = this.trimCSSString(cssStr);
+		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
+	},
+	trimCSSString: function(s) {
+		var spaces = s.match(/^[ \t]*/)[0];
+		return s.replace(new RegExp("^" + spaces, "mg"), "");
 	},
 
 	get bundle() {
