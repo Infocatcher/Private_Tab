@@ -2201,7 +2201,7 @@ var windowsObserver = {
 		window.addEventListener("command", waitForTab, true);
 
 		// Easy way to remove added items from all documents :)
-		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode are already null
+		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode is already null
 		var _this = this;
 		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
 			if(e.originalTarget != mp)
@@ -2661,7 +2661,7 @@ var windowsObserver = {
 		}
 		var bo = appBtn.boxObject;
 		var pbWidth = bo.width;
-		if(!pbWidth) { // App button are hidden?
+		if(!pbWidth) { // App button is hidden?
 			this.watchAppButton(document.defaultView);
 			this.appButtonNA = true; // Don't check and don't call watchAppButton() again
 			return;
@@ -2671,7 +2671,7 @@ var windowsObserver = {
 		var iconWidth = pbWidth - npbWidth;
 		root.setAttribute("privatebrowsingmode", "temporary");
 		if(iconWidth == 0) {
-			_log("Fix App button width: nothing to do, width are the same");
+			_log("Fix App button width: nothing to do, corrected width is the same");
 			this.appButtonNA = true;
 			return;
 		}
