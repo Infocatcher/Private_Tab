@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.1.6 (2013-10-31)
 `*` Improved compatibility with <a href="https://addons.mozilla.org/addon/tab-mix-plus/">Tab Mix Plus</a> (many thanks to <a href="https://addons.mozilla.org/user/onemen/">onemen</a> for fixes from Tab Mix Plus side) (<a href="https://github.com/Infocatcher/Private_Tab/issues/95">#95</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/96">#96</a>)<br>
 `+` Added “new private tab” item to task bar context menu (only Windows 7 and higher, <em>extensions.privateTab.showItemInTaskBarJumpList</em> preference) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
 `+` Added context menu item to open multiple bookmarks/history items in private tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/99">#99</a>)<br>
