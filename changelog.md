@@ -7,7 +7,7 @@
 
 ##### master/HEAD
 `*` Improved compatibility with <a href="https://addons.mozilla.org/addon/tab-mix-plus/">Tab Mix Plus</a> (many thanks to <a href="https://addons.mozilla.org/user/onemen/">onemen</a> for fixes from Tab Mix Plus side) (<a href="https://github.com/Infocatcher/Private_Tab/issues/95">#95</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/96">#96</a>)<br>
-`+` Added “new private tab” item to task bar context menu (only Windows 7 and higher) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
+`+` Added “new private tab” item to task bar context menu (only Windows 7 and higher, <em>extensions.privateTab.showItemInTaskBarJumpList</em> preference) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
 `+` Added context menu item to open multiple bookmarks/history items in private tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/99">#99</a>)<br>
 `*` Changed default hotkey for toggle private state of current tab from Ctrl+Alt+<strong>V</strong> to Ctr+Alt+<strong>T</strong> (set <em>extensions.privateTab.key.toggleTabPrivate</em> = “control alt VK_V” to restore old hotkey) (<a href="https://github.com/Infocatcher/Private_Tab/issues/105">#105</a>)<br>
 `+` Added ability to inherit private state for new empty tabs and windows (set <em>extensions.privateTab.makeNewEmptyTabsPrivate</em>/<em>extensions.privateTab.makeNewEmptyWindowsPrivate</em> to `-1`) (<a href="https://github.com/Infocatcher/Private_Tab/issues/111">#111</a>)<br>
