@@ -1508,7 +1508,7 @@ var windowsObserver = {
 				mi.removeAttribute("checked");
 			var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
 			if(accel)
-				accel.hidden = tab != window.gBrowser.selectedTab;
+				accel.hidden = tab.getAttribute("selected") != "true";
 			//mi.disabled = this.isPendingTab(tab);
 		}
 	},
@@ -1603,10 +1603,9 @@ var windowsObserver = {
 		var tab = e.originalTarget || e.target;
 		var isPrivate = e.detail == 1;
 		this.setTabState(tab, isPrivate);
-		var gBrowser = tab.ownerDocument.defaultView.gBrowser;
-		if(gBrowser.selectedTab == tab) {
-			_log(e.type + " + gBrowser.selectedTab == tab => updateWindowTitle()");
-			this.updateWindowTitle(gBrowser, isPrivate);
+		if(tab.getAttribute("selected") == "true") {
+			_log(e.type + " + tab is selected => updateWindowTitle()");
+			this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser, isPrivate);
 		}
 	},
 	setWindowBusy: function(e, busy) {
@@ -1865,7 +1864,7 @@ var windowsObserver = {
 				}
 			}
 		}
-		if(tab == this.getTabBrowser(tab).selectedTab) {
+		if(tab.getAttribute("selected") == "true") { // Only for hotkey
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
 			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
