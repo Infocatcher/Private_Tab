@@ -1619,6 +1619,10 @@ var windowsObserver = {
 			_log(e.type + " + tab is selected => updateWindowTitle()");
 			this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser, isPrivate);
 		}
+		if("mCorrespondingMenuitem" in tab && tab.mCorrespondingMenuitem) { // Opened "List all tabs" menu
+			_log("privateChangedHandler(): update tab.mCorrespondingMenuitem");
+			this.updateTabMenuItem(tab.mCorrespondingMenuitem, tab, isPrivate);
+		}
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
@@ -2300,15 +2304,19 @@ var windowsObserver = {
 		Array.forEach(
 			popup.getElementsByTagName("menuitem"),
 			function(mi) {
-				if(!mi.classList.contains("alltabs-item") || !("tab" in mi))
-					return;
-				if(this.isPrivateTab(mi.tab))
-					mi.setAttribute(this.privateAttr, "true");
-				else
-					mi.removeAttribute(this.privateAttr);
+				if(mi.classList.contains("alltabs-item") && "tab" in mi)
+					this.updateTabMenuItem(mi, mi.tab);
 			},
 			this
 		);
+	},
+	updateTabMenuItem: function(mi, tab, isPrivate) {
+		if(isPrivate === undefined)
+			isPrivate = this.isPrivateTab(tab);
+		if(isPrivate)
+			mi.setAttribute(this.privateAttr, "true");
+		else
+			mi.removeAttribute(this.privateAttr);
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
