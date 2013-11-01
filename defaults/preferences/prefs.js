@@ -21,6 +21,9 @@ pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 2 - use target private state
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
+pref("extensions.privateTab.rememberClosedPrivateTabs.enableCleanup", true);
+// Remove closed private tabs from undo close list in closing windows and after closing of
+// last private tab/window (only for rememberClosedPrivateTabs = true)
 pref("extensions.privateTab.savePrivateTabsInSessions", false);
 pref("extensions.privateTab.makeNewEmptyTabsPrivate", 0);
 pref("extensions.privateTab.makeNewEmptyWindowsPrivate", 0);

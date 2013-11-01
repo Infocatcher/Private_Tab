@@ -52,6 +52,8 @@ var windowsObserver = {
 		}, this);
 		Services.ww.registerNotification(this);
 		Services.obs.addObserver(this, "sessionstore-state-write", false);
+		if(this.cleanupClosedPrivateTabs)
+			this.addPbExitObserver(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -71,6 +73,9 @@ var windowsObserver = {
 		if(reason != APP_SHUTDOWN) {
 			// nsISessionStore may save data after our shutdown
 			Services.obs.removeObserver(this, "sessionstore-state-write");
+
+			if(this.cleanupClosedPrivateTabs)
+				this.addPbExitObserver(false);
 
 			this.unloadStyles();
 			this.restoreAppButtonWidth();
@@ -100,6 +105,10 @@ var windowsObserver = {
 			_log(topic + " => setupJumpLists()");
 			this.setupJumpListsLazy(false);
 			this.setupJumpLists(true, true);
+		}
+		else if(topic == "last-pb-context-exited") {
+			_log(topic + " => forgetAllClosedTabs()");
+			this.forgetAllClosedTabs();
 		}
 	},
 
@@ -166,6 +175,8 @@ var windowsObserver = {
 			_log(e.type + " => closePrivateTabs()");
 			this.closePrivateTabs(window);
 		}
+		if(this.cleanupClosedPrivateTabs)
+			this.forgetClosedTabs(window);
 		this.destroyWindowClosingHandler(window);
 	},
 	destroyWindowClosingHandler: function(window) {
@@ -629,6 +640,11 @@ var windowsObserver = {
 			if(prefs.get("enablePrivateProtocol"))
 				this.setupJumpLists(pVal);
 		}
+		else if(
+			pName == "rememberClosedPrivateTabs"
+			|| pName == "rememberClosedPrivateTabs.enableCleanup"
+		)
+			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
 		else if(pName == "debug")
 			_dbg = pVal;
 		else if(pName == "debug.verbose")
@@ -1168,7 +1184,11 @@ var windowsObserver = {
 				window.setTimeout(window.close, 0);
 		}, this);
 	},
-	forgetClosedTab: function(window, silentFail, _secondTry) {
+	get cleanupClosedPrivateTabs() {
+		return prefs.get("rememberClosedPrivateTabs")
+			&& prefs.get("rememberClosedPrivateTabs.enableCleanup");
+	},
+	getClosedPrivateTabs: function(window) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
@@ -1177,17 +1197,42 @@ var windowsObserver = {
 			if(
 				"attributes" in state
 				&& this.privateAttr in state.attributes
-			) {
-				this.ss.forgetClosedTab(window, i);
-				_log("Forget about closed tab #" + i + (_secondTry ? " (workaround for SeaMonkey)" : ""));
-				return;
-			}
+			)
+				yield i;
+		}
+	},
+	forgetClosedTab: function(window, silentFail, _secondTry) {
+		for(var i in this.getClosedPrivateTabs(window)) {
+			this.ss.forgetClosedTab(window, i);
+			_log("Forget about closed tab #" + i + (_secondTry ? " (workaround for SeaMonkey)" : ""));
+			return;
 		}
 		var msg = "Can't forget about closed tab: tab not found, closed tabs count: " + l;
 		if(silentFail)
 			_log(msg + ", but all should be OK");
 		else
 			Components.utils.reportError(LOG_PREFIX + "!!! " + msg);
+	},
+	forgetClosedTabs: function(window) {
+		var closedTabs = [i for(i in this.getClosedPrivateTabs(window))];
+		closedTabs.reverse().forEach(function(i) {
+			this.ss.forgetClosedTab(window, i);
+		}, this);
+		_log("Forget about " + closedTabs.length + " closed tabs");
+	},
+	forgetAllClosedTabs: function() {
+		this.windows.forEach(this.forgetClosedTabs, this);
+	},
+	_hasPbExitObserver: false,
+	addPbExitObserver: function(add) {
+		if(!add ^ this._hasPbExitObserver)
+			return;
+		this._hasPbExitObserver = add;
+		if(add)
+			Services.obs.addObserver(this, "last-pb-context-exited", false);
+		else
+			Services.obs.removeObserver(this, "last-pb-context-exited");
+		_log("addPbExitObserver(" + add + ")");
 	},
 	filterSession: function(stateData) {
 		if(!stateData || !(stateData instanceof Components.interfaces.nsISupportsString))
