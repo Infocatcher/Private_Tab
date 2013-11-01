@@ -384,6 +384,9 @@ var windowsObserver = {
 		window.setTimeout(function() {
 			this.initControls(document);
 			window.setTimeout(function() {
+				this.setupListAllTabs(window, true);
+			}.bind(this), 0);
+			window.setTimeout(function() {
 				this.setHotkeysText(document);
 			}.bind(this), 10);
 		}.bind(this), 50);
@@ -439,6 +442,7 @@ var windowsObserver = {
 			// This may happens after our "domwindowclosed" notification!
 			this.destroyWindowClosingHandler(window);
 		}
+		this.setupListAllTabs(window, false);
 		this.destroyControls(window, force);
 
 		window.privateTab._destroy();
@@ -1430,13 +1434,21 @@ var windowsObserver = {
 	},
 	popupShowingHandler: function(e) {
 		var popup = e.target;
-		if(popup != e.currentTarget)
+		if(
+			popup != e.currentTarget
+			&& popup.parentNode != e.currentTarget // Special check for "List all tabs" button
+		)
 			return;
 		var window = popup.ownerDocument.defaultView;
 		if(popup.id == "appmenu-popup")
 			this.initAppMenu(window, popup);
 		else if(popup.id == "contentAreaContextMenu")
 			this.updatePageContext(window);
+		else if(
+			popup.id == "alltabs-popup"
+			|| popup.getAttribute("anonid") == "alltabs-popup"
+		)
+			this.updateListAllTabs(window, popup);
 		else if(popup.localName == "tooltip")
 			this.updateTabTooltip(window);
 		else
@@ -2259,6 +2271,45 @@ var windowsObserver = {
 			}, 0);
 		}, true);
 	},
+	getListAllTabsButton: function(window) {
+		var document = window.document;
+		var btn = document.getElementById("alltabs-button"); // Firefox
+		if(!btn && "gNavToolbox" in window && window.gNavToolbox.palette) // Firefox + button in palette
+			btn = window.gNavToolbox.palette.getElementsByAttribute("id", "alltabs-button")[0];
+		if(!btn) { // SeaMonkey
+			var tabContainer = document.getAnonymousElementByAttribute(window.gBrowser, "anonid", "tabcontainer");
+			btn = tabContainer && document.getAnonymousElementByAttribute(tabContainer, "anonid", "alltabs-button");
+		}
+		return btn;
+	},
+	setupListAllTabs: function(window, init) {
+		var btn = this.getListAllTabsButton(window);
+		if(!btn) {
+			_log("setupListAllTabs(" + init + "): List all tabs button not found");
+			return;
+		}
+		_log("setupListAllTabs(" + init + ")");
+		// Note: we can't add listener directly to <menupopup> - this doesn't work for button in palette
+		if(init)
+			btn.addEventListener("popupshowing", this, false);
+		else
+			btn.removeEventListener("popupshowing", this, false);
+	},
+	updateListAllTabs: function(window, popup) {
+		_log("updateListAllTabs()");
+		Array.forEach(
+			popup.getElementsByTagName("menuitem"),
+			function(mi) {
+				if(!mi.classList.contains("alltabs-item") || !("tab" in mi))
+					return;
+				if(this.isPrivateTab(mi.tab))
+					mi.setAttribute(this.privateAttr, "true");
+				else
+					mi.removeAttribute(this.privateAttr);
+			},
+			this
+		);
+	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
 		var document = window.document;
@@ -3069,7 +3120,8 @@ var windowsObserver = {
 			/* Private Tab: main styles */\n\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
-				.tabbrowser-tab[' + this.privateAttr + '] {\n\
+				.tabbrowser-tab[' + this.privateAttr + '],\n\
+				.menuitem-iconic[' + this.privateAttr + '] {\n\
 					text-decoration: underline !important;\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
 					' + prefix + 'text-decoration-style: dashed !important;\n\
