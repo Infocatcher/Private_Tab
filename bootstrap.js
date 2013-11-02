@@ -1440,21 +1440,25 @@ var windowsObserver = {
 		)
 			return;
 		var window = popup.ownerDocument.defaultView;
-		if(popup.id == "appmenu-popup")
+		var id = popup.id || popup.getAttribute("anonid");
+		if(id == "appmenu-popup")
 			this.initAppMenu(window, popup);
-		else if(popup.id == "contentAreaContextMenu")
+		else if(id == "contentAreaContextMenu")
 			this.updatePageContext(window);
-		else if(
-			popup.id == "alltabs-popup"
-			|| popup.getAttribute("anonid") == "alltabs-popup"
-		)
+		else if(id == "alltabs-popup")
 			this.updateListAllTabs(window, popup);
-		else if(popup.localName == "tooltip")
-			this.updateTabTooltip(window);
-		else
+		else if(id == "tabContextMenu")
 			this.updateTabContext(window);
+		else if(
+			id == "tabbrowser-tab-tooltip"
+			|| this.isSeaMonkey
+				&& popup.localName == "tooltip"
+				&& popup.parentNode.classList.contains("tabbrowser-strip")
+		)
+			this.updateTabTooltip(window);
 	},
 	updatePageContext: function(window) {
+		_log("updatePageContext()");
 		var document = window.document;
 		var gContextMenu = window.gContextMenu;
 		var noLink = !gContextMenu
@@ -1487,6 +1491,7 @@ var windowsObserver = {
 			inNewWin.hidden = hideNotPrivate || this.isPrivateWindow(window);
 	},
 	updateTabTooltip: function(window) {
+		_log("updateTabTooltip()");
 		var document = window.document;
 		var tab = document.tooltipNode;
 		var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
@@ -1506,8 +1511,8 @@ var windowsObserver = {
 			label.hidden = hide;
 	},
 	updateTabContext: function(window) {
-		var document = window.document;
 		_log("updateTabContext()");
+		var document = window.document;
 		var tab = this.getContextTab(window);
 		var hide = !tab || tab.localName != "tab";
 		var mi = document.getElementById(this.tabContextId);
