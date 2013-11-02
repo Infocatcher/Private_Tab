@@ -2117,7 +2117,6 @@ var windowsObserver = {
 		}
 
 		var tabContext = this.getTabContextMenu(document);
-		_log("tabContext: " + tabContext);
 		tabContext.addEventListener("popupshowing", this, false);
 		var tabContextItem = this.createNode(document, "menuitem", this.tabContextId, {
 			label:     this.getLocalized("privateTab"),
@@ -3116,11 +3115,12 @@ var windowsObserver = {
 		var tt = this.getTabTooltip(document)
 			|| document.getElementsByTagName("tooltip")[0];
 		var ttOrigColor = tt && window.getComputedStyle(tt, null).color;
-		_log("Original tooltip color: " + ttOrigColor);
+		_log("Original tab tooltip color: " + ttOrigColor);
 		if(/^rgb\((\d+), *(\d+), *(\d+)\)$/.test(ttOrigColor)) {
 			var r = +RegExp.$1, g = +RegExp.$2, b = +RegExp.$3;
 			var brightness = Math.max(r/255, g/255, b/255); // HSV, 0..1
 			if(brightness > 0.5) { // Bright text, dark background
+				_log("Will use special styles for tab tooltip: bright text, dark background");
 				ttColor = "currentColor";
 				ttAddStyles = '\n\
 					font-weight: bold;\n\
