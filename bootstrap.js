@@ -1080,15 +1080,15 @@ var windowsObserver = {
 		}
 	},
 	tabCloseHandler: function(e) {
+		// We can't open new private tab in bubbling phase:
+		// Error: TypeError: preview is undefined
+		// Source file: resource://app/modules/WindowsPreviewPerTab.jsm
 		if(e.eventPhase == e.CAPTURING_PHASE)
 			this.checkForLastPrivateTab(e);
 		else
 			this.cleanupClosedTab(e);
 	},
 	checkForLastPrivateTab: function(e) {
-		// We can't open new private tab in bubbling phase:
-		// Error: TypeError: preview is undefined
-		// Source file: resource://app/modules/WindowsPreviewPerTab.jsm
 		var tab = e.originalTarget || e.target;
 		var window = tab.ownerDocument.defaultView;
 		if(
