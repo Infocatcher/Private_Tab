@@ -1326,8 +1326,10 @@ var windowsObserver = {
 		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> " + sourceNode + " node as private");
 	},
 	dragEndHandler: function(e) {
-		this._dndPrivateNode && _log(e.type + " => this._dndPrivateNode = null");
-		this._dndPrivateNode = null;
+		if(this._dndPrivateNode) {
+			_log(e.type + " => this._dndPrivateNode = null");
+			this._dndPrivateNode = null;
+		}
 	},
 	dropHandler: function(e) {
 		var window = e.currentTarget;
