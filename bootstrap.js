@@ -662,7 +662,8 @@ var windowsObserver = {
 					return isPrivate; //~ todo: check call stack?
 				},
 				configurable: true,
-				enumerable: true
+				enumerable: true,
+				writable: true
 			}
 		});
 	},
