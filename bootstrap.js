@@ -1616,6 +1616,7 @@ var windowsObserver = {
 				e.stopPropagation();
 				e.stopImmediatePropagation();
 				this.handleCommand(window, kId.replace(/#.*$/, ""));
+				break;
 			}
 		}
 	},
