@@ -1367,10 +1367,7 @@ var windowsObserver = {
 			}
 		}
 		else if(e.view.top == window.content) {
-			var trg = e.target;
-			var cs = trg.ownerDocument.defaultView.getComputedStyle(trg, null);
-			var userModify = "userModify" in cs ? cs.userModify : cs.MozUserModify;
-			if(userModify == "read-write") {
+			if(this.isEditableNode(e.target)) {
 				_log("Dropped into editable node, ignore");
 				return;
 			}
@@ -1434,6 +1431,11 @@ var windowsObserver = {
 			else
 				_log("Already correct private state, ignore");
 		}.bind(this));
+	},
+	isEditableNode: function(node) {
+		var cs = node.ownerDocument.defaultView.getComputedStyle(node, null);
+		var userModify = "userModify" in cs ? cs.userModify : cs.MozUserModify;
+		return userModify == "read-write";
 	},
 	popupShowingHandler: function(e) {
 		var popup = e.target;
@@ -1596,20 +1598,9 @@ var windowsObserver = {
 				var window = e.currentTarget;
 				if(k.forbidInTextFields) {
 					var fe = window.document.commandDispatcher.focusedElement;
-					if(
-						fe && (
-							fe instanceof window.HTMLInputElement
-							|| fe instanceof window.HTMLTextAreaElement
-						)
-					) {
-						try { // Throws on not-text input elements
-							if(typeof fe.selectionStart == "number") {
-								_log("Don't use single char hotkey in text field");
-								return;
-							}
-						}
-						catch(e) {
-						}
+					if(fe && this.isEditableNode(fe)) {
+						_log("Don't use single char hotkey in editable node");
+						return;
 					}
 				}
 				e.preventDefault();
