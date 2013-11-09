@@ -469,9 +469,8 @@ var windowsObserver = {
 		// See https://github.com/Infocatcher/Private_Tab/issues/61
 		if(rs != "interactive" && rs != "complete")
 			return false;
-		var winType = document.documentElement.getAttribute("windowtype");
-		return winType == "navigator:browser"
-			|| winType == "navigator:private"; // SeaMonkey >= 2.19a1 (2013-03-27)
+		return document.documentElement.getAttribute("windowtype") == "navigator:browser"
+			|| window.location.href == "chrome://navigator/content/navigator.xul"; // SeaMonkey >= 2.19a1 (2013-03-27)
 	},
 	isViewSourceWindow: function(window) {
 		return window.location.href == "chrome://global/content/viewSource.xul";
