@@ -454,10 +454,11 @@ var windowsObserver = {
 	},
 	get windows() {
 		var windows = [];
-		var ws = Services.wm.getEnumerator(this.isSeaMonkey ? null : "navigator:browser");
+		var isSeaMonkey = this.isSeaMonkey;
+		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
 		while(ws.hasMoreElements()) {
 			var window = ws.getNext();
-			if(this.isTargetWindow(window))
+			if(!isSeaMonkey || this.isTargetWindow(window))
 				windows.push(window);
 		}
 		return windows;
