@@ -463,6 +463,20 @@ var windowsObserver = {
 		}
 		return windows;
 	},
+	getMostRecentBrowserWindow: function() {
+		var window = Services.wm.getMostRecentWindow("navigator:browser");
+		if(window)
+			return window;
+		if(this.isSeaMonkey) {
+			var ws = Services.wm.getEnumerator(null);
+			while(ws.hasMoreElements()) {
+				window = ws.getNext();
+				if(this.isTargetWindow(window))
+					return window;
+			}
+		}
+		return null;
+	},
 	isTargetWindow: function(window) {
 		// Note: we can't touch document.documentElement in not yet loaded window
 		// (to check "windowtype"), see https://github.com/Infocatcher/Private_Tab/issues/61
@@ -3086,9 +3100,8 @@ var windowsObserver = {
 			sss.unregisterSheet(this.cssURI, sss.USER_SHEET);
 	},
 	reloadStyles: function(window) {
-		window = window
-			|| Services.wm.getMostRecentWindow("navigator:browser")
-			|| Services.wm.getMostRecentWindow("navigator:private"); // SeaMonkey >= 2.19a1 (2013-03-27)
+		if(!window)
+			window = this.getMostRecentBrowserWindow();
 		this.unloadStyles();
 		if(window)
 			this.loadStyles(window);
