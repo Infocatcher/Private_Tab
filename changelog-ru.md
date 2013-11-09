@@ -6,6 +6,12 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`+` Добавлена возможность удалять приватные вкладки из списка для восстановления закрытых вкладок только после завершения приватного просмотра (<a href="https://github.com/Infocatcher/Private_Tab/issues/112">#112</a>)<br>
+`+` Добавлена подсветка приватных вкладок в меню «Список всех вкладок» (<a href="https://github.com/Infocatcher/Private_Tab/issues/113">#113</a>)<br>
+`x` Исправлено: сочетания клавиш из одного символа (например, просто `V` или `Shift+V`) теперь игнорируются в WYSIWYG редакторах<br>
+`x` Исправлена обработка встроенных приватных окон в SeaMonkey (<a href="https://github.com/Infocatcher/Private_Tab/issues/116">#116</a>)<br>
+`*` Небольшие улучшения кода<br>
+
 ##### 0.1.6 (2013-10-31)
 `*` Улучшена совместимость с <a href="https://addons.mozilla.org/addon/tab-mix-plus/">Tab Mix Plus</a> (большое спасибо <a href="https://addons.mozilla.org/user/onemen/">onemen</a>'у за исправления со стороны Tab Mix Plus) (<a href="https://github.com/Infocatcher/Private_Tab/issues/95">#95</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/96">#96</a>)<br>
 `+` В контекстное меню кнопки на панели задач добавлен пункт «новая приватная вкладка» (только Windows 7 и выше, настройка <em>extensions.privateTab.showItemInTaskBarJumpList</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/98">#98</a>)<br>
