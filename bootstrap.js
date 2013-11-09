@@ -464,14 +464,13 @@ var windowsObserver = {
 		return windows;
 	},
 	isTargetWindow: function(window) {
-		var document = window.document;
-		var rs = document.readyState;
-		// We can't touch document.documentElement in not yet loaded window!
-		// See https://github.com/Infocatcher/Private_Tab/issues/61
-		if(rs != "interactive" && rs != "complete")
-			return false;
-		return document.documentElement.getAttribute("windowtype") == "navigator:browser"
-			|| window.location.href == "chrome://navigator/content/navigator.xul"; // SeaMonkey >= 2.19a1 (2013-03-27)
+		// Note: we can't touch document.documentElement in not yet loaded window
+		// (to check "windowtype"), see https://github.com/Infocatcher/Private_Tab/issues/61
+		// Also we don't have "windowtype" for private windows in SeaMonkey 2.19+,
+		// see https://github.com/Infocatcher/Private_Tab/issues/116
+		var loc = window.location.href;
+		return loc == "chrome://browser/content/browser.xul"
+			|| loc == "chrome://navigator/content/navigator.xul";
 	},
 	isViewSourceWindow: function(window) {
 		return window.location.href == "chrome://global/content/viewSource.xul";
