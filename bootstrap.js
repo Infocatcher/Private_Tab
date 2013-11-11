@@ -1114,7 +1114,7 @@ var windowsObserver = {
 				var pos = "_tPos" in tab
 					? tab._tPos
 					: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
-				this.openNewPrivateTab(window, function(newTab) {
+				this.openNewPrivateTab(window, false, function(newTab) {
 					newTab && window.gBrowser.moveTabTo(newTab, pos);
 				});
 			}
@@ -1572,7 +1572,7 @@ var windowsObserver = {
 		_log("handleCommand: " + cmd);
 		switch(cmd) {
 			case "openInNewPrivateTab":              this.openInNewPrivateTab(window, shifted);         break;
-			case "openNewPrivateTab":                this.openNewPrivateTab(window);                    break;
+			case "openNewPrivateTab":                this.openNewPrivateTab(window, shifted);           break;
 			case "toggleTabPrivate":                 this.toggleContextTabPrivate(window, shifted);     break;
 			case "openPlacesInNewPrivateTab":        this.openPlaceInNewPrivateTab(window, shifted, e); break;
 			case "openPlacesInPrivateTabs":          this.openPlacesInPrivateTabs(window, e, false);    break;
@@ -1796,14 +1796,14 @@ var windowsObserver = {
 		this.dispatchAPIEvent(tab, "PrivateTab:OpenInNewTab", openAsChild);
 		return tab;
 	},
-	openNewPrivateTab: function(window, callback) {
+	openNewPrivateTab: function(window, middleClicked, callback) {
 		var w = this.getNotPopupWindow(window);
 		if(w && w != window) {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
 		this.readyToOpenTab(window, true, function(tab) {
-			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab");
+			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab", !!middleClicked);
 			callback && callback(tab);
 		}.bind(this));
 		if("BrowserOpenTab" in window)
