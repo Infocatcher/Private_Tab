@@ -18,12 +18,32 @@ You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab) and `#main-win
 You can listen for following events:
 <table>
 <thead>
-<tr><th>event.type               </th><th>event.target</th><th>event.detail                      </th><th>Description                       </th></tr>
+<tr>
+	<th>event.type</th>
+	<th>event.target</th>
+	<th>event.detail</th>
+	<th>Description</th>
+</tr>
 </thead>
 <tbody>
-<tr><td>PrivateTab:PrivateChanged</td><td>tab         </td><td>1 – private tab<br>0 – not private</td><td>Changed private state of the tab  </td></tr>
-<tr><td>PrivateTab:OpenInNewTab  </td><td>tab         </td><td>1 – may be opened as child tab    </td><td>Link was opened in new private tab</td></tr>
-<tr><td>PrivateTab:OpenNewTab    </td><td>tab         </td><td align="center">–                  </td><td>Opened new (empty) private tab    </td></tr>
+	<tr>
+		<td>PrivateTab:PrivateChanged</td>
+		<td>tab</td>
+		<td>1 – private tab<br>0 – not private</td>
+		<td>Changed private state of the tab</td>
+	</tr>
+	<tr>
+		<td>PrivateTab:OpenInNewTab</td>
+		<td>tab</td>
+		<td>1 – may be opened as child tab</td>
+		<td>Link was opened in new private tab</td>
+	</tr>
+	<tr>
+		<td>PrivateTab:OpenNewTab</td>
+		<td>tab</td>
+		<td>1 – opened using middle-click<br>(or left-click with any modifier)</td>
+		<td>Opened new (empty) private tab</td>
+	</tr>
 </tbody>
 </table>
 
