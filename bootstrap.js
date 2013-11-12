@@ -1803,7 +1803,10 @@ var windowsObserver = {
 			window = w;
 		}
 		this.readyToOpenTab(window, true, function(tab) {
-			tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab", !!middleClicked);
+			if(tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab", !!middleClicked)) {
+				var gBrowser = window.gBrowser;
+				gBrowser.moveTabTo(tab, gBrowser.tabContainer.selectedIndex + 1);
+			}
 			callback && callback(tab);
 		}.bind(this));
 		if("BrowserOpenTab" in window)
@@ -2650,7 +2653,7 @@ var windowsObserver = {
 			var evt = document.createEvent("UIEvent");
 			evt.initUIEvent(eventType, true, false, document.defaultView, +eventDetail);
 		}
-		target.dispatchEvent(evt);
+		return target.dispatchEvent(evt);
 	},
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
 		var privacyContext = this.getTabPrivacyContext(tab);
