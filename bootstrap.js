@@ -1803,7 +1803,11 @@ var windowsObserver = {
 			window = w;
 		}
 		this.readyToOpenTab(window, true, function(tab) {
-			if(tab && this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab", !!middleClicked)) {
+			if(
+				tab
+				&& this.dispatchAPIEvent(tab, "PrivateTab:OpenNewTab", !!middleClicked)
+				&& middleClicked
+			) {
 				var gBrowser = window.gBrowser;
 				gBrowser.moveTabTo(tab, gBrowser.tabContainer.selectedIndex + 1);
 			}
