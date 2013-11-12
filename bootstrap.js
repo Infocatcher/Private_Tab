@@ -2648,16 +2648,15 @@ var windowsObserver = {
 		}
 	},
 	dispatchAPIEvent: function(target, eventType, eventDetail) {
-		var document = target.ownerDocument || target;
-		if(eventDetail === undefined) {
-			var evt = document.createEvent("Events");
-			evt.initEvent(eventType, true, false);
-		}
-		else {
-			var evt = document.createEvent("UIEvent");
-			evt.initUIEvent(eventType, true, false, document.defaultView, +eventDetail);
-		}
-		return target.dispatchEvent(evt);
+		var window = target.defaultView
+			|| target.ownerDocument && target.ownerDocument.defaultView
+			|| target;
+		return target.dispatchEvent(new window.CustomEvent(eventType, {
+			bubbles: true,
+			cancelable: false,
+			detail: +eventDetail,
+			view: window
+		}));
 	},
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
 		var privacyContext = this.getTabPrivacyContext(tab);

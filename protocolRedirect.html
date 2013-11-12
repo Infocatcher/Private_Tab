@@ -44,9 +44,12 @@ try {
 			&& "PrivateBrowsingUtils" in win
 			&& win.PrivateBrowsingUtils.isWindowPrivate(window)
 		) {
-			var evt = doc.createEvent("UIEvent");
-			evt.initUIEvent("PrivateTab:PrivateChanged", true, false, win, 1);
-			tab.dispatchEvent(evt);
+			tab.dispatchEvent(new win.UIEvent("PrivateTab:PrivateChanged", {
+				bubbles: true,
+				cancelable: false,
+				detail: 1,
+				view: win
+			}));
 		}
 
 		//win.setTimeout(function() {
