@@ -2950,8 +2950,19 @@ var windowsObserver = {
 			// resource:///modules/DownloadsCommon.jsm
 			// Clear download panel:
 			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
-				window.DownloadsView.onDataInvalidated(); // This calls DownloadsPanel.terminate();
-				_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+				if("onDataInvalidated" in window.DownloadsView) {
+					window.DownloadsView.onDataInvalidated(); // This calls DownloadsPanel.terminate();
+					_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
+				}
+				else { // Firefox 28.0a1+
+					// Based on code from chrome://browser/content/downloads/downloads.js in Firefox 25.0
+					window.DownloadsPanel.terminate();
+					window.DownloadsView.richListBox.textContent = "";
+					// We can't use {} and [] here because of memory leaks!
+					window.DownloadsView._viewItems = new window.Object();
+					window.DownloadsView._dataItems = new window.Array();
+					_log("updateDownloadPanel() => DownloadsPanel.terminate() + cleanup manually");
+				}
 				window.DownloadsPanel.initialize(function() {
 					_log("updateDownloadPanel() => DownloadsPanel.initialize() done");
 				});
