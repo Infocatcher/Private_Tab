@@ -1451,6 +1451,8 @@ var windowsObserver = {
 		return userModify == "read-write";
 	},
 	popupShowingHandler: function(e) {
+		if(e.defaultPrevented)
+			return;
 		var popup = e.target;
 		if(
 			popup != e.currentTarget
@@ -2212,7 +2214,7 @@ var windowsObserver = {
 	},
 	_initPlacesContext: function(e) {
 		var mp = e.originalTarget || e.target;
-		if(mp.id != "placesContext")
+		if(mp.id != "placesContext" || e.defaultPrevented)
 			return;
 
 		if(mp.getElementsByAttribute("id", this.placesContextId).length) {
