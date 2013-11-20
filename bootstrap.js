@@ -2025,7 +2025,10 @@ var windowsObserver = {
 				}
 				break;
 			}
-			toolbar.insertBefore(tb, insPos);
+			var insParent = insPos && insPos.parentNode
+				|| toolbar.getElementsByAttribute("class", "customization-target")[0]
+				|| toolbar;
+			insParent.insertBefore(tb, insPos);
 			if(newTabBtn && insPos && this.hasNodeAfter(tb, "new-tab-button"))
 				newTabBtn.parentNode.insertBefore(newTabBtn, tb2.nextSibling);
 			this.updateShowAfterTabs(tb, document);
@@ -2033,6 +2036,7 @@ var windowsObserver = {
 			return;
 		}
 
+		_log("Insert toolbar button into palette");
 		this.getToolbox(window)
 			.palette
 			.appendChild(tb);
