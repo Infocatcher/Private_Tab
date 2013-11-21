@@ -1225,7 +1225,7 @@ var windowsObserver = {
 			_log("Forget about closed tab #" + i + (_secondTry ? " (workaround for SeaMonkey)" : ""));
 			return;
 		}
-		var msg = "Can't forget about closed tab: tab not found, closed tabs count: " + l;
+		var msg = "Can't forget about closed private tab: tab not found";
 		if(silentFail)
 			_log(msg + ", but all should be OK");
 		else
