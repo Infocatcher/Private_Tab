@@ -1454,10 +1454,7 @@ var windowsObserver = {
 		if(e.defaultPrevented)
 			return;
 		var popup = e.target;
-		if(
-			popup != e.currentTarget
-			&& popup.parentNode != e.currentTarget // Special check for "List all tabs" button
-		)
+		if(popup != e.currentTarget)
 			return;
 		var window = popup.ownerDocument.defaultView;
 		var id = popup.id || popup.getAttribute("anonid");
@@ -2076,6 +2073,9 @@ var windowsObserver = {
 	updateToolbars: function(e) {
 		var window = e.currentTarget;
 		var document = window.document;
+		window.setTimeout(function() {
+			this.setupListAllTabs(window, true);
+		}.bind(this), 0);
 		var tbBtn = document.getElementById(this.toolbarButtonId);
 		this.updateShowAfterTabs(tbBtn, document);
 		if(!tbBtn)
@@ -2300,40 +2300,47 @@ var windowsObserver = {
 			}, 0);
 		}, true);
 	},
-	getListAllTabsButton: function(window) {
+	getListAllTabsPopup: function(window, checkInPalette) {
 		var document = window.document;
-		var btn = document.getElementById("alltabs-button"); // Firefox
-		if(!btn && "gNavToolbox" in window && window.gNavToolbox.palette) // Firefox + button in palette
-			btn = window.gNavToolbox.palette.getElementsByAttribute("id", "alltabs-button")[0];
-		if(!btn) { // SeaMonkey
-			var tabContainer = document.getAnonymousElementByAttribute(window.gBrowser, "anonid", "tabcontainer");
-			btn = tabContainer && document.getAnonymousElementByAttribute(tabContainer, "anonid", "alltabs-button");
-		}
-		return btn;
+		return document.getElementById("alltabs-popup")
+			|| checkInPalette
+				&& "gNavToolbox" in window
+				&& window.gNavToolbox.palette
+				&& window.gNavToolbox.palette.getElementsByAttribute("id", "alltabs-popup")[0]
+			|| document.getAnonymousElementByAttribute(window.gBrowser.tabContainer, "anonid", "alltabs-popup"); // SeaMonkey
 	},
 	setupListAllTabs: function(window, init) {
-		var btn = this.getListAllTabsButton(window);
-		if(!btn) {
-			_log("setupListAllTabs(" + init + "): List all tabs button not found");
+		// Note: we can't add listener to <menupopup> for button in palette
+		var popup = this.getListAllTabsPopup(window, !init);
+		if(!popup) {
+			_log("setupListAllTabs(" + init + "): List all tabs popup not found");
 			return;
 		}
 		_log("setupListAllTabs(" + init + ")");
-		// Note: we can't add listener directly to <menupopup> - this doesn't work for button in palette
 		if(init)
-			btn.addEventListener("popupshowing", this, false);
+			popup.addEventListener("popupshowing", this, false);
 		else
-			btn.removeEventListener("popupshowing", this, false);
+			popup.removeEventListener("popupshowing", this, false);
 	},
 	updateListAllTabs: function(window, popup) {
 		_log("updateListAllTabs()");
-		Array.forEach(
-			popup.getElementsByTagName("menuitem"),
-			function(mi) {
-				if(mi.classList.contains("alltabs-item") && "tab" in mi)
-					this.updateTabMenuItem(mi, mi.tab);
-			},
-			this
-		);
+		var update = function(e) {
+			_log("updateListAllTabs(): " + (e ? e.type + " event on parent node" : "fallback delay"));
+			window.clearTimeout(fallbackTimer);
+			parent.removeEventListener("popupshowing", update, false);
+			Array.forEach(
+				popup.getElementsByTagName("menuitem"),
+				function(mi) {
+					if(mi.classList.contains("alltabs-item") && "tab" in mi)
+						this.updateTabMenuItem(mi, mi.tab);
+				},
+				this
+			);
+		}.bind(this);
+		// We should wait, while built-in functions create menu contents
+		var parent = popup.parentNode;
+		parent.addEventListener("popupshowing", update, false);
+		var fallbackTimer = window.setTimeout(update, 0);
 	},
 	updateTabMenuItem: function(mi, tab, isPrivate) {
 		if(isPrivate === undefined)
