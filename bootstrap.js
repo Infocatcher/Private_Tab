@@ -1812,12 +1812,14 @@ var windowsObserver = {
 			}
 			callback && callback(tab);
 		}.bind(this));
-		if("BrowserOpenTab" in window)
+		var newTabPref = "newPrivateTabURL" + (this.isPrivateWindow(window) ? ".inPrivateWindow" : "");
+		var newTabURL = prefs.get(newTabPref);
+		if(!newTabURL && "BrowserOpenTab" in window)
 			window.BrowserOpenTab();
 		else {
-			_log("openNewPrivateTab(): BrowserOpenTab() not found, will open manually");
+			!newTabURL && _log("openNewPrivateTab(): BrowserOpenTab() not found, will open manually");
 			var gBrowser = window.gBrowser;
-			gBrowser.selectedTab = gBrowser.addTab(window.BROWSER_NEW_TAB_URL);
+			gBrowser.selectedTab = gBrowser.addTab(newTabURL || window.BROWSER_NEW_TAB_URL);
 			this.focusAndSelectUrlBar(window);
 		}
 	},

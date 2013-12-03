@@ -15,6 +15,10 @@ pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if s
 pref("extensions.privateTab.key.openNewPrivateTab", "control alt VK_P");
 pref("extensions.privateTab.key.toggleTabPrivate", "control alt VK_T");
 
+pref("extensions.privateTab.newPrivateTabURL", "");
+pref("extensions.privateTab.newPrivateTabURL.inPrivateWindow", "");
+// Any URL to open it in new empty private tabs or leave empty to open the same as in new non-private tabs
+
 pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 0 - make new (or target) tab private, if source or target are private
 // 1 - use source private state
