@@ -11,7 +11,7 @@
 `x` Correctly ignore single char hotkeys (like just `V` or `Shift+V`) in WYSIWYG editors<br>
 `x` Correctly detect built-in private windows in SeaMonkey (<a href="https://github.com/Infocatcher/Private_Tab/issues/116">#116</a>)<br>
 `x` Correctly update download panel in Firefox 28.0a1+<br>
-`x` Correctly insert button into toolbar in Firefox 28.0a1+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>))<br>
+`x` Correctly insert button into toolbar in Firefox 28.0a1+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>)<br>
 `+` Added preferences to open user-defined URL in new empty private tabs (<em>extensions.privateTab.newPrivateTabURL</em> and <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>)<br>
 `*` Minor code improvements<br>
 `*` Updated Polish locale (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a><br>
