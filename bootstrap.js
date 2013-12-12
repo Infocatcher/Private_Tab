@@ -2357,6 +2357,8 @@ var windowsObserver = {
 		var document = window.document;
 		this.destroyNodes(document, force);
 		this.destroyNode(this.getPaletteButton(window), force);
+		// Force destroy toolbar button in Australis menu
+		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
 		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
