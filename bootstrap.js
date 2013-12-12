@@ -1931,6 +1931,12 @@ var windowsObserver = {
 			.getElementsByAttribute("id", this.toolbarButtonId);
 		return btns.length && btns[0];
 	},
+	addButtonToPalette: function(window, btn) {
+		_log("Insert toolbar button #" + btn.id + " into palette");
+		this.getToolbox(window)
+			.palette
+			.appendChild(btn);
+	},
 	getNewTabButton: function(window) {
 		return window.document.getAnonymousElementByAttribute(
 			window.gBrowser.tabContainer,
@@ -1976,6 +1982,16 @@ var windowsObserver = {
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
+		}
+
+		if("CustomizableUI" in window) try { // Australis
+			this.addButtonToPalette(window, tb);
+			window.CustomizableUI.ensureWidgetPlacedInWindow(tb.id, window);
+			_log("Toolbar button: use CustomizableUI.ensureWidgetPlacedInWindow()");
+			return;
+		}
+		catch(e) {
+			Components.utils.reportError(e);
 		}
 
 		var toolbars = document.getElementsByTagName("toolbar");
@@ -2034,11 +2050,7 @@ var windowsObserver = {
 			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
 			return;
 		}
-
-		_log("Insert toolbar button into palette");
-		this.getToolbox(window)
-			.palette
-			.appendChild(tb);
+		this.addButtonToPalette(window, tb);
 	},
 	hasNodeAfter: function(node, id) {
 		for(var ns = node.nextSibling; ns; ns = ns.nextSibling)
