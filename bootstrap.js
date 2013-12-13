@@ -47,9 +47,8 @@ var windowsObserver = {
 		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
-		this.windows.forEach(function(window) {
+		for(var window in this.windows)
 			this.initWindow(window, reason);
-		}, this);
 		Services.ww.registerNotification(this);
 		Services.obs.addObserver(this, "sessionstore-state-write", false);
 		if(this.cleanupClosedPrivateTabs)
@@ -65,9 +64,8 @@ var windowsObserver = {
 		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
 
-		this.windows.forEach(function(window) {
+		for(var window in this.windows)
 			this.destroyWindow(window, reason);
-		}, this);
 		Services.ww.unregisterNotification(this);
 
 		if(reason != APP_SHUTDOWN) {
@@ -453,28 +451,20 @@ var windowsObserver = {
 		return this.isSeaMonkey = Services.appinfo.name == "SeaMonkey";
 	},
 	get windows() {
-		var windows = [];
 		var isSeaMonkey = this.isSeaMonkey;
 		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
 		while(ws.hasMoreElements()) {
 			var window = ws.getNext();
 			if(!isSeaMonkey || this.isTargetWindow(window))
-				windows.push(window);
+				yield window;
 		}
-		return windows;
 	},
 	getMostRecentBrowserWindow: function() {
 		var window = Services.wm.getMostRecentWindow("navigator:browser");
 		if(window)
 			return window;
-		if(this.isSeaMonkey) {
-			var ws = Services.wm.getEnumerator(null);
-			while(ws.hasMoreElements()) {
-				window = ws.getNext();
-				if(this.isTargetWindow(window))
-					return window;
-			}
-		}
+		if(this.isSeaMonkey) for(var window in this.windows)
+			return window;
 		return null;
 	},
 	isTargetWindow: function(window) {
@@ -611,22 +601,21 @@ var windowsObserver = {
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
 			this.restoreAppButtonWidth();
-			this.windows.forEach(function(window) {
+			for(var window in this.windows) {
 				var document = window.document;
 				this.appButtonNA = false;
 				if(pVal && !this.appButtonCssURI)
 					this.fixAppButtonWidth(document);
 				this.updateAppButtonWidth(document, true);
-			}, this);
+			}
 		}
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
-			this.windows.forEach(function(window) {
+			for(var window in this.windows)
 				this.patchTabBrowserDND(window, window.gBrowser, pVal, true);
-			}, this);
 		}
 		else if(pName == "makeNewEmptyTabsPrivate") {
 			var hide = pVal == 1;
-			this.windows.forEach(function(window) {
+			for(var window in this.windows) {
 				var document = window.document;
 				var menuItem = document.getElementById(this.newTabMenuId);
 				if(menuItem)
@@ -634,17 +623,15 @@ var windowsObserver = {
 				var appMenuItem = document.getElementById(this.newTabAppMenuId);
 				if(appMenuItem)
 					appMenuItem.hidden = hide;
-			}, this);
+			}
 		}
 		else if(pName == "patchDownloads") {
-			if(!pVal) this.windows.forEach(function(window) {
+			if(!pVal) for(var window in this.windows)
 				this.updateDownloadPanel(window, this.isPrivateWindow(window));
-			}, this);
 		}
 		else if(pName == "allowOpenExternalLinksInPrivateTabs") {
-			this.windows.forEach(function(window) {
+			for(var window in this.windows)
 				this.patchBrowserLoadURI(window, !pVal);
-			}, this);
 		}
 		else if(pName == "enablePrivateProtocol") {
 			if(pVal)
@@ -1164,9 +1151,9 @@ var windowsObserver = {
 	},
 	askToClosePrivateTabs: function() {
 		var privateTabs = 0;
-		this.windows.forEach(function(window) {
+		for(var window in this.windows) {
 			if(this.isPrivateWindow(window))
-				return;
+				continue;
 			Array.forEach(
 				window.gBrowser.tabs,
 				function(tab) {
@@ -1175,7 +1162,7 @@ var windowsObserver = {
 				},
 				this
 			);
-		}, this);
+		}
 		_log("askToClosePrivateTabs(): tabs count: " + privateTabs);
 		if(!privateTabs)
 			return;
@@ -1195,12 +1182,9 @@ var windowsObserver = {
 			"",
 			null, {}
 		) != 1;
-		closeTabs && this.windows.forEach(function(window) {
-			if(this.isPrivateWindow(window))
-				return;
-			if(this.closePrivateTabs(window))
+		if(closeTabs) for(var window in this.windows)
+			if(!this.isPrivateWindow(window) && this.closePrivateTabs(window))
 				window.setTimeout(window.close, 0);
-		}, this);
 	},
 	get cleanupClosedPrivateTabs() {
 		return prefs.get("rememberClosedPrivateTabs")
@@ -1239,7 +1223,8 @@ var windowsObserver = {
 		_log("Forget about " + closedTabs.length + " closed tabs");
 	},
 	forgetAllClosedTabs: function() {
-		this.windows.forEach(this.forgetClosedTabs, this);
+		for(var window in this.windows)
+			this.forgetClosedTabs(window);
 	},
 	_hasPbExitObserver: false,
 	addPbExitObserver: function(add) {
@@ -2581,14 +2566,14 @@ var windowsObserver = {
 		var hasHotkeys = !!this.hotkeys;
 		var keyEvent = this.keyEvent;
 		var keyHighPriority = this.keyHighPriority;
-		this.windows.forEach(function(window) {
+		for(var window in this.windows) {
 			window.removeEventListener("keydown", this, true);
 			window.removeEventListener("keydown", this, false);
 			window.removeEventListener("keypress", this, true);
 			window.removeEventListener("keypress", this, false);
 			hasHotkeys && window.addEventListener(keyEvent, this, keyHighPriority);
 			if(!updateAll)
-				return;
+				continue;
 			var document = window.document;
 			this.getHotkeysNodes(document, "*").forEach(function(node) {
 				node.removeAttribute("key");
@@ -2597,7 +2582,7 @@ var windowsObserver = {
 					node.removeAttribute("tooltiptext");
 			}, this);
 			hasHotkeys && this.setHotkeysText(document);
-		}, this);
+		}
 	},
 
 	isEmptyTab: function(tab, gBrowser) {
@@ -3097,9 +3082,10 @@ var windowsObserver = {
 			ourWindow = tabOrWindow;
 		else if(tabOrWindow.ownerDocument)
 			ourTab = tabOrWindow;
-		return !this.windows.some(function(window) {
-			return window != ourWindow && this.hasPrivateTab(window, ourTab);
-		}, this);
+		for(var window in this.windows)
+			if(window != ourWindow && this.hasPrivateTab(window, ourTab))
+				return false;
+		return true;
 	},
 	hasPrivateTab: function(window, ignoreTab) {
 		return Array.some(
