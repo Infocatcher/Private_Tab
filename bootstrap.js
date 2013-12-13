@@ -151,7 +151,9 @@ var windowsObserver = {
 				this.hasPrivateTab(window)
 				&& this.isLastPrivate(window)
 			) {
+				_log("Closing window with last private tab(s)");
 				if(this.forbidCloseLastPrivate()) {
+					_log("Prevent closing window with last private tab(s)");
 					e.preventDefault();
 					return;
 				}
