@@ -1044,8 +1044,8 @@ var windowsObserver = {
 			this.toggleTabPrivate(tab, isPrivate);
 		else {
 			window.setTimeout(function() {
-				if(tab.parentNode) // Handle only not yet closed tabs
-					this.setTabState(tab);
+				if(tab.parentNode) // Handle only not yet closed tabs + check attribute from nsISessionStore
+					this.setTabState(tab, tab.hasAttribute(this.privateAttr) || undefined);
 			}.bind(this), 0);
 		}
 
