@@ -1093,6 +1093,10 @@ var windowsObserver = {
 	checkForLastPrivateTab: function(e) {
 		var tab = e.originalTarget || e.target;
 		var window = tab.ownerDocument.defaultView;
+		if(!("privateTab" in window)) {
+			_log("checkForLastPrivateTab(): window is closing, do nothing");
+			return;
+		}
 		if(
 			window.privateTab._checkLastPrivate
 			&& this.isPrivateTab(tab)
