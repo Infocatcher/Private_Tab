@@ -1972,6 +1972,7 @@ var windowsObserver = {
 		if("CustomizableUI" in window) try { // Australis
 			this.addButtonToPalette(window, tb);
 			window.CustomizableUI.ensureWidgetPlacedInWindow(tb.id, window);
+			this.updateButtonAfterTabs(window);
 			_log("Toolbar button: use CustomizableUI.ensureWidgetPlacedInWindow()");
 			return;
 		}
@@ -2071,10 +2072,13 @@ var windowsObserver = {
 	},
 	updateToolbars: function(e) {
 		var window = e.currentTarget;
-		var document = window.document;
 		window.setTimeout(function() {
 			this.setupListAllTabs(window, true);
 		}.bind(this), 0);
+		this.updateButtonAfterTabs(window);
+	},
+	updateButtonAfterTabs: function(window) {
+		var document = window.document;
 		var tbBtn = document.getElementById(this.toolbarButtonId);
 		this.updateShowAfterTabs(tbBtn, document);
 		if(!tbBtn)
