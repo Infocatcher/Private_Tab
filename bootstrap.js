@@ -1209,7 +1209,7 @@ var windowsObserver = {
 			_log("Forget about closed tab #" + i + (_secondTry ? " (workaround for SeaMonkey)" : ""));
 			return;
 		}
-		var msg = "Can't forget about closed private tab: tab not found";
+		var msg = "Can't forget about closed private tab: undo close list doesn't contain private tabs";
 		if(silentFail)
 			_log(msg + ", but all should be OK");
 		else
