@@ -2523,10 +2523,10 @@ var windowsObserver = {
 		_log("Keys:\n" + JSON.stringify(keys, null, "\t"));
 	},
 	getHotkeysNodes: function(document, attr) {
-		var nodes = Array.slice(document.getElementsByAttribute(this.cmdAttr, attr));
+		var nodes = [...document.getElementsByAttribute(this.cmdAttr, attr)];
 		var tabContext = this.getTabContextMenu(document);
 		if(tabContext && !tabContext.id)
-			nodes.push.apply(nodes, Array.slice(tabContext.getElementsByAttribute(this.cmdAttr, attr)));
+			nodes.push.apply(nodes, [...tabContext.getElementsByAttribute(this.cmdAttr, attr)]);
 		return nodes;
 	},
 	keyInTooltip: function(node) {
