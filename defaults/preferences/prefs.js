@@ -47,6 +47,9 @@ pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.patchDownloads", true);
 pref("extensions.privateTab.enablePrivateProtocol", true);
 pref("extensions.privateTab.showItemInTaskBarJumpList", true); // Works only if enablePrivateProtocol == true
+pref("extensions.privateTab.usePrivateWindowStyle", true);
+// true  - apply private window style to private tabs (and show tab private state)
+// false - show window private state
 
 pref("extensions.privateTab.debug", false);
 pref("extensions.privateTab.debug.verbose", false);

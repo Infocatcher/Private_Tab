@@ -651,6 +651,10 @@ var windowsObserver = {
 			|| pName == "rememberClosedPrivateTabs.enableCleanup"
 		)
 			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
+		else if(pName == "usePrivateWindowStyle") {
+			for(var window in this.windows)
+				this.updateWindowTitle(window.gBrowser, undefined, true);
+		}
 		else if(pName == "debug")
 			_dbg = pVal;
 		else if(pName == "debug.verbose")
@@ -2892,7 +2896,7 @@ var windowsObserver = {
 			delete window._privateTabAppButtonWatcher;
 		}
 	},
-	updateWindowTitle: function(gBrowser, isPrivate) {
+	updateWindowTitle: function(gBrowser, isPrivate, force) {
 		var document = gBrowser.ownerDocument;
 		if(isPrivate === undefined)
 			isPrivate = this.isPrivateWindow(document.defaultView.content);
@@ -2902,7 +2906,7 @@ var windowsObserver = {
 				|| root.getAttribute("privateTab_titlemodifier_privatebrowsing")
 			: root.getAttribute("titlemodifier_normal")
 				|| root.getAttribute("privateTab_titlemodifier_normal");
-		if(root.getAttribute("titlemodifier") == tm)
+		if(!force && root.getAttribute("titlemodifier") == tm)
 			return;
 		_log("updateWindowTitle() " + tm);
 		root.setAttribute("titlemodifier", tm);
@@ -2912,21 +2916,27 @@ var windowsObserver = {
 				? root.getAttribute("title_privatebrowsing")
 				: root.getAttribute("title_normal")
 		);
-		if(isPrivate) {
-			var pbTemp = !PrivateBrowsingUtils.permanentPrivateBrowsing;
-			root.setAttribute("privatebrowsingmode", pbTemp ? "temporary" : "permanent");
-			pbTemp && this.fixAppButtonWidth(document);
-		}
-		else {
-			root.removeAttribute("privatebrowsingmode");
-		}
-		// See chrome://browser/content/browser.js, gPrivateBrowsingUI.init()
-		// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
-		if(Services.appinfo.OS == "Darwin") {
-			if(isPrivate && pbTemp)
-				root.setAttribute("drawintitlebar", "true");
-			else
-				root.removeAttribute("drawintitlebar");
+		var usePrivateWindowStyle = prefs.get("usePrivateWindowStyle");
+		if(force || usePrivateWindowStyle) {
+			var indicatePrivate = usePrivateWindowStyle
+				? isPrivate
+				: this.isPrivateWindow(document.defaultView);
+			if(indicatePrivate) {
+				var pbTemp = !PrivateBrowsingUtils.permanentPrivateBrowsing;
+				root.setAttribute("privatebrowsingmode", pbTemp ? "temporary" : "permanent");
+				pbTemp && this.fixAppButtonWidth(document);
+			}
+			else {
+				root.removeAttribute("privatebrowsingmode");
+			}
+			// See chrome://browser/content/browser.js, gPrivateBrowsingUI.init()
+			// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
+			if(Services.appinfo.OS == "Darwin") {
+				if(indicatePrivate && pbTemp)
+					root.setAttribute("drawintitlebar", "true");
+				else
+					root.removeAttribute("drawintitlebar");
+			}
 		}
 		gBrowser.updateTitlebar();
 		this.privateChanged(document, isPrivate);
