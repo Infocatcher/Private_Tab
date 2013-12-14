@@ -13,6 +13,7 @@
 `x` Исправлено обновление панели загрузок в Firefox 28.0a1+<br>
 `x` Исправлено добавление кнопки на панель инструментов в Firefox 28.0a1+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>)<br>
 `+` Добавлены настройки для изменения адреса, который будет открываться в новых пустых вкладках (<em>extensions.privateTab.newPrivateTabURL</em> и <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>)<br>
+`+` Добавлена возможность отключения стилей приватного окна, если активна приватная вкладка (настройка <em>extensions.privateTab.usePrivateWindowStyle</em>)<br>
 `*` Небольшие улучшения кода<br>
 `+` Обновлена польская локаль (pl), спасибо <a href="https://github.com/marcinsu">marcinsu</a><br>
 `*` Обновлена венгерская локаль (hu), спасибо <a href="https://github.com/evenorbert">evenorbert</a><br>

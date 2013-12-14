@@ -13,6 +13,7 @@
 `x` Correctly update download panel in Firefox 28.0a1+<br>
 `x` Correctly insert button into toolbar in Firefox 28.0a1+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>)<br>
 `+` Added preferences to open user-defined URL in new empty private tabs (<em>extensions.privateTab.newPrivateTabURL</em> and <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>)<br>
+`+` Added ability to disable private window-like styles, if current tab is private (<em>extensions.privateTab.usePrivateWindowStyle</em> preference)<br>
 `*` Minor code improvements<br>
 `*` Updated Polish locale (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a><br>
 `*` Updated Hungarian locale (hu), thanks to <a href="https://github.com/evenorbert">evenorbert</a><br>
