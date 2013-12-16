@@ -50,6 +50,8 @@ pref("extensions.privateTab.showItemInTaskBarJumpList", true); // Works only if 
 pref("extensions.privateTab.usePrivateWindowStyle", true);
 // true  - apply private window style to private tabs (and show tab private state)
 // false - show window private state
+pref("extensions.privateTab.stylesHighPriority", true); // Set "!important" flag to force override third-party styles
+pref("extensions.privateTab.stylesHighPriority.tree", true); // The same as above for private:///#... bookmarks inside XUL <tree>
 
 pref("extensions.privateTab.debug", false);
 pref("extensions.privateTab.debug.verbose", false);

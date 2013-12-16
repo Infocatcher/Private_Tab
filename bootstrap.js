@@ -655,6 +655,8 @@ var windowsObserver = {
 			for(var window in this.windows)
 				this.updateWindowTitle(window.gBrowser, undefined, true);
 		}
+		else if(pName == "stylesHighPriority" || pName == "stylesHighPriority.tree")
+			this.reloadStyles();
 		else if(pName == "debug")
 			_dbg = pVal;
 		else if(pName == "debug.verbose")
@@ -3188,19 +3190,21 @@ var windowsObserver = {
 					' + prefix + 'text-decoration-style: dashed;';
 			}
 		}
+		var important = prefs.get("stylesHighPriority") ? " !important" : "";
+		var importantTree = prefs.get("stylesHighPriority.tree") ? " !important" : "";
 		var cssStr = '\
 			/* Private Tab: main styles */\n\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '],\n\
 				.menuitem-iconic[' + this.privateAttr + '] {\n\
-					text-decoration: underline !important;\n\
-					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
-					' + prefix + 'text-decoration-style: dashed !important;\n\
+					text-decoration: underline' + important + ';\n\
+					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext' + important + ';\n\
+					' + prefix + 'text-decoration-style: dashed' + important + ';\n\
 				}\n\
 				.tabbrowser-tab[' + this.privateAttr + '][pinned] .tab-icon-image,\n\
 				.tabbrowser-tab[' + this.privateAttr + '][pinned] .tab-throbber {\n\
-					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext' + important + ';\n\
 				}\n\
 				#' + this.tabTipId + ' {\n\
 					color: ' + ttColor + ';' + ttAddStyles + '\n\
@@ -3251,9 +3255,9 @@ var windowsObserver = {
 			cssStr += '\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.bookmark-item[scheme="private"] {\n\
-					text-decoration: underline !important;\n\
-					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext !important;\n\
-					' + prefix + 'text-decoration-style: dashed !important;\n\
+					text-decoration: underline' + important + ';\n\
+					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext' + important + ';\n\
+					' + prefix + 'text-decoration-style: dashed' + important + ';\n\
 				}\n\
 			}\n\
 			@-moz-document url("chrome://browser/content/bookmarks/bookmarksPanel.xul"),\n\
@@ -3261,8 +3265,8 @@ var windowsObserver = {
 				url("chrome://communicator/content/bookmarks/bm-panel.xul"),\n\
 				url("chrome://communicator/content/bookmarks/bookmarksManager.xul") {\n\
 				treechildren::-moz-tree-cell-text(private) {\n\
-					border-bottom: 1px dashed -moz-nativehyperlinktext !important;\n\
-					margin-bottom: 1px !important;\n\
+					border-bottom: 1px dashed -moz-nativehyperlinktext' + importantTree + ';\n\
+					margin-bottom: 1px' + importantTree + ';\n\
 				}\n\
 			}';
 		}
