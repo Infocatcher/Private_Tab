@@ -648,7 +648,7 @@ var windowsObserver = {
 		}
 		else if(
 			pName == "rememberClosedPrivateTabs"
-			|| pName == "rememberClosedPrivateTabs.enableCleanup"
+			|| pName == "rememberClosedPrivateTabs.cleanup"
 		)
 			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
 		else if(pName == "usePrivateWindowStyle") {
@@ -1117,6 +1117,15 @@ var windowsObserver = {
 					newTab && window.gBrowser.moveTabTo(newTab, pos);
 				});
 			}
+			else if(
+				this.isSeaMonkey
+				&& prefs.get("rememberClosedPrivateTabs.cleanup") > 1
+			) { // SeaMonkey has some cache for fast tabs restoring and doesn't destroy closed tabs immediately
+				window.setTimeout(function() {
+					_log("Closed last private tab => forgetAllClosedTabs()");
+					this.forgetAllClosedTabs();
+				}.bind(this), 0);
+			}
 		}
 	},
 	cleanupClosedTab: function(e) {
@@ -1204,7 +1213,7 @@ var windowsObserver = {
 	},
 	get cleanupClosedPrivateTabs() {
 		return prefs.get("rememberClosedPrivateTabs")
-			&& prefs.get("rememberClosedPrivateTabs.enableCleanup");
+			&& prefs.get("rememberClosedPrivateTabs.cleanup") > 0;
 	},
 	getClosedPrivateTabs: function(window) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));

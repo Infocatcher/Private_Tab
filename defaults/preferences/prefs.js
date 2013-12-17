@@ -25,9 +25,13 @@ pref("extensions.privateTab.dragAndDropBehavior", 0);
 // 2 - use target private state
 pref("extensions.privateTab.dragAndDropTabsBetweenDifferentWindows", true);
 pref("extensions.privateTab.rememberClosedPrivateTabs", false);
-pref("extensions.privateTab.rememberClosedPrivateTabs.enableCleanup", true);
-// Remove closed private tabs from undo close list in closing windows and after closing of
-// last private tab/window (only for rememberClosedPrivateTabs = true)
+// But be careful: undo close history with private tabs will be saved to the disk!
+pref("extensions.privateTab.rememberClosedPrivateTabs.cleanup", 2); // (only for rememberClosedPrivateTabs == true)
+// Remove closed private tabs from undo close history in closing windows and after closing of last private tab/window
+// 0 - disable cleanup
+// 1 - perform cleanup after "last-pb-context-exited" notification
+// 2 - additionally perform cleanup after closing of last private tab in SeaMonkey (SeaMonkey has
+//     some cache for fast tabs restoring and doesn't destroy closed tabs immediately)
 pref("extensions.privateTab.savePrivateTabsInSessions", false);
 pref("extensions.privateTab.makeNewEmptyTabsPrivate", 0);
 pref("extensions.privateTab.makeNewEmptyWindowsPrivate", 0);
