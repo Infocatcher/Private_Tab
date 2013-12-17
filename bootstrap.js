@@ -1140,6 +1140,10 @@ var windowsObserver = {
 			_log('Found "closedownloadtabs-closed" attribute');
 			silentFail = true;
 		}
+		else if(this.isBlankTab(tab)) {
+			_log("Closed blank tab");
+			silentFail = true;
+		}
 		this.forgetClosedTab(window, silentFail);
 		if(this.isSeaMonkey)
 			window.setTimeout(this.forgetClosedTab.bind(this, window, silentFail, true), 0);
@@ -2620,6 +2624,17 @@ var windowsObserver = {
 		var emptyTabLabel = this.getTabBrowserString("tabs.emptyTabTitle", gBrowser)
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
 		return tabLabel == emptyTabLabel;
+	},
+	isBlankTab: function(tab) {
+		var window = tab.ownerDocument.defaultView;
+		// See chrome://browser/content/browser.js
+		if("isTabEmpty" in window) try {
+			return window.isTabEmpty(tab);
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
+		return false;
 	},
 	getTabBrowserString: function(id, gBrowser) {
 		try {
