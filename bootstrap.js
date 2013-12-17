@@ -649,8 +649,11 @@ var windowsObserver = {
 		else if(
 			pName == "rememberClosedPrivateTabs"
 			|| pName == "rememberClosedPrivateTabs.cleanup"
-		)
+		) {
+			if(pName == "rememberClosedPrivateTabs" && !prefs.get(pName))
+				this.forgetAllClosedTabs();
 			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
+		}
 		else if(pName == "usePrivateWindowStyle") {
 			for(var window in this.windows)
 				this.updateWindowTitle(window.gBrowser, undefined, true);
