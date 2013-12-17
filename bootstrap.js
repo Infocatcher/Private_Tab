@@ -3226,6 +3226,11 @@ var windowsObserver = {
 				toolbar[iconsize="small"] #' + this.afterTabsButtonId + ' {\n\
 					list-style-image: url("chrome://privatetab/content/privacy-16.png") !important;\n\
 				}\n\
+				/* Special icon for Australis (menu panel and customization area) */\n\
+				#' + this.toolbarButtonId + '[cui-areatype="menu-panel"],\n\
+				#customization-palette > toolbarpaletteitem[place="palette"] > #' + this.toolbarButtonId + ' {\n\
+					list-style-image: url("chrome://privatetab/content/privacy-32.png") !important;\n\
+				}\n\
 				#' + this.afterTabsButtonId + ' > .toolbarbutton-icon {\n\
 					margin: 0 !important;\n\
 				}\n\
