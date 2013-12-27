@@ -1475,7 +1475,7 @@ var windowsObserver = {
 			this.initAppMenu(window, popup);
 		else if(id == "contentAreaContextMenu")
 			this.updatePageContext(window);
-		else if(id == "alltabs-popup")
+		else if(id == "alltabs-popup" || id == "tm-tabsList-menu")
 			this.updateListAllTabs(window, popup);
 		else if(id == "tabContextMenu")
 			this.updateTabContext(window);
@@ -2341,17 +2341,21 @@ var windowsObserver = {
 			|| document.getAnonymousElementByAttribute(window.gBrowser.tabContainer, "anonid", "alltabs-popup"); // SeaMonkey
 	},
 	setupListAllTabs: function(window, init) {
-		// Note: we can't add listener to <menupopup> for button in palette
-		var popup = this.getListAllTabsPopup(window, !init);
-		if(!popup) {
-			_log("setupListAllTabs(" + init + "): List all tabs popup not found");
-			return;
-		}
 		_log("setupListAllTabs(" + init + ")");
-		if(init)
-			popup.addEventListener("popupshowing", this, false);
-		else
-			popup.removeEventListener("popupshowing", this, false);
+		// Note: we can't add listener to <menupopup> for button in palette, so we should
+		// also call setupListAllTabs() after "aftercustomization" event
+		[
+			this.getListAllTabsPopup(window, !init),
+			window.document.getElementById("tm-tabsList-menu") // Tab Mix Plus
+		].forEach(function(popup) {
+			if(!popup)
+				return;
+			_log("setupListAllTabs(" + init + "): #" + (popup.id || popup.getAttribute("anonid")));
+			if(init)
+				popup.addEventListener("popupshowing", this, false);
+			else
+				popup.removeEventListener("popupshowing", this, false);
+		}, this);
 	},
 	updateListAllTabs: function(window, popup) {
 		_log("updateListAllTabs()");
