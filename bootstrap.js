@@ -354,6 +354,7 @@ var windowsObserver = {
 			if(!PrivateBrowsingUtils.permanentPrivateBrowsing)
 				root.setAttribute("privatebrowsingmode", "temporary");
 			root.setAttribute(this.privateAttr, "true");
+			root.setAttribute(this.rootPrivateAttr, "true");
 		}
 		window.setTimeout(function() {
 			// Wait for third-party styles like https://addons.mozilla.org/addon/movable-firefox-button/
@@ -2942,6 +2943,10 @@ var windowsObserver = {
 		if(!force && root.getAttribute("titlemodifier") == tm)
 			return;
 		_log("updateWindowTitle() " + tm);
+		if(isPrivate)
+			root.setAttribute(this.rootPrivateAttr, "true");
+		else
+			root.removeAttribute(this.rootPrivateAttr);
 		root.setAttribute("titlemodifier", tm);
 		root.setAttribute(
 			"title",
@@ -3158,6 +3163,7 @@ var windowsObserver = {
 	},
 
 	privateAttr: "privateTab-isPrivate",
+	rootPrivateAttr: "privateTab-selectedTabIsPrivate",
 	get ss() {
 		delete this.ss;
 		return this.ss = (
