@@ -6,7 +6,7 @@
 * Can't open new private tab, if installed <a href="https://addons.mozilla.org/addon/scriptify/">Scriptify</a>-based extension: please use <a href="https://addons.mozilla.org/addon/greasemonkey/">Greasemonkey</a> or <a href="https://addons.mozilla.org/addon/scriptish/">Scriptish</a> instead (<a href="https://github.com/Infocatcher/Private_Tab/issues/110">#110</a>)
 
 #### Styles:
-You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab) and `#main-window[privateTab-isPrivate]` (built-in private window) selectors in styles for <a href="http://kb.mozillazine.org/UserChrome.css">userChrome.css</a>/<a href="https://addons.mozilla.org/addon/stylish/">Stylish</a>.
+You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window[privateTab-selectedTabIsPrivate]` (selected tab is private) and `#main-window[privateTab-isPrivate]` (built-in private window) selectors in styles for <a href="http://kb.mozillazine.org/UserChrome.css">userChrome.css</a>/<a href="https://addons.mozilla.org/addon/stylish/">Stylish</a>.
 <br>Example styles:
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_underline">change underline of private tabs</a>
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_icon">change icon</a>
