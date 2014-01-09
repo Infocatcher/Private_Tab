@@ -1671,7 +1671,12 @@ var windowsObserver = {
 		var gContextMenu = window.gContextMenu;
 		var uri = gContextMenu.linkURL;
 		var doc = gContextMenu.target.ownerDocument;
-		window.urlSecurityCheck(uri, doc.nodePrincipal);
+		try {
+			window.urlSecurityCheck(uri, doc.nodePrincipal);
+		}
+		catch(e) {
+			throw typeof e == "string" ? new Error(e) : e;
+		}
 		this.openURIInNewPrivateTab(window, uri, doc, {
 			toggleInBackground: toggleInBackground
 		});
