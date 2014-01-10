@@ -148,7 +148,7 @@ var windowsObserver = {
 				return;
 			}
 			if(
-				this.hasPrivateTab(window)
+				(this.isPrivateWindow(window) || this.hasPrivateTab(window))
 				&& this.isLastPrivate(window)
 			) {
 				_log("Closing window with last private tab(s)");
@@ -3180,9 +3180,15 @@ var windowsObserver = {
 			else if(tabOrWindow.ownerDocument)
 				ourTab = tabOrWindow;
 		}
-		for(var window in this.windows)
-			if(window != ourWindow && this.hasPrivateTab(window, ourTab))
+		for(var window in this.windows) {
+			if(
+				window != ourWindow && (
+					this.isPrivateWindow(window)
+					|| this.hasPrivateTab(window, ourTab)
+				)
+			)
 				return false;
+		}
 		return true;
 	},
 	hasPrivateTab: function(window, ignoreTab) {
