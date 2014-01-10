@@ -1277,7 +1277,15 @@ var windowsObserver = {
 		)
 			return;
 		var state = JSON.parse(stateString);
-		var sessionChanged = this.filterSessionWindows(state.windows);
+		var sessionChanged = false;
+		if(this.filterSessionWindows(state.windows)) {
+			sessionChanged = true;
+			_dbgv && _log("filterSession(): cleanup state.windows");
+		}
+		if(this.filterSessionWindows(state._closedWindows)) {
+			sessionChanged = true;
+			_dbgv && _log("filterSession(): cleanup state._closedWindows");
+		}
 		if(!sessionChanged)
 			return;
 		var newStateString = JSON.stringify(state);
@@ -1287,6 +1295,8 @@ var windowsObserver = {
 		//_log("Try override session state");
 	},
 	filterSessionWindows: function(windows) {
+		if(!windows)
+			return false;
 		var sessionChanged = false;
 		windows.forEach(function(windowState) {
 			if(windowState.isPrivate) // Browser should ignore private windows itself
