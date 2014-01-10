@@ -1316,6 +1316,17 @@ var windowsObserver = {
 				}
 				return !isPrivate;
 			}, this);
+			if(windowState._closedTabs) {
+				windowState._closedTabs = windowState._closedTabs.filter(function(closedTabState) {
+					var tabState = closedTabState.state || closedTabState;
+					var isPrivate = "attributes" in tabState && this.privateAttr in tabState.attributes;
+					if(isPrivate) {
+						sessionChanged = true;
+						_dbgv && _log("filterSession() -> filterSessionWindows(): cleanup windowState._closedTabs");
+					}
+					return !isPrivate;
+				}, this);
+			}
 			if(windowChanged) {
 				windowState.selected = newSelected || tabs.length;
 				//_log("Correct selected tab: " + oldSelected + " => " + newSelected + " => " + windowState.selected);
