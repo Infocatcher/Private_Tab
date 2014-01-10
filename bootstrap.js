@@ -1277,8 +1277,18 @@ var windowsObserver = {
 		)
 			return;
 		var state = JSON.parse(stateString);
+		var sessionChanged = this.filterSessionWindows(state.windows);
+		if(!sessionChanged)
+			return;
+		var newStateString = JSON.stringify(state);
+		if(newStateString == stateString)
+			return;
+		stateData.data = newStateString;
+		//_log("Try override session state");
+	},
+	filterSessionWindows: function(windows) {
 		var sessionChanged = false;
-		state.windows.forEach(function(windowState) {
+		windows.forEach(function(windowState) {
 			if(windowState.isPrivate) // Browser should ignore private windows itself
 				return;
 			var windowChanged = false;
@@ -1302,13 +1312,7 @@ var windowsObserver = {
 			}
 			//~ todo: what to do with empty window without tabs ?
 		}, this);
-		if(!sessionChanged)
-			return;
-		var newStateString = JSON.stringify(state);
-		if(newStateString == stateString)
-			return;
-		stateData.data = newStateString;
-		//_log("Try override session state");
+		return sessionChanged;
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
