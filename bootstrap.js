@@ -656,7 +656,10 @@ var windowsObserver = {
 			pName == "rememberClosedPrivateTabs"
 			|| pName == "rememberClosedPrivateTabs.cleanup"
 		) {
-			if(pName == "rememberClosedPrivateTabs" && !prefs.get(pName))
+			if(
+				pName == "rememberClosedPrivateTabs" && !pVal
+				|| pName == "rememberClosedPrivateTabs.cleanup" && pVal > 0 && this.isLastPrivate()
+			)
 				this.forgetAllClosedTabs();
 			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
 		}
@@ -3171,10 +3174,12 @@ var windowsObserver = {
 
 	isLastPrivate: function(tabOrWindow) {
 		var ourTab, ourWindow;
-		if(tabOrWindow instanceof Components.interfaces.nsIDOMChromeWindow)
-			ourWindow = tabOrWindow;
-		else if(tabOrWindow.ownerDocument)
-			ourTab = tabOrWindow;
+		if(tabOrWindow) {
+			if(tabOrWindow instanceof Components.interfaces.nsIDOMChromeWindow)
+				ourWindow = tabOrWindow;
+			else if(tabOrWindow.ownerDocument)
+				ourTab = tabOrWindow;
+		}
 		for(var window in this.windows)
 			if(window != ourWindow && this.hasPrivateTab(window, ourTab))
 				return false;
