@@ -170,8 +170,13 @@ var windowsObserver = {
 		}
 		if( //~ todo: this looks like SeaMonkey bug... and may be fixed later
 			(this.isSeaMonkey || !this.isPrivateWindow(window))
-			&& !prefs.get("savePrivateTabsInSessions")
+			&& (
+				!prefs.get("rememberClosedPrivateTabs")
+				|| prefs.get("rememberClosedPrivateTabs.cleanup") > 0
+			)
 		) {
+			// Note: we don't have public API to tweak closed windows data,
+			// so we remove all private tabs from closing window
 			_log(e.type + " => closePrivateTabs()");
 			this.closePrivateTabs(window);
 		}
