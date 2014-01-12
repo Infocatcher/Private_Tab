@@ -3159,7 +3159,7 @@ var windowsObserver = {
 						return { value: isPrivate };
 					}
 					var stack = new Error().stack;
-					var fromSearchBar = stack.indexOf("@chrome://browser/content/search/search.xml:" != -1);
+					var fromSearchBar = stack.indexOf("@chrome://browser/content/search/search.xml:") != -1;
 					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads") && (
 						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
 						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
