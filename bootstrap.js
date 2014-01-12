@@ -427,6 +427,7 @@ var windowsObserver = {
 		this.patchWarnAboutClosingWindow(window, false, !force);
 		if(!prefs.get("allowOpenExternalLinksInPrivateTabs"))
 			this.patchBrowserLoadURI(window, false, !force);
+		this.patchSearchBar(window, false, !force);
 		this.patchTabIcons(window, false, !force);
 		this.patchBrowserThumbnails(window, false, !force);
 
@@ -793,6 +794,42 @@ var windowsObserver = {
 		}
 		else {
 			patcher.unwrapFunction(browserProto, "loadURIWithFlags", "browser.loadURIWithFlags", forceDestroy);
+		}
+	},
+	patchSearchBar: function(window, applyPatch, forceDestroy) {
+		if(!this.isSeaMonkey)
+			return;
+		var document = window.document;
+		var searchBar = document.getElementById("searchbar");
+		if(!searchBar) // We can't patch node inside toolbar palette
+			return;
+		if(!("usePrivateBrowsing" in searchBar)) {
+			_log("patchSearchBar(): can't patch, usePrivateBrowsing property not found");
+			return;
+		}
+		var bakKey = "privateTabOrig::usePrivateBrowsing";
+		if(!applyPatch ^ bakKey in searchBar)
+			return;
+		_log("patchSearchBar(" + applyPatch + ")");
+		if(applyPatch) {
+			searchBar[bakKey] = Object.getOwnPropertyDescriptor(searchBar, "usePrivateBrowsing");
+			Object.defineProperty(searchBar, "usePrivateBrowsing", {
+				get: function() {
+					_log("patchSearchBar(): return state of selected tab");
+					var window = this.ownerDocument.defaultView.top;
+					return window.PrivateBrowsingUtils.isWindowPrivate(window.content);
+				},
+				configurable: true,
+				enumerable: true
+			});
+		}
+		else {
+			var origDesc = searchBar[bakKey];
+			delete searchBar[bakKey];
+			if(origDesc)
+				Object.defineProperty(searchBar, "usePrivateBrowsing", origDesc);
+			else
+				delete searchBar.usePrivateBrowsing;
 		}
 	},
 	patchBrowsers: function(gBrowser, applyPatch, forceDestroy) {
@@ -2141,6 +2178,7 @@ var windowsObserver = {
 		var window = e.currentTarget;
 		window.setTimeout(function() {
 			this.setupListAllTabs(window, true);
+			this.patchSearchBar(window, true);
 		}.bind(this), 0);
 		this.updateButtonAfterTabs(window);
 	},
@@ -3415,14 +3453,14 @@ API.prototype = {
 	_onFirstPrivateTab: function(window, tab) {
 		this._onFirstPrivateTab = function() {};
 		_log("First private tab in window");
-		if(
-			!prefs.get("allowOpenExternalLinksInPrivateTabs")
-			&& !privateTabInternal.isPrivateWindow(window)
-		) {
-			window.setTimeout(function() {
-				privateTabInternal.patchBrowserLoadURI(window, true);
-			}, 50);
-		}
+		if(privateTabInternal.isPrivateWindow(window))
+			return;
+		if(privateTabInternal.isSeaMonkey) window.setTimeout(function() {
+			privateTabInternal.patchSearchBar(window, true);
+		}, 0);
+		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) window.setTimeout(function() {
+			privateTabInternal.patchBrowserLoadURI(window, true);
+		}, 50);
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
