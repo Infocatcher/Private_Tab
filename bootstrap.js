@@ -3120,17 +3120,17 @@ var windowsObserver = {
 						_log(key + "(): override to " + isPrivate);
 						return { value: isPrivate };
 					}
-					if(!prefs.get("patchDownloads"))
-						return false;
 					var stack = new Error().stack;
-					_dbgv && _log(key + "():\n" + stack);
-					if(
+					var fromSearchBar = stack.indexOf("@chrome://browser/content/search/search.xml:" != -1);
+					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads") && (
 						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
 						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
 						|| stack.indexOf("@resource://app/components/DownloadsUI.js:") != -1
 						|| stack.indexOf("@resource://gre/modules/DownloadsCommon.jsm:") != -1
 						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
-					) try {
+					);
+					_dbgv && _log(key + "():\n" + stack);
+					if(fromSearchBar || fromDownloads) try {
 						var isPrivate = _this.isPrivateWindow(window.content);
 						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
 						return { value: isPrivate };
