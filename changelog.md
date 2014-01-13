@@ -16,6 +16,7 @@
 `+` Added ability to disable private window-like styles, if current tab is private (<em>extensions.privateTab.usePrivateWindowStyle</em> preference)<br>
 `+` Simplified ability to override private tabs/bookmarks styles from other themes/extensions (disabled by default, see <em>extensions.privateTab.stylesHighPriority</em>* preferences) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>)<br>
 `+` Added 32×32px icon for Australis (used in menu panel and in customization area) (<a href="https://github.com/Infocatcher/Private_Tab/issues/128">#128</a>)<br>
+`x` Correctly don't save search bar history from private tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/129">#129</a>).<br>
 `*` Minor code improvements<br>
 `*` Updated Polish locale (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a><br>
 `*` Updated Hungarian locale (hu), thanks to <a href="https://github.com/evenorbert">evenorbert</a><br>
