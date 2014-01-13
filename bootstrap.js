@@ -51,8 +51,6 @@ var windowsObserver = {
 			this.initWindow(window, reason);
 		Services.ww.registerNotification(this);
 		Services.obs.addObserver(this, "sessionstore-state-write", false);
-		if(this.cleanupClosedPrivateTabs)
-			this.addPbExitObserver(true);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -72,9 +70,7 @@ var windowsObserver = {
 			// nsISessionStore may save data after our shutdown
 			Services.obs.removeObserver(this, "sessionstore-state-write");
 
-			if(this.cleanupClosedPrivateTabs)
-				this.addPbExitObserver(false);
-
+			this.addPbExitObserver(false);
 			this.unloadStyles();
 			this.restoreAppButtonWidth();
 			this.patchPrivateBrowsingUtils(false);
@@ -105,8 +101,12 @@ var windowsObserver = {
 			this.setupJumpLists(true, true);
 		}
 		else if(topic == "last-pb-context-exited") {
-			_log(topic + " => forgetAllClosedTabs()");
-			this.forgetAllClosedTabs();
+			_log(topic);
+			if(this.cleanupClosedPrivateTabs) {
+				_log(topic + " => forgetAllClosedTabs()");
+				this.forgetAllClosedTabs();
+			}
+			this.clearSearchBar();
 		}
 	},
 
@@ -662,7 +662,6 @@ var windowsObserver = {
 				|| pName == "rememberClosedPrivateTabs.cleanup" && pVal > 0 && this.isLastPrivate()
 			)
 				this.forgetAllClosedTabs();
-			this.addPbExitObserver(this.cleanupClosedPrivateTabs);
 		}
 		else if(pName == "usePrivateWindowStyle") {
 			for(var window in this.windows)
@@ -817,7 +816,14 @@ var windowsObserver = {
 				get: function() {
 					_log("patchSearchBar(): return state of selected tab");
 					var window = this.ownerDocument.defaultView.top;
-					return window.PrivateBrowsingUtils.isWindowPrivate(window.content);
+					var isPrivate = window.PrivateBrowsingUtils.isWindowPrivate(window.content);
+					if("privateTab" in window) {
+						var pt = window.privateTab;
+						pt._clearSearchBarUndo = true;
+						pt._clearSearchBarValue = isPrivate;
+						_dbgv && _log("_clearSearchBarValue: " + isPrivate);
+					}
+					return isPrivate;
 				},
 				configurable: true,
 				enumerable: true
@@ -1299,6 +1305,27 @@ var windowsObserver = {
 	forgetAllClosedTabs: function() {
 		for(var window in this.windows)
 			this.forgetClosedTabs(window);
+	},
+	clearSearchBar: function() {
+		for(var window in this.windows) {
+			var pt = window.privateTab;
+			if(pt && pt._clearSearchBarUndo) {
+				var searchBar = window.document.getElementById("searchbar");
+				if(searchBar) try {
+					var tb = searchBar.textbox;
+					if(pt._clearSearchBarValue) {
+						_log("Clear search bar value");
+						tb.value = "";
+					}
+					tb.editor.transactionManager.clear();
+					_log("Clear search bar undo buffer");
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+				}
+				pt._clearSearchBarUndo = pt._clearSearchBarValue = false;
+			}
+		}
 	},
 	_hasPbExitObserver: false,
 	addPbExitObserver: function(add) {
@@ -3172,6 +3199,12 @@ var windowsObserver = {
 					if(fromSearchBar || fromDownloads) try {
 						var isPrivate = _this.isPrivateWindow(window.content);
 						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
+						if(fromSearchBar && "privateTab" in window) {
+							var pt = window.privateTab;
+							pt._clearSearchBarUndo = true;
+							pt._clearSearchBarValue = isPrivate;
+							_dbgv && _log("_clearSearchBarValue: " + isPrivate);
+						}
 						return { value: isPrivate };
 					}
 					catch(e) {
@@ -3440,6 +3473,8 @@ API.prototype = {
 	_ssWindowBusyRestoreTimer: 0,
 	_updateDownloadPanelTimer: 0,
 	_checkLastPrivate: true,
+	_clearSearchBarUndo: false,
+	_clearSearchBarValue: false,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
@@ -3456,7 +3491,8 @@ API.prototype = {
 		_log("First private tab in window");
 		if(privateTabInternal.isPrivateWindow(window))
 			return;
-		if(privateTabInternal.isSeaMonkey) window.setTimeout(function() {
+		window.setTimeout(function() {
+			privateTabInternal.addPbExitObserver(true);
 			privateTabInternal.patchSearchBar(window, true);
 		}, 0);
 		if(!prefs.get("allowOpenExternalLinksInPrivateTabs")) window.setTimeout(function() {
