@@ -98,15 +98,21 @@ var windowsObserver = {
 		else if(topic == "browser-delayed-startup-finished") {
 			_log(topic + " => setupJumpLists()");
 			this.setupJumpListsLazy(false);
-			this.setupJumpLists(true, true);
+			subject.setTimeout(function() {
+				this.setupJumpLists(true, true);
+			}.bind(this), 0);
 		}
 		else if(topic == "last-pb-context-exited") {
 			_log(topic);
-			if(this.cleanupClosedPrivateTabs) {
-				_log(topic + " => forgetAllClosedTabs()");
-				this.forgetAllClosedTabs();
-			}
-			this.clearSearchBar();
+			var timer = Components.classes["@mozilla.org/timer;1"]
+				.createInstance(Components.interfaces.nsITimer);
+			timer.init(function() {
+				if(this.cleanupClosedPrivateTabs) {
+					_log(topic + " => forgetAllClosedTabs()");
+					this.forgetAllClosedTabs();
+				}
+				this.clearSearchBar();
+			}.bind(this), 0, timer.TYPE_ONE_SHOT);
 		}
 	},
 
