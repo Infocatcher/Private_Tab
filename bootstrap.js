@@ -298,6 +298,10 @@ var windowsObserver = {
 		function updateJumpList() {
 			var WinTaskbarJumpList = global.WinTaskbarJumpList;
 			var pending = WinTaskbarJumpList._pendingStatements;
+			if(!pending) {
+				pending = {};
+				Components.utils.reportError(LOG_PREFIX + "updateJumpList(): can't get state of pending statements");
+			}
 			var timer = Components.classes["@mozilla.org/timer;1"]
 				.createInstance(Components.interfaces.nsITimer);
 			var stopWait = Date.now() + 5e3;
