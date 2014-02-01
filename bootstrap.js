@@ -3082,7 +3082,10 @@ var windowsObserver = {
 			}
 			// See chrome://browser/content/browser.js, gPrivateBrowsingUI.init()
 			// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
-			if(Services.appinfo.OS == "Darwin") {
+			if(
+				Services.appinfo.OS == "Darwin"
+				&& !("CustomizableUI" in document.defaultView) // Exclude Australis
+			) {
 				if(indicatePrivate && pbTemp)
 					root.setAttribute("drawintitlebar", "true");
 				else
