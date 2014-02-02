@@ -3045,8 +3045,9 @@ var windowsObserver = {
 	},
 	updateWindowTitle: function(gBrowser, isPrivate, force) {
 		var document = gBrowser.ownerDocument;
+		var window = document.defaultView;
 		if(isPrivate === undefined)
-			isPrivate = this.isPrivateWindow(document.defaultView.content);
+			isPrivate = this.isPrivateWindow(window.content);
 		var root = document.documentElement;
 		var tm = isPrivate
 			? root.getAttribute("titlemodifier_privatebrowsing")
@@ -3071,7 +3072,7 @@ var windowsObserver = {
 		if(force || usePrivateWindowStyle) {
 			var indicatePrivate = usePrivateWindowStyle
 				? isPrivate
-				: this.isPrivateWindow(document.defaultView);
+				: this.isPrivateWindow(window);
 			if(indicatePrivate) {
 				var pbTemp = !PrivateBrowsingUtils.permanentPrivateBrowsing;
 				root.setAttribute("privatebrowsingmode", pbTemp ? "temporary" : "permanent");
@@ -3084,7 +3085,7 @@ var windowsObserver = {
 			// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
 			if(
 				Services.appinfo.OS == "Darwin"
-				&& !("CustomizableUI" in document.defaultView) // Exclude Australis
+				&& !("CustomizableUI" in window) // Exclude Australis
 			) {
 				if(indicatePrivate && pbTemp)
 					root.setAttribute("drawintitlebar", "true");
