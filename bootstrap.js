@@ -3092,6 +3092,20 @@ var windowsObserver = {
 				else
 					root.removeAttribute("drawintitlebar");
 			}
+			// After changing of "privatebrowsingmode" attribute #alltabs-popup may not receive
+			// "popuphidden" event (only on Australis?)
+			// See view-source:chrome://browser/content/tabbrowser.xml#tabbrowser-alltabs-popup
+			if("CustomizableUI" in window) window.setTimeout(function() {
+				var allTabsPopup = document.getElementById("alltabs-popup");
+				if(
+					allTabsPopup
+					&& allTabsPopup.state == "closed"
+					&& allTabsPopup.getElementsByClassName("alltabs-item").length
+				) {
+					_log("Force cleanup #alltabs-popup");
+					allTabsPopup.dispatchEvent(new window.Event("popuphidden"));
+				}
+			}.bind(this), 10);
 		}
 		gBrowser.updateTitlebar();
 		this.privateChanged(document, isPrivate);
