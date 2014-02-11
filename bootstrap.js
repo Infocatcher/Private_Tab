@@ -1192,13 +1192,16 @@ var windowsObserver = {
 					}.bind(this), 0);
 				}
 			}
-			window.setTimeout(function() {
-				if(!this.hasPrivateTab(window)) {
-					_log("Closed last private tab in window");
-					this.clearSearchBar(window);
-				}
-			}.bind(this), 0);
+			this.checkNoPrivate(window);
 		}
+	},
+	checkNoPrivate: function(window) {
+		window.setTimeout(function() {
+			if(!this.hasPrivateTab(window)) {
+				_log("Closed last private tab in window");
+				this.clearSearchBar(window);
+			}
+		}.bind(this), 0);
 	},
 	cleanupClosedTab: function(e) {
 		if(prefs.get("rememberClosedPrivateTabs"))
@@ -2844,6 +2847,7 @@ var windowsObserver = {
 		}));
 	},
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
+		var window = tab.ownerDocument.defaultView;
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
@@ -2851,11 +2855,13 @@ var windowsObserver = {
 		if(
 			!isPrivate
 			&& privacyContext.usePrivateBrowsing
-			&& this.isLastPrivate(tab)
 		) {
-			_log("toggleTabPrivate() called for last private tab");
-			if(this.forbidCloseLastPrivate())
-				return undefined;
+			this.checkNoPrivate(window);
+			if(this.isLastPrivate(tab)) {
+				_log("toggleTabPrivate() called for last private tab");
+				if(this.forbidCloseLastPrivate())
+					return undefined;
+			}
 		}
 
 		privacyContext.usePrivateBrowsing = isPrivate;
@@ -2863,7 +2869,7 @@ var windowsObserver = {
 		// Workaround for browser.newtab.preload = true
 		var browser = tab.linkedBrowser;
 		browser._privateTabIsPrivate = isPrivate;
-		tab.ownerDocument.defaultView.setTimeout(function() {
+		window.setTimeout(function() {
 			delete browser._privateTabIsPrivate;
 		}, 0);
 
