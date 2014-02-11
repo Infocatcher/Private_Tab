@@ -11,7 +11,7 @@
 `x` Исправлено: сочетания клавиш из одного символа (например, просто `V` или `Shift+V`) теперь игнорируются в WYSIWYG редакторах<br>
 `x` Исправлена обработка встроенных приватных окон в SeaMonkey (<a href="https://github.com/Infocatcher/Private_Tab/issues/116">#116</a>)<br>
 `x` Исправлено обновление панели загрузок в Firefox 28.0a1+<br>
-`x` Исправлено добавление кнопки на панель инструментов в Firefox 28.0a1+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>)<br>
+`x` Исправлено добавление кнопки на панель инструментов в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>)<br>
 `+` Добавлены настройки для изменения адреса, который будет открываться в новых пустых вкладках (<em>extensions.privateTab.newPrivateTabURL</em> и <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>)<br>
 `+` Добавлена возможность отключения стилей приватного окна, если активна приватная вкладка (настройка <em>extensions.privateTab.usePrivateWindowStyle</em>)<br>
 `+` Упрощена возможность перезаписи стилей приватных вкладок/закладок из других тем/расширений (по умолчанию отключено, см. настройки <em>extensions.privateTab.stylesHighPriority</em>*) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>)<br>
