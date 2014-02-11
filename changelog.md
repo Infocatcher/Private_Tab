@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.1.7 (2014-02-11)
 `+` Added ability to remove private tabs from undo close history only after private browsing ends (<a href="https://github.com/Infocatcher/Private_Tab/issues/112">#112</a>)<br>
 `+` Added highlighting of private tabs in “List all tabs” menu (<a href="https://github.com/Infocatcher/Private_Tab/issues/113">#113</a>)<br>
 `x` Correctly ignore single char hotkeys (like just `V` or `Shift+V`) in WYSIWYG editors<br>
