@@ -3311,7 +3311,9 @@ var windowsObserver = {
 		return Array.some(
 			window.gBrowser.tabs,
 			function(tab) {
-				return tab != ignoreTab && this.isPrivateTab(tab);
+				return tab != ignoreTab
+					&& !tab.closing
+					&& this.isPrivateTab(tab);
 			},
 			this
 		);
