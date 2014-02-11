@@ -111,7 +111,7 @@ var windowsObserver = {
 					_log(topic + " => forgetAllClosedTabs()");
 					this.forgetAllClosedTabs();
 				}
-				this.clearSearchBar();
+				this.clearSearchBars();
 			}.bind(this), 0, timer.TYPE_ONE_SHOT);
 		}
 	},
@@ -1171,26 +1171,33 @@ var windowsObserver = {
 		if(
 			window.privateTab._checkLastPrivate
 			&& this.isPrivateTab(tab)
-			&& this.isLastPrivate(tab)
 		) {
-			_log("Closed last private tab");
-			if(this.forbidCloseLastPrivate()) {
-				var pos = "_tPos" in tab
-					? tab._tPos
-					: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
-				this.openNewPrivateTab(window, false, function(newTab) {
-					newTab && window.gBrowser.moveTabTo(newTab, pos);
-				});
+			if(this.isLastPrivate(tab)) {
+				_log("Closed last private tab");
+				if(this.forbidCloseLastPrivate()) {
+					var pos = "_tPos" in tab
+						? tab._tPos
+						: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
+					this.openNewPrivateTab(window, false, function(newTab) {
+						newTab && window.gBrowser.moveTabTo(newTab, pos);
+					});
+				}
+				else if(
+					this.isSeaMonkey
+					&& prefs.get("rememberClosedPrivateTabs.cleanup") > 1
+				) { // SeaMonkey has some cache for fast tabs restoring and doesn't destroy closed tabs immediately
+					window.setTimeout(function() {
+						_log("Closed last private tab => forgetAllClosedTabs()");
+						this.forgetAllClosedTabs();
+					}.bind(this), 0);
+				}
 			}
-			else if(
-				this.isSeaMonkey
-				&& prefs.get("rememberClosedPrivateTabs.cleanup") > 1
-			) { // SeaMonkey has some cache for fast tabs restoring and doesn't destroy closed tabs immediately
-				window.setTimeout(function() {
-					_log("Closed last private tab => forgetAllClosedTabs()");
-					this.forgetAllClosedTabs();
-				}.bind(this), 0);
-			}
+			window.setTimeout(function() {
+				if(!this.hasPrivateTab(window)) {
+					_log("Closed last private tab in window");
+					this.clearSearchBar(window);
+				}
+			}.bind(this), 0);
 		}
 	},
 	cleanupClosedTab: function(e) {
@@ -1316,25 +1323,28 @@ var windowsObserver = {
 		for(var window in this.windows)
 			this.forgetClosedTabs(window);
 	},
-	clearSearchBar: function() {
-		for(var window in this.windows) {
-			var pt = window.privateTab;
-			if(pt && pt._clearSearchBarUndo) {
-				var searchBar = window.document.getElementById("searchbar");
-				if(searchBar) try {
-					var tb = searchBar.textbox;
-					if(pt._clearSearchBarValue) {
-						_log("Clear search bar value");
-						tb.value = "";
-					}
-					tb.editor.transactionManager.clear();
-					_log("Clear search bar undo buffer");
+	clearSearchBars: function() {
+		_log("clearSearchBars()");
+		for(var window in this.windows)
+			this.clearSearchBar(window);
+	},
+	clearSearchBar: function(window) {
+		var pt = window.privateTab;
+		if(pt && pt._clearSearchBarUndo) {
+			var searchBar = window.document.getElementById("searchbar");
+			if(searchBar) try {
+				var tb = searchBar.textbox;
+				if(pt._clearSearchBarValue) {
+					_log("Clear search bar value");
+					tb.value = "";
 				}
-				catch(e) {
-					Components.utils.reportError(e);
-				}
-				pt._clearSearchBarUndo = pt._clearSearchBarValue = false;
+				tb.editor.transactionManager.clear();
+				_log("Clear search bar undo buffer");
 			}
+			catch(e) {
+				Components.utils.reportError(e);
+			}
+			pt._clearSearchBarUndo = pt._clearSearchBarValue = false;
 		}
 	},
 	_hasPbExitObserver: false,
