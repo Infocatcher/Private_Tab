@@ -1330,7 +1330,7 @@ var windowsObserver = {
 	},
 	clearSearchBar: function(window) {
 		var pt = window.privateTab;
-		if(pt && pt._clearSearchBarUndo) {
+		if(pt && pt._clearSearchBarUndo && !this.isPrivateWindow(window)) {
 			var searchBar = window.document.getElementById("searchbar");
 			if(searchBar) try {
 				var tb = searchBar.textbox;
