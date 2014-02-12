@@ -15,7 +15,7 @@
 `x` Исправлено добавление кнопки на панель инструментов в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>).<br>
 `+` Добавлены настройки для изменения адреса, который будет открываться в новых пустых вкладках (<em>extensions.privateTab.newPrivateTabURL</em> и <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>).<br>
 `+` Добавлена возможность отключения стилей приватного окна, если активна приватная вкладка (настройка <em>extensions.privateTab.usePrivateWindowStyle</em>).<br>
-`+` Упрощена возможность перезаписи стилей приватных вкладок/закладок из других тем/расширений (по умолчанию отключено, см. настройки <em>extensions.privateTab.stylesHighPriority</em>*) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
+`+` Упрощена возможность перезаписи стилей приватных вкладок/закладок из других тем/расширений (по умолчанию отключено, см. настройки <em>extensions.privateTab.stylesHighPriority*</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
 `+` Добавлена иконка 32×32px для Australis'а (используется в панели меню и при настройке панелей) (<a href="https://github.com/Infocatcher/Private_Tab/issues/128">#128</a>).<br>
 `x` Исправлено: история панели поиска сохранялась в приватных вкладках (<a href="https://github.com/Infocatcher/Private_Tab/issues/129">#129</a>).<br>
 `*` Небольшие улучшения кода.<br>
