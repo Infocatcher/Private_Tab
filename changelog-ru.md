@@ -15,7 +15,7 @@
 `x` Исправлено добавление кнопки на панель инструментов в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>).<br>
 `+` Добавлены настройки для изменения адреса, который будет открываться в новых пустых вкладках (<em>extensions.privateTab.newPrivateTabURL</em> и <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>).<br>
 `+` Добавлена возможность отключения стилей приватного окна, если активна приватная вкладка (настройка <em>extensions.privateTab.usePrivateWindowStyle</em>).<br>
-`+` Упрощена возможность перезаписи стилей приватных вкладок/закладок из других тем/расширений (по умолчанию отключено, см. настройки <em>extensions.privateTab.stylesHighPriority*</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
+`+` Упрощена возможность перезаписи стилей приватных вкладок/закладок из других тем/расширений (по умолчанию отключено, см. настройки <em>extensions.privateTab.stylesHighPriority\*</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
 `+` Добавлена иконка 32×32px для Australis'а (используется в панели меню и при настройке панелей) (<a href="https://github.com/Infocatcher/Private_Tab/issues/128">#128</a>).<br>
 `x` Исправлено: история панели поиска сохранялась в приватных вкладках (<a href="https://github.com/Infocatcher/Private_Tab/issues/129">#129</a>).<br>
 `*` Небольшие улучшения кода.<br>
@@ -84,7 +84,7 @@
 `x` Исправлено: добавлено удаление оберток при закрытии окна, чтобы исключить утечки памяти (<a href="https://github.com/Infocatcher/Private_Tab/issues/45">#45</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/46">#46</a>).<br>
 `+` Добавлена эстонская локать (et), спасибо <a href="http://forums.mozillazine.org/memberlist.php?mode=viewprofile&amp;u=2361677">mdr.ksk</a>.<br>
 `x` Исправлено: сочетание клавиш не отображалось в меню Файл в Mac OS X <a href="https://github.com/Infocatcher/Private_Tab/issues/47">#47</a>.<br>
-`+` Добавлена настройка <em>extensions.privateTab.keysHighPriority</em> для обработки key*-события в capturing (true) или bubbling (false) фазе, см. http://www.w3.org/TR/DOM-Level-3-Events/#event-flow.<br>
+`+` Добавлена настройка <em>extensions.privateTab.keysHighPriority</em> для обработки key\*-события в capturing (true) или bubbling (false) фазе, см. http://www.w3.org/TR/DOM-Level-3-Events/#event-flow.<br>
 `*` Подкорректирована китайская (Traditional) локаль (zh-TW), спасибо <a href="https://github.com/marcinsu">ikurrina</a>.<br>
 `+` Добавлена возможность закрытия всех приватных вкладок при отключении или удалении расширения (<a href="https://github.com/Infocatcher/Private_Tab/issues/51">#51</a>).<br>
 
@@ -134,7 +134,7 @@
 ##### 0.1.0b2 (2013-03-17)
 `*` Пункт контекстного меню закладок «Открыть в новой вкладке» теперь всегда открывает не приватную вкладку: после добавления пункта «Открыть в новой приватной вкладке» такое поведение более интуитивно.<br>
 `x` Добавлено скрытие текста сочетаний клавиш в меню приложения и исправлено некорректное отображение текста сочетаний клавиш встроенного пункта «Новое приватное окно» (<a href="https://github.com/Infocatcher/Private_Tab/issues/3">#3</a>).<br>
-`x` Исправлено обновление сочетаний клавиш в нескольких окнах при изменении настроек <em>extensions.privateTab.key.*</em>.<br>
+`x` Исправлено обновление сочетаний клавиш в нескольких окнах при изменении настроек <em>extensions.privateTab.key.\*</em>.<br>
 `x` Исправлено перетаскивание из приватных вкладок в приватном окне.<br>
 `+` Добавлена настройка <em>extensions.privateTab.dragAndDropUseTargetPrivateState</em> для использования приватного состояния «получателя» для перетаскиваемых ссылок (<a href="https://github.com/Infocatcher/Private_Tab/issues/4">#4</a>).<br>
 `*` Некоторые внутренние улучшения.<br>

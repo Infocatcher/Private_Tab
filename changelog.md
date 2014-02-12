@@ -15,7 +15,7 @@
 `x` Correctly insert button into toolbar in Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/121">#121</a>).<br>
 `+` Added preferences to open user-defined URL in new empty private tabs (<em>extensions.privateTab.newPrivateTabURL</em> and <em>extensions.privateTab.newPrivateTabURL.inPrivateWindow</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/125">#125</a>).<br>
 `+` Added ability to disable private window-like styles, if current tab is private (<em>extensions.privateTab.usePrivateWindowStyle</em> preference).<br>
-`+` Simplified ability to override private tabs/bookmarks styles from other themes/extensions (disabled by default, see <em>extensions.privateTab.stylesHighPriority*</em> preferences) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
+`+` Simplified ability to override private tabs/bookmarks styles from other themes/extensions (disabled by default, see <em>extensions.privateTab.stylesHighPriority\*</em> preferences) (<a href="https://github.com/Infocatcher/Private_Tab/issues/127">#127</a>).<br>
 `+` Added 32×32px icon for Australis (used in menu panel and in customization area) (<a href="https://github.com/Infocatcher/Private_Tab/issues/128">#128</a>).<br>
 `x` Correctly don't save search bar history from private tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/129">#129</a>).<br>
 `*` Minor code improvements.<br>
@@ -84,7 +84,7 @@
 `x` Fixed: remove wrappers when window is closed to avoid memory leaks (<a href="https://github.com/Infocatcher/Private_Tab/issues/45">#45</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/46">#46</a>).<br>
 `+` Added Estonian locale (et), thanks to <a href="http://forums.mozillazine.org/memberlist.php?mode=viewprofile&amp;u=2361677">mdr.ksk</a>.<br>
 `x` Fixed: hotkey isn't shown in File menu on Mac OS X <a href="https://github.com/Infocatcher/Private_Tab/issues/47">#47</a>.<br>
-`+` Added <em>extensions.privateTab.keysHighPriority</em> preference to handle key* event in the capturing (true) or bubbling (false) phase, see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow.<br>
+`+` Added <em>extensions.privateTab.keysHighPriority</em> preference to handle key\* event in the capturing (true) or bubbling (false) phase, see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow.<br>
 `*` Corrected Chinese (Traditional) locale (zh-TW), thanks to <a href="https://github.com/marcinsu">ikurrina</a>.<br>
 `+` Added ability to close all private tabs after extension will be disabled or uninstalled (<a href="https://github.com/Infocatcher/Private_Tab/issues/51">#51</a>).<br>
 
@@ -134,7 +134,7 @@
 ##### 0.1.0b2 (2013-03-17)
 `*` Always open not private tab using “Open in a New Tab” in bookmark context menu: now we have “Open in a New Private Tab”, so this is more intuitive.<br>
 `x` Hide hotkeys text from App menu and don't break hetkey text hiding for built-in “New Private Window” item (<a href="https://github.com/Infocatcher/Private_Tab/issues/3">#3</a>).<br>
-`x` Correctly update hotkeys in multiple windows after <em>extensions.privateTab.key.*</em> preferences changes.<br>
+`x` Correctly update hotkeys in multiple windows after <em>extensions.privateTab.key.\*</em> preferences changes.<br>
 `x` Fix drop from private tab in private window.<br>
 `+` Added <em>extensions.privateTab.dragAndDropUseTargetPrivateState</em> preference to use target private state for dropped link-like things (<a href="https://github.com/Infocatcher/Private_Tab/issues/4">#4</a>).<br>
 `*` Some internal improvements.<br>
