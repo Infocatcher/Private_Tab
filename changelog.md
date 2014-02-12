@@ -60,21 +60,21 @@
 `*` Small performance improvements.<br>
 `*` Improved localizability of confirmation dialog in case of extension disabling or uninstalling.<br>
 `+` Added locales:<br>
-	Catalan (ca), thanks to <a href="https://github.com/Dimas-sc">Dimas-sc</a><br>
-	Hungarian (hu), thanks to <a href="https://github.com/evenorbert">evenorbert</a><br>
-	Italian (it), thanks to <a href="https://github.com/moretti">moretti</a><br>
-	Portuguese (Brazilian) (pt-BR), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=212">Ghelman</a><br>
-	Serbian (sr), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=8719">DakSrbija</a><br>
-	Spanish (es), thanks to <a href="https://github.com/strel">strel</a><br>
+&emsp;&emsp;Catalan (ca), thanks to <a href="https://github.com/Dimas-sc">Dimas-sc</a><br>
+&emsp;&emsp;Hungarian (hu), thanks to <a href="https://github.com/evenorbert">evenorbert</a><br>
+&emsp;&emsp;Italian (it), thanks to <a href="https://github.com/moretti">moretti</a><br>
+&emsp;&emsp;Portuguese (Brazilian) (pt-BR), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=212">Ghelman</a><br>
+&emsp;&emsp;Serbian (sr), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=8719">DakSrbija</a><br>
+&emsp;&emsp;Spanish (es), thanks to <a href="https://github.com/strel">strel</a><br>
 `*` Updated locales:<br>
-	Chinese (Simplified) (zh-CN), thanks to <a href="https://github.com/Cye3s">Cye3s</a><br>
-	Chinese (Traditional) (zh-TW), thanks to <a href="https://github.com/ikurrina">ikurrina</a><br>
-	Estonian (et), thanks to <a href="https://github.com/mdr-ksk">mdr-ksk</a><br>
-	French (fr) from babelzilla.org (yes, not complete)<br>
-	German (de), thanks to <a href="https://github.com/sierkb">sierkb</a><br>
-	Greek (el), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=15362">Grg68</a><br>
-	Japanese (jp), thanks to <a href="https://github.com/charishi">charishi</a><br>
-	Polish (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a><br>
+&emsp;&emsp;Chinese (Simplified) (zh-CN), thanks to <a href="https://github.com/Cye3s">Cye3s</a><br>
+&emsp;&emsp;Chinese (Traditional) (zh-TW), thanks to <a href="https://github.com/ikurrina">ikurrina</a><br>
+&emsp;&emsp;Estonian (et), thanks to <a href="https://github.com/mdr-ksk">mdr-ksk</a><br>
+&emsp;&emsp;French (fr) from babelzilla.org (yes, not complete)<br>
+&emsp;&emsp;German (de), thanks to <a href="https://github.com/sierkb">sierkb</a><br>
+&emsp;&emsp;Greek (el), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=15362">Grg68</a><br>
+&emsp;&emsp;Japanese (jp), thanks to <a href="https://github.com/charishi">charishi</a><br>
+&emsp;&emsp;Polish (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a><br>
 
 ##### 0.1.2 (2013-05-01)
 `+` Added Polish locale (pl), thanks to <a href="https://github.com/marcinsu">marcinsu</a>.<br>

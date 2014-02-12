@@ -60,21 +60,21 @@
 `*` Небольшие улучшения производительности.<br>
 `*` Улучшена возможность локализации диалога подтверждения в случае отключения или удаления расширения.<br>
 `+` Добавлены локали:<br>
-	Catalan (ca), спасибо <a href="https://github.com/Dimas-sc">Dimas-sc</a><br>
-	Hungarian (hu), спасибо <a href="https://github.com/evenorbert">evenorbert</a><br>
-	Italian (it), спасибо <a href="https://github.com/moretti">moretti</a><br>
-	Portuguese (Brazilian) (pt-BR), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=212">Ghelman</a><br>
-	Serbian (sr), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=8719">DakSrbija</a><br>
-	Spanish (es), спасибо <a href="https://github.com/strel">strel</a><br>
+&emsp;&emsp;Catalan (ca), спасибо <a href="https://github.com/Dimas-sc">Dimas-sc</a><br>
+&emsp;&emsp;Hungarian (hu), спасибо <a href="https://github.com/evenorbert">evenorbert</a><br>
+&emsp;&emsp;Italian (it), спасибо <a href="https://github.com/moretti">moretti</a><br>
+&emsp;&emsp;Portuguese (Brazilian) (pt-BR), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=212">Ghelman</a><br>
+&emsp;&emsp;Serbian (sr), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=8719">DakSrbija</a><br>
+&emsp;&emsp;Spanish (es), спасибо <a href="https://github.com/strel">strel</a><br>
 `*` Обновлены локали:<br>
-	Chinese (Simplified) (zh-CN), спасибо <a href="https://github.com/Cye3s">Cye3s</a><br>
-	Chinese (Traditional) (zh-TW), спасибо <a href="https://github.com/ikurrina">ikurrina</a><br>
-	Estonian (et), спасибо <a href="https://github.com/mdr-ksk">mdr-ksk</a><br>
-	French (fr) из babelzilla.org (переведено не все)<br>
-	German (de), спасибо <a href="https://github.com/sierkb">sierkb</a><br>
-	Greek (el), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=15362">Grg68</a><br>
-	Japanese (jp), спасибо <a href="https://github.com/charishi">charishi</a><br>
-	Polish (pl), спасибо <a href="https://github.com/marcinsu">marcinsu</a><br>
+&emsp;&emsp;Chinese (Simplified) (zh-CN), спасибо <a href="https://github.com/Cye3s">Cye3s</a><br>
+&emsp;&emsp;Chinese (Traditional) (zh-TW), спасибо <a href="https://github.com/ikurrina">ikurrina</a><br>
+&emsp;&emsp;Estonian (et), спасибо <a href="https://github.com/mdr-ksk">mdr-ksk</a><br>
+&emsp;&emsp;French (fr) из babelzilla.org (переведено не все)<br>
+&emsp;&emsp;German (de), спасибо <a href="https://github.com/sierkb">sierkb</a><br>
+&emsp;&emsp;Greek (el), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=15362">Grg68</a><br>
+&emsp;&emsp;Japanese (jp), спасибо <a href="https://github.com/charishi">charishi</a><br>
+&emsp;&emsp;Polish (pl), спасибо <a href="https://github.com/marcinsu">marcinsu</a><br>
 
 ##### 0.1.2 (2013-05-01)
 `+` Добавлена польская локаль (pl), спасибо <a href="https://github.com/marcinsu">marcinsu</a>.<br>
