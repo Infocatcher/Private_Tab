@@ -13,6 +13,7 @@ You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_background">change background color</a>
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_overlay_icon">add overlay icon</a>
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_menu_icons">add icons to menu items</a>
+* <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_hide_items">hide some menu items</a>
 
 #### API for other extensions:
 ##### Events:
