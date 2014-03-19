@@ -2683,6 +2683,7 @@ var windowsObserver = {
 	},
 	setHotkeysText: function(document) {
 		_log("setHotkeysText(): " + document.title);
+		var window = document.defaultView;
 
 		const keysetId = "privateTab-keyset";
 		var keyset = document.getElementById(keysetId);
@@ -2716,12 +2717,39 @@ var windowsObserver = {
 					cl.remove("menuitem-tooltip");
 					cl.remove("menuitem-iconic-tooltip");
 					node.offsetHeight; // Ensure binding changed
-					document.defaultView.setTimeout(function() {
+					window.setTimeout(function() {
 						node.className = cn;
 					}, 50);
 				}
 			}, this);
+			if(
+				kId == "openNewPrivateTab"
+				&& "ShortcutUtils" in window // Australis
+			) window.setTimeout(function(key) {
+				var keyText = window.ShortcutUtils.prettifyShortcut(key);
+				this.setButtonHotkeyTip(document, keyText);
+			}.bind(this), 0, key);
 		}
+	},
+	setButtonHotkeyTip: function(document, keyText) {
+		var window = document.defaultView;
+		var tipAttr = "privateTab-baseTooltip";
+		var updateTip = function(btn) {
+			if(!btn)
+				return;
+			var baseTip = btn.getAttribute(tipAttr);
+			if(!baseTip) {
+				baseTip = btn.getAttribute("tooltiptext");
+				btn.setAttribute(tipAttr, baseTip);
+			}
+			var tip = keyText
+				? baseTip + " (" + keyText + ")"
+				: baseTip;
+			btn.setAttribute("tooltiptext", tip);
+			_log("setButtonHotkeyTip(): #" + btn.id + "\n" + tip);
+		}.bind(this);
+		updateTip(document.getElementById(this.toolbarButtonId) || this.getPaletteButton(window));
+		updateTip(document.getElementById(this.afterTabsButtonId));
 	},
 	updateHotkeys: function(updateAll) {
 		_log("updateHotkeys(" + (updateAll || "") + ")");
@@ -2744,6 +2772,7 @@ var windowsObserver = {
 				if(this.keyInTooltip(node))
 					node.removeAttribute("tooltiptext");
 			}, this);
+			this.setButtonHotkeyTip(document, "");
 			hasHotkeys && this.setHotkeysText(document);
 		}
 	},
