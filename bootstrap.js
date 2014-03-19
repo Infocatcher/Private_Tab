@@ -2743,7 +2743,9 @@ var windowsObserver = {
 				btn.setAttribute(tipAttr, baseTip);
 			}
 			var tip = keyText
-				? baseTip + " (" + keyText + ")"
+				? this.getLocalized("buttonTipTemplate")
+					.replace("%tip%", baseTip)
+					.replace("%key%", keyText)
 				: baseTip;
 			btn.setAttribute("tooltiptext", tip);
 			_log("setButtonHotkeyTip(): #" + btn.id + "\n" + tip);
