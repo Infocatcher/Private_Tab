@@ -3158,7 +3158,8 @@ var windowsObserver = {
 		this.privateChanged(document, isPrivate);
 	},
 	privateChanged: function(document, isPrivate) {
-		this.updateTabsInTitlebar(document);
+		if(prefs.get("usePrivateWindowStyle"))
+			this.updateTabsInTitlebar(document);
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(document.defaultView, isPrivate);
 	},
