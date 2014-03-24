@@ -625,7 +625,7 @@ var windowsObserver = {
 				this.appButtonNA = false;
 				if(pVal && !this.appButtonCssURI)
 					this.fixAppButtonWidth(document);
-				this.updateAppButtonWidth(document, true);
+				this.updateTabsInTitlebar(document, true);
 			}
 		}
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
@@ -3158,11 +3158,11 @@ var windowsObserver = {
 		this.privateChanged(document, isPrivate);
 	},
 	privateChanged: function(document, isPrivate) {
-		this.updateAppButtonWidth(document);
+		this.updateTabsInTitlebar(document);
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(document.defaultView, isPrivate);
 	},
-	updateAppButtonWidth: function(document, force) {
+	updateTabsInTitlebar: function(document, force) {
 		var window = document.defaultView;
 		if(
 			"TabsInTitlebar" in window
@@ -3171,14 +3171,18 @@ var windowsObserver = {
 		) {
 			window.setTimeout(function() { // Pseudo async
 				// Based on code from chrome://browser/content/browser.js
-				var appBtnBox = document.getElementById("appmenu-button-container");
-				if(appBtnBox) {
-					var rect = appBtnBox.getBoundingClientRect();
-					if(rect.width) {
-						_log("Update size placeholder for App button");
-						window.TabsInTitlebar._sizePlaceholder("appmenu-button", rect.width);
+				function sizePlaceholder(type, baseNodeId) {
+					var baseNode = document.getElementById(baseNodeId);
+					if(baseNode) {
+						var rect = baseNode.getBoundingClientRect();
+						if(rect.width) {
+							_log("Update size placeholder for #" + baseNodeId);
+							window.TabsInTitlebar._sizePlaceholder(type, rect.width);
+						}
 					}
 				}
+				sizePlaceholder("appmenu-button", "appmenu-button-container");
+				sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
 			}, 0);
 		}
 	},
