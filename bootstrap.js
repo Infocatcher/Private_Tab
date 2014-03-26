@@ -3183,18 +3183,24 @@ var windowsObserver = {
 		) {
 			window.setTimeout(function() { // Pseudo async
 				// Based on code from chrome://browser/content/browser.js
-				function sizePlaceholder(type, baseNodeId) {
-					var baseNode = document.getElementById(baseNodeId);
-					if(baseNode) {
-						var rect = baseNode.getBoundingClientRect();
-						if(rect.width) {
-							_log("Update size placeholder for #" + baseNodeId);
-							window.TabsInTitlebar._sizePlaceholder(type, rect.width);
-						}
-					}
+				if("CustomizableUI" in window) { // Australis
+					window.TabsInTitlebar._update(true);
+					_log("updateTabsInTitlebar() => TabsInTitlebar._update(true)");
 				}
-				sizePlaceholder("appmenu-button", "appmenu-button-container");
-				sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
+				else {
+					var sizePlaceholder = function(type, baseNodeId) {
+						var baseNode = document.getElementById(baseNodeId);
+						if(baseNode) {
+							var rect = baseNode.getBoundingClientRect();
+							if(rect.width) {
+								_log("Update size placeholder for #" + baseNodeId);
+								window.TabsInTitlebar._sizePlaceholder(type, rect.width);
+							}
+						}
+					};
+					sizePlaceholder("appmenu-button", "appmenu-button-container");
+					sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
+				}
 			}, 0);
 		}
 	},
