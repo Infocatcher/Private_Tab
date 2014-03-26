@@ -3325,7 +3325,14 @@ var windowsObserver = {
 				+ new Error().stack
 			);
 		}
-		return this.getPrivacyContext(tab.linkedBrowser.contentWindow);
+		var window = tab.linkedBrowser.contentWindow;
+		if(!window) {
+			Components.utils.reportError(
+				LOG_PREFIX
+				+ "getTabPrivacyContext(): tab.linkedBrowser.contentWindow is null. Electrolysis?"
+			);
+		}
+		return this.getPrivacyContext(window);
 	},
 	isPrivateTab: function(tab) {
 		return tab && this.getTabPrivacyContext(tab).usePrivateBrowsing;
