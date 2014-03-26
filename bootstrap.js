@@ -1791,8 +1791,19 @@ var windowsObserver = {
 		var gContextMenu = window.gContextMenu;
 		var uri = gContextMenu.linkURL;
 		var doc = gContextMenu.target.ownerDocument;
+		var principal = doc.nodePrincipal;
+		if(
+			"gContextMenu" in window
+			&& window.gContextMenu
+			&& "_unremotePrincipal" in window.gContextMenu // Electrolysis
+		) try {
+			principal = window.gContextMenu._unremotePrincipal(principal);
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
 		try {
-			window.urlSecurityCheck(uri, doc.nodePrincipal);
+			window.urlSecurityCheck(uri, principal);
 		}
 		catch(e) {
 			throw typeof e == "string" ? new Error(e) : e;
