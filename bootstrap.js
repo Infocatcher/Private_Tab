@@ -50,7 +50,8 @@ var windowsObserver = {
 		for(var window in this.windows)
 			this.initWindow(window, reason);
 		Services.ww.registerNotification(this);
-		Services.obs.addObserver(this, "sessionstore-state-write", false);
+		if(this.platformVersion < 29) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+			Services.obs.addObserver(this, "sessionstore-state-write", false);
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -68,7 +69,8 @@ var windowsObserver = {
 
 		if(reason != APP_SHUTDOWN) {
 			// nsISessionStore may save data after our shutdown
-			Services.obs.removeObserver(this, "sessionstore-state-write");
+			if(this.platformVersion < 29)
+				Services.obs.removeObserver(this, "sessionstore-state-write");
 
 			this.addPbExitObserver(false);
 			this.unloadStyles();
@@ -464,6 +466,10 @@ var windowsObserver = {
 
 		window.privateTab._destroy();
 		delete window.privateTab;
+	},
+	get platformVersion() {
+		delete this.platformVersion;
+		return this.platformVersion = parseFloat(Services.appinfo.platformVersion);
 	},
 	get isSeaMonkey() {
 		delete this.isSeaMonkey;
@@ -1362,10 +1368,12 @@ var windowsObserver = {
 		_log("addPbExitObserver(" + add + ")");
 	},
 	filterSession: function(stateData) {
-		if(!stateData || !(stateData instanceof Components.interfaces.nsISupportsString))
+		if(!stateData || !(stateData instanceof Components.interfaces.nsISupportsString)) {
+			_dbgv && _log("filterSession(): no data");
 			return;
+		}
 		var stateString = stateData.data;
-		//_log("filterSession():\n" + stateString);
+		//_dbgv && _log("filterSession():\n" + stateString);
 		if(
 			prefs.get("savePrivateTabsInSessions")
 			|| stateString.indexOf('"' + this.privateAttr + '":"true"') == -1 // Should be faster, than JSON.parse()
