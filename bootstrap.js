@@ -1600,7 +1600,7 @@ var windowsObserver = {
 			return;
 		var window = popup.ownerDocument.defaultView;
 		var id = popup.id || popup.getAttribute("anonid");
-		if(id == "appmenu-popup")
+		if(id == "appmenu-popup" || id == "ctr_appbuttonPopup")
 			this.initAppMenu(window, popup);
 		else if(id == "contentAreaContextMenu")
 			this.updatePageContext(window);
@@ -2297,7 +2297,8 @@ var windowsObserver = {
 
 		// We can't do 'document.getElementById("appmenu_newPrivateWindow")' while App menu was never open:
 		// this (somehow) breaks binding for .menuitem-iconic-tooltip class
-		var appMenuPopup = document.getElementById("appmenu-popup");
+		var appMenuPopup = document.getElementById("appmenu-popup")
+			|| document.getElementById("ctr_appbuttonPopup"); // Classic Theme Restorer
 		var appMenuItemParent = document.getElementById("appmenuPrimaryPane");
 		if(appMenuPopup && appMenuItemParent) {
 			// So will wait for "popupshowing" to move menuitem (and do other initializations)
@@ -2369,9 +2370,15 @@ var windowsObserver = {
 			return;
 		}
 		appMenuItem.setAttribute("privateTab-initialized", "true");
-		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow");
+		var newPrivateWin = document.getElementById("appmenu_newPrivateWindow")
+			|| document.getElementById("menu_newPrivateWindow"); // Classic Theme Restorer
 		if(newPrivateWin) {
 			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
+			if(
+				newPrivateWin.id == "menu_newPrivateWindow" // Classic Theme Restorer
+				&& !appMenuItem.classList.contains("menuitem-iconic-tooltip")
+			)
+				appMenuItem.classList.add("menuitem-iconic-tooltip");
 			if(newPrivateWin.hidden) // Permanent private browsing?
 				appMenuItem.collapsed = true;
 			var s = window.getComputedStyle(newPrivateWin, null);
@@ -2543,7 +2550,8 @@ var windowsObserver = {
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
 
-		var appMenuPopup = document.getElementById("appmenu-popup");
+		var appMenuPopup = document.getElementById("appmenu-popup")
+			|| document.getElementById("ctr_appbuttonPopup"); // Classic Theme Restorer
 		appMenuPopup && appMenuPopup.removeEventListener("popupshowing", this, false);
 
 		var tabContext = this.getTabContextMenu(document);
