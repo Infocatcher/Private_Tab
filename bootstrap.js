@@ -1692,6 +1692,20 @@ var windowsObserver = {
 		this.handleCommandFromEvent(e, e.shiftKey || e.ctrlKey || e.altKey || e.metaKey);
 	},
 	clickHandler: function(e) {
+		if(e.currentTarget.id == "tabbrowser-tabs") {
+			var trg = e.originalTarget || e.target;
+			if(
+				e.button == 0
+				&& trg.classList.contains("toolbarbutton-icon")
+				&& trg.parentNode.classList.contains("tabs-newtab-button")
+			) {
+				e.preventDefault();
+				e.stopPropagation();
+				trg.parentNode.doCommand();
+				_log(e.type + " on .tabs-newtab-button => doCommand()");
+			}
+			return;
+		}
 		if(e.button == 1 && e.target.getAttribute("disabled") != "true")
 			this.handleCommandFromEvent(e, true, true);
 	},
@@ -2071,6 +2085,7 @@ var windowsObserver = {
 	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
 	afterTabsButtonId: "privateTab-afterTabs-openNewPrivateTab",
 	showAfterTabsAttr: "privateTab-showButtonAfterTabs",
+	fixAfterTabsA11yAttr: "privateTab-fixAfterTabsButtonsAccessibility",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
 	newTabMenuId: "privateTab-menu-openNewPrivateTab",
@@ -2140,6 +2155,8 @@ var windowsObserver = {
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
+			if("CustomizableUI" in window) // Australis, make buttons clickable with our binding
+				window.gBrowser.tabContainer.addEventListener("click", this, true);
 		}
 
 		if("CustomizableUI" in window) try { // Australis
@@ -2218,12 +2235,17 @@ var windowsObserver = {
 		return false;
 	},
 	updateShowAfterTabs: function(tbb, document) {
-		if(this.showAfterTabs(tbb))
+		if(this.showAfterTabs(tbb)) {
 			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
+			if("CustomizableUI" in document.defaultView) // Australis
+				tbb.parentNode.setAttribute(this.fixAfterTabsA11yAttr, "true");
+		}
 		else {
 			var tabsToolbar = document.getElementById("TabsToolbar");
-			if(tabsToolbar)
+			if(tabsToolbar) {
 				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
+				tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
+			}
 		}
 	},
 	showAfterTabs: function(tbb, document) {
@@ -2546,6 +2568,8 @@ var windowsObserver = {
 		// Force destroy toolbar button in Australis menu
 		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
 		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
+
+		window.gBrowser.tabContainer.removeEventListener("click", this, true);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
@@ -3469,6 +3493,38 @@ var windowsObserver = {
 		}
 		var important = prefs.get("stylesHighPriority") ? " !important" : "";
 		var importantTree = prefs.get("stylesHighPriority.tree") ? " !important" : "";
+
+		// See https://github.com/Infocatcher/Private_Tab/issues/137
+		// Correct clickable area for buttons after last tab:
+		// we use extending binding with display="xul:hbox" to make button's icon accessible,
+		// buttons becomes not clickable (no "command" event), so we add "click" listener
+		var a11yStyles = "";
+		var newTabBtn = "CustomizableUI" in window // Australis
+			&& this.getNewTabButton(window);
+		if(newTabBtn) {
+			var origBinding = window.getComputedStyle(newTabBtn, null).MozBinding;
+			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
+				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
+			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext);
+			var btnBinding = '<?xml version="1.0"?>\n\
+				<bindings id="privateTabBindings"\n\
+					xmlns="http://www.mozilla.org/xbl"\n\
+					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
+					<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
+						extends="' + ext + '" />\n\
+				</bindings>';
+			var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
+			var a11yStyles = '\
+				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button {\n\
+					pointer-events: none;\n\
+					-moz-binding: url("' + btnBindingData + '");\n\
+				}\n\
+				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
+					pointer-events: auto;\n\
+					padding: 5px 12px;\n\
+				}\n';
+		}
+
 		var cssStr = '\
 			/* Private Tab: main styles */\n\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
@@ -3531,7 +3587,7 @@ var windowsObserver = {
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
-				}\n\
+				}\n' + a11yStyles + '\
 			}';
 		if(prefs.get("enablePrivateProtocol")) {
 			cssStr += '\n\
