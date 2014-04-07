@@ -3502,10 +3502,17 @@ var windowsObserver = {
 		var newTabBtn = "CustomizableUI" in window // Australis
 			&& this.getNewTabButton(window);
 		if(newTabBtn) {
-			var origBinding = window.getComputedStyle(newTabBtn, null).MozBinding;
+			var cs = window.getComputedStyle(newTabBtn, null);
+			var origBinding = cs.MozBinding;
 			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
 				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
-			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext);
+			var paddingSide = (
+				parseFloat(cs.width) - 16 // Assumed icon width
+				+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
+				- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+			)/2;
+			var padding = "5px " + Math.max(0, paddingSide) + "px";
+			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
 			var btnBinding = '<?xml version="1.0"?>\n\
 				<bindings id="privateTabBindings"\n\
 					xmlns="http://www.mozilla.org/xbl"\n\
@@ -3521,7 +3528,7 @@ var windowsObserver = {
 				}\n\
 				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
 					pointer-events: auto;\n\
-					padding: 5px 12px;\n\
+					padding: ' + padding + ';\n\
 				}\n';
 		}
 
