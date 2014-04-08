@@ -9,6 +9,7 @@
 `+` Display hotkey in toolbar button's tooltip in Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/136">#136</a>).<br>
 `x` Workaround to correctly update title bar in Firefox 29+ (Australis), also see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=987929">bug 987929</a> (you can set <em>browser.tabs.drawInTitlebar</em> = false or <em>extensions.privateTab.usePrivateWindowStyle</em> = false as alternative and better workaround).<br>
 `+` Added support for App button from <a href="https://addons.mozilla.org/addon/classicthemerestorer/">Classic Theme Restorer</a> extension in Firefox 29+ (Australis).<br>
+`x` Fixed width of clickable area for “New Private Tab” button after last tab in Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/137">#137</a>).<br>
 
 ##### 0.1.7 (2014-02-11)
 `+` Added ability to remove private tabs from undo close history only after private browsing ends (<a href="https://github.com/Infocatcher/Private_Tab/issues/112">#112</a>).<br>

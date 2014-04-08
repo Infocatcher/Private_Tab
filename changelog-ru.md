@@ -9,6 +9,7 @@
 `+` Добавлено отображение сочетания клавиш во всплывающей подсказке кнопки для панелей инструментов в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/136">#136</a>).<br>
 `x` Workaround для корректного обновления заголовка окна в Firefox 29+ (Australis), также см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=987929">bug 987929</a> (или вы можете использовать более корректно работающий обходной путь – установить <em>browser.tabs.drawInTitlebar</em> = false или <em>extensions.privateTab.usePrivateWindowStyle</em> = false).<br>
 `+` Добавлена поддержка кнопки-меню приложения от расширения <a href="https://addons.mozilla.org/addon/classicthemerestorer/">Classic Theme Restorer</a> в Firefox 29+ (Australis).<br>
+`x` Исправлена ширина кликабельной области кнопки «Новая приватная вкладка» после последней вкладки в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/137">#137</a>).<br>
 
 ##### 0.1.7 (2014-02-11)
 `+` Добавлена возможность удалять приватные вкладки из списка для восстановления закрытых вкладок только после завершения приватного просмотра (<a href="https://github.com/Infocatcher/Private_Tab/issues/112">#112</a>).<br>
