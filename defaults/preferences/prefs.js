@@ -49,6 +49,9 @@ pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);
 pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.fixAfterTabsButtonsAccessibility", true);
+// Fix width of clickable area for "New Tab" and "New Private Tab" buttons after last tab
+pref("extensions.privateTab.fixAfterTabsButtonsAccessibility.iconPadding", "");
+// Custom padding for button's icon (to override autodetected value), example: "6px 11px"
 pref("extensions.privateTab.patchDownloads", true);
 pref("extensions.privateTab.enablePrivateProtocol", true);
 pref("extensions.privateTab.showItemInTaskBarJumpList", true); // Works only if enablePrivateProtocol == true

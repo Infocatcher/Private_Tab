@@ -643,7 +643,10 @@ var windowsObserver = {
 				this.updateTabsInTitlebar(document, true);
 			}
 		}
-		else if(pName == "fixAfterTabsButtonsAccessibility")
+		else if(
+			pName == "fixAfterTabsButtonsAccessibility"
+			|| pName == "fixAfterTabsButtonsAccessibility.iconPadding"
+		)
 			this.reloadStyles();
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
 			for(var window in this.windows)
@@ -3518,12 +3521,13 @@ var windowsObserver = {
 			var origBinding = cs.MozBinding;
 			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
 				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
-			var paddingSide = (
-				parseFloat(cs.width) - 16 // Assumed icon width
-				+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
-				- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
-			)/2;
-			var padding = "5px " + Math.max(0, paddingSide) + "px";
+			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
+				"5px " + Math.max(0, (
+					parseFloat(cs.width) - 16 // Assumed icon width
+					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
+					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+				)/2) + "px"
+			);
 			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
 			var btnBinding = '<?xml version="1.0"?>\n\
 				<bindings id="privateTabBindings"\n\
