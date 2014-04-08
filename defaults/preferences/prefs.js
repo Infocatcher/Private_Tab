@@ -48,6 +48,7 @@ pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);
 pref("extensions.privateTab.fixAppButtonWidth", true);
+pref("extensions.privateTab.fixAfterTabsButtonsAccessibility", true);
 pref("extensions.privateTab.patchDownloads", true);
 pref("extensions.privateTab.enablePrivateProtocol", true);
 pref("extensions.privateTab.showItemInTaskBarJumpList", true); // Works only if enablePrivateProtocol == true

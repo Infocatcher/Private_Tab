@@ -643,6 +643,8 @@ var windowsObserver = {
 				this.updateTabsInTitlebar(document, true);
 			}
 		}
+		else if(pName == "fixAfterTabsButtonsAccessibility")
+			this.reloadStyles();
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
 			for(var window in this.windows)
 				this.patchTabBrowserDND(window, window.gBrowser, pVal, true);
@@ -1707,6 +1709,7 @@ var windowsObserver = {
 				e.button == 0
 				&& trg.classList.contains("toolbarbutton-icon")
 				&& trg.parentNode.classList.contains("tabs-newtab-button")
+				&& prefs.get("fixAfterTabsButtonsAccessibility")
 			) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -3508,6 +3511,7 @@ var windowsObserver = {
 		// buttons becomes not clickable (no "command" event), so we add "click" listener
 		var a11yStyles = "";
 		var newTabBtn = this.isAustralis
+			&& prefs.get("fixAfterTabsButtonsAccessibility")
 			&& this.getNewTabButton(window);
 		if(newTabBtn) {
 			var cs = window.getComputedStyle(newTabBtn, null);
