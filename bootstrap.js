@@ -475,6 +475,15 @@ var windowsObserver = {
 		delete this.isSeaMonkey;
 		return this.isSeaMonkey = Services.appinfo.name == "SeaMonkey";
 	},
+	get isAustralis() {
+		var window = Services.wm.getMostRecentWindow("navigator:browser");
+		if(!window) {
+			_log("get isAustralis(): no browser window!");
+			return undefined;
+		}
+		delete this.isAustralis;
+		return this.isAustralis = "CustomizableUI" in window;
+	},
 	get windows() {
 		var isSeaMonkey = this.isSeaMonkey;
 		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
@@ -2155,11 +2164,11 @@ var windowsObserver = {
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
-			if("CustomizableUI" in window) // Australis, make buttons clickable with our binding
+			if(this.isAustralis) // Make buttons clickable with our binding
 				window.gBrowser.tabContainer.addEventListener("click", this, true);
 		}
 
-		if("CustomizableUI" in window) try { // Australis
+		if(this.isAustralis) try {
 			this.addButtonToPalette(window, tb);
 			window.CustomizableUI.ensureWidgetPlacedInWindow(tb.id, window);
 			this.updateButtonAfterTabs(window);
@@ -2237,14 +2246,15 @@ var windowsObserver = {
 	updateShowAfterTabs: function(tbb, document) {
 		if(this.showAfterTabs(tbb)) {
 			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
-			if("CustomizableUI" in document.defaultView) // Australis
+			if(this.isAustralis)
 				tbb.parentNode.setAttribute(this.fixAfterTabsA11yAttr, "true");
 		}
 		else {
 			var tabsToolbar = document.getElementById("TabsToolbar");
 			if(tabsToolbar) {
 				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
-				tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
+				if(this.isAustralis)
+					tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
 			}
 		}
 	},
@@ -2569,7 +2579,8 @@ var windowsObserver = {
 		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
 		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
 
-		window.gBrowser.tabContainer.removeEventListener("click", this, true);
+		if(this.isAustralis)
+			window.gBrowser.tabContainer.removeEventListener("click", this, true);
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
@@ -3181,10 +3192,7 @@ var windowsObserver = {
 			}
 			// See chrome://browser/content/browser.js, gPrivateBrowsingUI.init()
 			// http://hg.mozilla.org/mozilla-central/file/55f750590259/browser/base/content/browser.js#l6734
-			if(
-				Services.appinfo.OS == "Darwin"
-				&& !("CustomizableUI" in window) // Exclude Australis
-			) {
+			if(Services.appinfo.OS == "Darwin" && !this.isAustralis) {
 				if(indicatePrivate && pbTemp)
 					root.setAttribute("drawintitlebar", "true");
 				else
@@ -3193,7 +3201,7 @@ var windowsObserver = {
 			// After changing of "privatebrowsingmode" attribute #alltabs-popup may not receive
 			// "popuphidden" event (only on Australis?)
 			// See view-source:chrome://browser/content/tabbrowser.xml#tabbrowser-alltabs-popup
-			if("CustomizableUI" in window) window.setTimeout(function() {
+			if(this.isAustralis) window.setTimeout(function() {
 				var allTabsPopup = document.getElementById("alltabs-popup");
 				if(
 					allTabsPopup
@@ -3223,7 +3231,7 @@ var windowsObserver = {
 		) {
 			window.setTimeout(function() { // Pseudo async
 				// Based on code from chrome://browser/content/browser.js
-				if("CustomizableUI" in window) { // Australis
+				if(this.isAustralis) {
 					window.TabsInTitlebar._update(true);
 					_log("updateTabsInTitlebar() => TabsInTitlebar._update(true)");
 				}
@@ -3241,7 +3249,7 @@ var windowsObserver = {
 					sizePlaceholder("appmenu-button", "appmenu-button-container");
 					sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
 				}
-			}, 0);
+			}.bind(this), 0);
 		}
 	},
 	updateDownloadPanel: function(window, isPrivate) {
@@ -3499,7 +3507,7 @@ var windowsObserver = {
 		// we use extending binding with display="xul:hbox" to make button's icon accessible,
 		// buttons becomes not clickable (no "command" event), so we add "click" listener
 		var a11yStyles = "";
-		var newTabBtn = "CustomizableUI" in window // Australis
+		var newTabBtn = this.isAustralis
 			&& this.getNewTabButton(window);
 		if(newTabBtn) {
 			var cs = window.getComputedStyle(newTabBtn, null);
