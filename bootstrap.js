@@ -2174,8 +2174,6 @@ var windowsObserver = {
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
-			if(this.isAustralis) // Make buttons clickable with our binding
-				window.gBrowser.tabContainer.addEventListener("click", this, true);
 		}
 
 		if(this.isAustralis) try {
@@ -2256,15 +2254,20 @@ var windowsObserver = {
 	updateShowAfterTabs: function(tbb, document) {
 		if(this.showAfterTabs(tbb)) {
 			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
-			if(this.isAustralis)
+			if(this.isAustralis) {
 				tbb.parentNode.setAttribute(this.fixAfterTabsA11yAttr, "true");
+				// Make buttons clickable with our binding
+				document.defaultView.gBrowser.tabContainer.addEventListener("click", this, true);
+			}
 		}
 		else {
 			var tabsToolbar = document.getElementById("TabsToolbar");
 			if(tabsToolbar) {
 				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
-				if(this.isAustralis)
+				if(this.isAustralis) {
 					tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
+					document.defaultView.gBrowser.tabContainer.removeEventListener("click", this, true);
+				}
 			}
 		}
 	},
