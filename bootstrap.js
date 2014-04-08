@@ -3613,9 +3613,16 @@ var windowsObserver = {
 			var origBinding = cs.MozBinding;
 			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
 				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
+			var icon = newTabBtn.ownerDocument.getAnonymousElementByAttribute(newTabBtn, "class", "toolbarbutton-icon");
+			var csi = icon ? window.getComputedStyle(icon, null) : {};
 			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
-				"5px " + Math.max(0, (
-					parseFloat(cs.width) - 16 // Assumed icon width
+				Math.max(0, (
+					parseFloat(cs.height) - parseFloat(csi.height || 16)
+					+ parseFloat(cs.marginTop) + parseFloat(cs.marginTop)
+					- parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
+				)/2) + "px "
+				+ Math.max(0, (
+					parseFloat(cs.width) - parseFloat(csi.width || 16)
 					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
 					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
 				)/2) + "px"
@@ -3638,7 +3645,7 @@ var windowsObserver = {
 					}\n\
 					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
 						pointer-events: auto;\n\
-						padding: ' + padding + ';\n\
+						padding: ' + padding + ' !important;\n\
 					}\n\
 				}';
 			return this.newCssURI(cssStr);
