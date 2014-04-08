@@ -3459,6 +3459,11 @@ var windowsObserver = {
 		var cssURI = this.cssURI = this.makeCssURI(window);
 		if(!sss.sheetRegistered(cssURI, sss.USER_SHEET))
 			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
+		if(this.isAustralis) window.setTimeout(function() {
+			var cssA11yURI = this.cssA11yURI = this.makeCssA11yURI(window);
+			if(cssA11yURI && !sss.sheetRegistered(cssA11yURI, sss.USER_SHEET))
+				sss.loadAndRegisterSheet(cssA11yURI, sss.USER_SHEET);
+		}.bind(this), 25);
 	},
 	unloadStyles: function() {
 		if(!this._stylesLoaded)
@@ -3467,6 +3472,9 @@ var windowsObserver = {
 		var sss = this.sss;
 		if(sss.sheetRegistered(this.cssURI, sss.USER_SHEET))
 			sss.unregisterSheet(this.cssURI, sss.USER_SHEET);
+		if(this.cssA11yURI && sss.sheetRegistered(this.cssA11yURI, sss.USER_SHEET))
+			sss.unregisterSheet(this.cssA11yURI, sss.USER_SHEET);
+		this.cssURI = this.cssA11yURI = null;
 	},
 	reloadStyles: function(window) {
 		if(!window)
@@ -3507,47 +3515,6 @@ var windowsObserver = {
 		}
 		var important = prefs.get("stylesHighPriority") ? " !important" : "";
 		var importantTree = prefs.get("stylesHighPriority.tree") ? " !important" : "";
-
-		// See https://github.com/Infocatcher/Private_Tab/issues/137
-		// Correct clickable area for buttons after last tab:
-		// we use extending binding with display="xul:hbox" to make button's icon accessible,
-		// buttons becomes not clickable (no "command" event), so we add "click" listener
-		var a11yStyles = "";
-		var newTabBtn = this.isAustralis
-			&& prefs.get("fixAfterTabsButtonsAccessibility")
-			&& this.getNewTabButton(window);
-		if(newTabBtn) {
-			var cs = window.getComputedStyle(newTabBtn, null);
-			var origBinding = cs.MozBinding;
-			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
-				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
-			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
-				"5px " + Math.max(0, (
-					parseFloat(cs.width) - 16 // Assumed icon width
-					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
-					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
-				)/2) + "px"
-			);
-			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
-			var btnBinding = '<?xml version="1.0"?>\n\
-				<bindings id="privateTabBindings"\n\
-					xmlns="http://www.mozilla.org/xbl"\n\
-					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
-					<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
-						extends="' + ext + '" />\n\
-				</bindings>';
-			var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
-			var a11yStyles = '\
-				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button {\n\
-					pointer-events: none;\n\
-					-moz-binding: url("' + btnBindingData + '");\n\
-				}\n\
-				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
-					pointer-events: auto;\n\
-					padding: ' + padding + ';\n\
-				}\n';
-		}
-
 		var cssStr = '\
 			/* Private Tab: main styles */\n\
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
@@ -3610,7 +3577,7 @@ var windowsObserver = {
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
-				}\n' + a11yStyles + '\
+				}\n\
 			}';
 		if(prefs.get("enablePrivateProtocol")) {
 			cssStr += '\n\
@@ -3632,6 +3599,51 @@ var windowsObserver = {
 			}';
 		}
 		return this.newCssURI(cssStr);
+	},
+	makeCssA11yURI: function(window) {
+		// See https://github.com/Infocatcher/Private_Tab/issues/137
+		// Correct clickable area for buttons after last tab:
+		// we use extending binding with display="xul:hbox" to make button's icon accessible,
+		// buttons becomes not clickable (no "command" event), so we add "click" listener
+		var newTabBtn = this.isAustralis
+			&& prefs.get("fixAfterTabsButtonsAccessibility")
+			&& this.getNewTabButton(window);
+		if(newTabBtn) {
+			var cs = window.getComputedStyle(newTabBtn, null);
+			var origBinding = cs.MozBinding;
+			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
+				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
+			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
+				"5px " + Math.max(0, (
+					parseFloat(cs.width) - 16 // Assumed icon width
+					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
+					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+				)/2) + "px"
+			);
+			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
+			var btnBinding = '<?xml version="1.0"?>\n\
+				<bindings id="privateTabBindings"\n\
+					xmlns="http://www.mozilla.org/xbl"\n\
+					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
+					<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
+						extends="' + ext + '" />\n\
+				</bindings>';
+			var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
+			var cssStr = '\
+				/* Private Tab: fix width of clickable area for buttons after last tab */\n\
+				@-moz-document url("' + window.document.documentURI + '") {\n\
+					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button {\n\
+						pointer-events: none;\n\
+						-moz-binding: url("' + btnBindingData + '");\n\
+					}\n\
+					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
+						pointer-events: auto;\n\
+						padding: ' + padding + ';\n\
+					}\n\
+				}';
+			return this.newCssURI(cssStr);
+		}
+		return null;
 	},
 	newCssURI: function(cssStr) {
 		cssStr = this.trimCSSString(cssStr);
