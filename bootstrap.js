@@ -1710,13 +1710,17 @@ var windowsObserver = {
 			var trg = e.originalTarget || e.target;
 			if(
 				e.button == 0
-				&& trg.classList.contains("toolbarbutton-icon")
-				&& trg.parentNode.classList.contains("tabs-newtab-button")
+				&& (
+					trg.classList.contains("toolbarbutton-icon")
+					&& trg.parentNode.classList.contains("tabs-newtab-button")
+					|| trg.classList.contains("tabs-newtab-button")
+				)
 				&& prefs.get("fixAfterTabsButtonsAccessibility")
 			) {
 				e.preventDefault();
 				e.stopPropagation();
-				trg.parentNode.doCommand();
+				var btn = trg.localName == "image" ? trg.parentNode : trg;
+				btn.doCommand();
 				_log(e.type + " on .tabs-newtab-button => doCommand()");
 			}
 			return;
