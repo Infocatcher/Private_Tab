@@ -139,7 +139,9 @@ var windowsObserver = {
 			case "close":
 			case "beforeunload":
 			case "SSWindowClosing":           this.windowClosingHandler(e);  break;
-			case "aftercustomization":        this.updateToolbars(e);
+			case "aftercustomization":        this.updateToolbars(e);        break;
+			case "mouseover":
+			case "mouseout":                  this.filterMouseEvent(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -2171,6 +2173,18 @@ var windowsObserver = {
 			var tb2 = tb.cloneNode(true);
 			tb2.id = this.afterTabsButtonId;
 			tb2.className = "tabs-newtab-button";
+			if(newTabBtn.hasAttribute("onmouseover")) {
+				// See view-source:chrome://browser/content/tabbrowser.xml
+				// gBrowser.tabContainer._enterNewTab()/_leaveNewTab()
+				// This sets "beforehovered" on last tab, so we should prevent this,
+				// if our button is placed before "New Tab" button
+				tb2.setAttribute("onmouseover", newTabBtn.getAttribute("onmouseover") || "");
+				tb2.setAttribute("onmouseout",  newTabBtn.getAttribute("onmouseout")  || "");
+				tb2.addEventListener("mouseover", this, true);
+				tb2.addEventListener("mouseout", this, true);
+				newTabBtn.addEventListener("mouseover", this, true);
+				newTabBtn.addEventListener("mouseout", this, true);
+			}
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
@@ -2295,6 +2309,20 @@ var windowsObserver = {
 			this.patchSearchBar(window, true);
 		}.bind(this), 0);
 		this.updateButtonAfterTabs(window);
+	},
+	filterMouseEvent: function(e) {
+		var btn = e.originalTarget || e.target;
+		if(btn.localName == "image")
+			btn = btn.parentNode;
+		for(var ps = btn.previousSibling; ps; ps = ps.previousSibling) {
+			if(btn.id == "tabbrowser-tabs")
+				break;
+			if(ps.boxObject && ps.boxObject.width) { // Found visible node before button
+				e.stopPropagation();
+				_dbgv && _log("Stop propagation of " + e.type + " for \"" + btn.tooltipText + "\" button");
+				break;
+			}
+		}
 	},
 	updateButtonAfterTabs: function(window) {
 		var document = window.document;
@@ -2590,7 +2618,17 @@ var windowsObserver = {
 		this.destroyNode(this.getPaletteButton(window), force);
 		// Force destroy toolbar button in Australis menu
 		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
-		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
+		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
+		if(afterTabsBtn) {
+			afterTabsBtn.removeEventListener("mouseover", this, true);
+			afterTabsBtn.removeEventListener("mouseout", this, true);
+			this.destroyNode(afterTabsBtn, force);
+		}
+		var newTabBtn = this.getNewTabButton(window);
+		if(newTabBtn) {
+			newTabBtn.removeEventListener("mouseover", this, true);
+			newTabBtn.removeEventListener("mouseout", this, true);
+		}
 
 		if(this.isAustralis)
 			window.gBrowser.tabContainer.removeEventListener("click", this, true);
