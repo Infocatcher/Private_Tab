@@ -2253,7 +2253,7 @@ var windowsObserver = {
 			insParent.insertBefore(tb, insPos);
 			if(newTabBtn && insPos && this.hasNodeAfter(tb, "new-tab-button"))
 				newTabBtn.parentNode.insertBefore(newTabBtn, tb2.nextSibling);
-			this.updateShowAfterTabs(tb, document);
+			this.updateShowAfterTabs(document, tb);
 			_log("Insert toolbar button " + (insPos ? "before " + insPos.id : "at the end"));
 			return;
 		}
@@ -2265,31 +2265,40 @@ var windowsObserver = {
 				return true;
 		return false;
 	},
-	updateShowAfterTabs: function(tbb, document) {
-		if(this.showAfterTabs(tbb)) {
+	updateShowAfterTabs: function(document, tbb) {
+		var window = document.defaultView;
+		if(tbb === undefined)
+			tbb = document.getElementById(this.toolbarButtonId);
+		var showAfterTabs = this.showAfterTabs(tbb);
+		if(showAfterTabs) {
 			var tabsToolbar = tbb.parentNode;
 			tabsToolbar.setAttribute(this.showAfterTabsAttr, "true");
-			if(this.isAustralis) {
+		}
+		else {
+			var tabsToolbar = document.getElementById("TabsToolbar");
+			if(tabsToolbar)
+				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
+		}
+		if(this.isAustralis) window.setTimeout(function() {
+			// Don't apply fix, if tab bar is vertical
+			// (and wait for vertical tab bar initialization)
+			if(
+				showAfterTabs
+				&& tabsToolbar.getAttribute("orient") != "vertical"
+			) {
+				_log("updateShowAfterTabs(): set " + this.fixAfterTabsA11yAttr + "=true");
 				tabsToolbar.setAttribute(this.fixAfterTabsA11yAttr, "true");
 				var window = document.defaultView;
 				// Make buttons clickable with our binding
 				window.gBrowser.tabContainer.addEventListener("click", this, true);
-				window.setTimeout(function() {
-					this.watchTabBarChanges(tabsToolbar, true);
-				}.bind(this), 0);
 			}
-		}
-		else {
-			var tabsToolbar = document.getElementById("TabsToolbar");
-			if(tabsToolbar) {
-				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
-				if(this.isAustralis) {
-					tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
-					document.defaultView.gBrowser.tabContainer.removeEventListener("click", this, true);
-					this.watchTabBarChanges(tabsToolbar, false);
-				}
+			else {
+				_log("updateShowAfterTabs(): remove " + this.fixAfterTabsA11yAttr);
+				tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
+				document.defaultView.gBrowser.tabContainer.removeEventListener("click", this, true);
 			}
-		}
+			this.watchTabBarChanges(tabsToolbar, showAfterTabs);
+		}.bind(this), 10);
 	},
 	watchTabBarChanges: function(tabsToolbar, watch) {
 		if(!tabsToolbar || !watch ^ "_privateTabMutationObserver" in tabsToolbar)
@@ -2300,7 +2309,8 @@ var windowsObserver = {
 		if(watch) {
 			var mo = tabsToolbar._privateTabMutationObserver = new window.MutationObserver(function(mutations) {
 				if(this.cssA11yURI) { // Don't load styles too early!
-					_log('Changed "orient" attribute of #TabsToolbar => reloadStyles()');
+					_log('Changed "orient" attribute of #TabsToolbar');
+					this.updateShowAfterTabs(window.document);
 					this.reloadStyles(window);
 				}
 			}.bind(this));
@@ -2356,7 +2366,7 @@ var windowsObserver = {
 	updateButtonAfterTabs: function(window) {
 		var document = window.document;
 		var tbBtn = document.getElementById(this.toolbarButtonId);
-		this.updateShowAfterTabs(tbBtn, document);
+		this.updateShowAfterTabs(document, tbBtn);
 		if(!tbBtn)
 			return;
 		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
