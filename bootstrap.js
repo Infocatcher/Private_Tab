@@ -3704,13 +3704,14 @@ var windowsObserver = {
 				)/2) + "px"
 			);
 			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
-			var btnBinding = '<?xml version="1.0"?>\n\
+			var btnBinding = this.trimMultilineString('\
+				<?xml version="1.0"?>\n\
 				<bindings id="privateTabBindings"\n\
 					xmlns="http://www.mozilla.org/xbl"\n\
 					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
 					<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
 						extends="' + ext + '" />\n\
-				</bindings>';
+				</bindings>');
 			var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
 			var cssStr = '\
 				/* Private Tab: fix width of clickable area for buttons after last tab */\n\
@@ -3729,10 +3730,10 @@ var windowsObserver = {
 		return null;
 	},
 	newCssURI: function(cssStr) {
-		cssStr = this.trimCSSString(cssStr);
+		cssStr = this.trimMultilineString(cssStr);
 		return Services.io.newURI("data:text/css," + encodeURIComponent(cssStr), null, null);
 	},
-	trimCSSString: function(s) {
+	trimMultilineString: function(s) {
 		var spaces = s.match(/^[ \t]*/)[0];
 		return s.replace(new RegExp("^" + spaces, "mg"), "");
 	},
