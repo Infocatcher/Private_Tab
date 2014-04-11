@@ -2267,11 +2267,16 @@ var windowsObserver = {
 	},
 	updateShowAfterTabs: function(tbb, document) {
 		if(this.showAfterTabs(tbb)) {
-			tbb.parentNode.setAttribute(this.showAfterTabsAttr, "true");
+			var tabsToolbar = tbb.parentNode;
+			tabsToolbar.setAttribute(this.showAfterTabsAttr, "true");
 			if(this.isAustralis) {
-				tbb.parentNode.setAttribute(this.fixAfterTabsA11yAttr, "true");
+				tabsToolbar.setAttribute(this.fixAfterTabsA11yAttr, "true");
+				var window = document.defaultView;
 				// Make buttons clickable with our binding
-				document.defaultView.gBrowser.tabContainer.addEventListener("click", this, true);
+				window.gBrowser.tabContainer.addEventListener("click", this, true);
+				window.setTimeout(function() {
+					this.watchTabBarChanges(tabsToolbar, true);
+				}.bind(this), 0);
 			}
 		}
 		else {
@@ -2281,8 +2286,32 @@ var windowsObserver = {
 				if(this.isAustralis) {
 					tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
 					document.defaultView.gBrowser.tabContainer.removeEventListener("click", this, true);
+					this.watchTabBarChanges(tabsToolbar, false);
 				}
 			}
+		}
+	},
+	watchTabBarChanges: function(tabsToolbar, watch) {
+		if(!tabsToolbar || !watch ^ "_privateTabMutationObserver" in tabsToolbar)
+			return;
+		_log("watchTabBarChanges(" + watch + ")");
+		// Detect changes of tabs toolbar orientation, for extensions like Tree Style Tab
+		var window = tabsToolbar.ownerDocument.defaultView;
+		if(watch) {
+			var mo = tabsToolbar._privateTabMutationObserver = new window.MutationObserver(function(mutations) {
+				if(this.cssA11yURI) { // Don't load styles too early!
+					_log('Changed "orient" attribute of #TabsToolbar => reloadStyles()');
+					this.reloadStyles(window);
+				}
+			}.bind(this));
+			mo.observe(tabsToolbar, {
+				attributes: true,
+				attributeFilter: ["orient"]
+			});
+		}
+		else {
+			tabsToolbar._privateTabMutationObserver.disconnect();
+			delete tabsToolbar._privateTabMutationObserver;
 		}
 	},
 	showAfterTabs: function(tbb, document) {
@@ -2630,8 +2659,10 @@ var windowsObserver = {
 			newTabBtn.removeEventListener("mouseout", this, true);
 		}
 
-		if(this.isAustralis)
+		if(this.isAustralis) {
 			window.gBrowser.tabContainer.removeEventListener("click", this, true);
+			this.watchTabBarChanges(document.getElementById("TabsToolbar"), false);
+		}
 
 		var contentContext = document.getElementById("contentAreaContextMenu");
 		contentContext && contentContext.removeEventListener("popupshowing", this, false);
