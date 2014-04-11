@@ -2448,7 +2448,7 @@ var windowsObserver = {
 		if(newPrivateWin) {
 			appMenuItem.className = newPrivateWin.className; // menuitem-iconic menuitem-iconic-tooltip
 			if(
-				newPrivateWin.id == "menu_newPrivateWindow" // Classic Theme Restorer
+				this.isAustralis // Classic Theme Restorer
 				&& !appMenuItem.classList.contains("menuitem-iconic-tooltip")
 			)
 				appMenuItem.classList.add("menuitem-iconic-tooltip");
