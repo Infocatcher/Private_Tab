@@ -2307,12 +2307,18 @@ var windowsObserver = {
 		// Detect changes of tabs toolbar orientation, for extensions like Tree Style Tab
 		var window = tabsToolbar.ownerDocument.defaultView;
 		if(watch) {
+			var oldOrient = tabsToolbar.getAttribute("orient");
 			var mo = tabsToolbar._privateTabMutationObserver = new window.MutationObserver(function(mutations) {
-				if(this.cssA11yURI) { // Don't load styles too early!
+				var newOrient = tabsToolbar.getAttribute("orient");
+				if(
+					this.cssA11yURI // Don't load styles too early!
+					&& (newOrient != oldOrient || newOrient != "vertical")
+				) {
 					_log("Changed orient, width or height attribute of #TabsToolbar");
 					this.updateShowAfterTabs(window.document);
 					this.reloadStyles(window);
 				}
+				oldOrient = newOrient;
 			}.bind(this));
 			mo.observe(tabsToolbar, {
 				attributes: true,
