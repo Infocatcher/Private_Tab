@@ -3704,7 +3704,7 @@ var windowsObserver = {
 			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
 				Math.max(0, (
 					parseFloat(cs.height) - parseFloat(csi.height || 16)
-					+ parseFloat(cs.marginTop) + parseFloat(cs.marginTop)
+					+ parseFloat(cs.marginTop) + parseFloat(cs.marginBottom)
 					- parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
 				)/2) + "px "
 				+ Math.max(0, (
