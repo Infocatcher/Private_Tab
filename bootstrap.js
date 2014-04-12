@@ -3706,11 +3706,15 @@ var windowsObserver = {
 					parseFloat(cs.height) - parseFloat(csi.height || 16)
 					+ parseFloat(cs.marginTop) + parseFloat(cs.marginBottom)
 					- parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
+					- parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+					- parseFloat(csi.marginTop || 0) - parseFloat(csi.marginBottom || 0)
 				)/2) + "px "
 				+ Math.max(0, (
 					parseFloat(cs.width) - parseFloat(csi.width || 16)
 					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
 					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+					- parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+					- parseFloat(csi.marginLeft || 0) - parseFloat(csi.marginRight || 0)
 				)/2) + "px"
 			);
 			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
