@@ -2309,14 +2309,14 @@ var windowsObserver = {
 		if(watch) {
 			var mo = tabsToolbar._privateTabMutationObserver = new window.MutationObserver(function(mutations) {
 				if(this.cssA11yURI) { // Don't load styles too early!
-					_log('Changed "orient" attribute of #TabsToolbar');
+					_log("Changed orient, width or height attribute of #TabsToolbar");
 					this.updateShowAfterTabs(window.document);
 					this.reloadStyles(window);
 				}
 			}.bind(this));
 			mo.observe(tabsToolbar, {
 				attributes: true,
-				attributeFilter: ["orient"]
+				attributeFilter: ["orient", "width", "height"]
 			});
 		}
 		else {
