@@ -53,10 +53,10 @@ var privateProtocol = {
 		return false;
 	},
 	newURI: function(spec, originCharset, baseURI) {
-		var url = Components.classes["@mozilla.org/network/standard-url;1"]
-			.createInstance(Components.interfaces.nsIStandardURL);
-		url.init(Components.interfaces.nsIStandardURL.URLTYPE_STANDARD, 0, spec, originCharset, baseURI);
-		return url.QueryInterface(Components.interfaces.nsIURI);
+		var uri = Components.classes["@mozilla.org/network/simple-uri;1"]
+			.createInstance(Components.interfaces.nsIURI);
+		uri.spec = spec;
+		return uri;
 	},
 	newChannel: function(uri) {
 		var spec = uri.spec;
