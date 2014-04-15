@@ -265,7 +265,7 @@ var windowsObserver = {
 			var ptEntry = {
 				get title()       _getString("taskBarOpenNewPrivateTab" + sm),
 				get description() _getString("taskBarOpenNewPrivateTabDesc" + sm),
-				get args()        "-new-tab private:///#" + (prefs.getPref("browser.newtab.url") || "about:blank"),
+				get args()        "-new-tab private:" + (prefs.getPref("browser.newtab.url") || "about:blank"),
 				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
 				open:             true,
 				close:            true,
@@ -1142,9 +1142,11 @@ var windowsObserver = {
 			}.bind(this), 0);
 		}
 
-		if( // Focus URL bar, if opened empty private tab becomes selected
-			tabLabel == "private:///#about:blank"
-			|| tabLabel == "private:///#" + window.BROWSER_NEW_TAB_URL
+		// Focus URL bar, if opened empty private tab becomes selected
+		var privateURI = /^private:\/*#?/i.test(tabLabel) && RegExp.rightContext;
+		if(
+			privateURI
+			&& (privateURI == "about:blank" || privateURI == window.BROWSER_NEW_TAB_URL)
 		) {
 			window.setTimeout(function() {
 				if(tab.getAttribute("selected") != "true")
