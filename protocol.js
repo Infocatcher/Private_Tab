@@ -63,7 +63,7 @@ var privateProtocol = {
 		_log("[protocol] newChannel(): spec = " + spec);
 		var newSpec = "";
 		var schemePrefix = P_SCHEME + ":";
-		// Example: private:///#https://addons.mozilla.org/
+		// Example: private:///#http://example.com/ (legacy) or private:http://example.com/
 		if(spec && spec.startsWith(schemePrefix))
 			newSpec = spec.substr(0, schemePrefix.length).replace(/^\/*#?/, "");
 		_log("[protocol] newChannel(): newSpec = " + newSpec);
