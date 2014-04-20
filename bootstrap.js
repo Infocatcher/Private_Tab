@@ -1239,7 +1239,9 @@ var windowsObserver = {
 			+ "\nTry don't save it in undo close history"
 		);
 		var silentFail = false;
-		if(e.detail) {
+		if(this.platformVersion >= 29) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+			silentFail = true;
+		else if(e.detail) {
 			_log("Tab moved to another window");
 			silentFail = true;
 		}
