@@ -6,6 +6,7 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+##### 0.1.7.1 (2014-04-20)
 `+` Добавлено отображение сочетания клавиш во всплывающей подсказке кнопки для панелей инструментов в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/136">#136</a>).<br>
 `x` Workaround для корректного обновления заголовка окна в Firefox 29+ (Australis), также см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=987929">bug 987929</a> (или вы можете использовать более корректно работающий обходной путь – установить <em>browser.tabs.drawInTitlebar</em> = false или <em>extensions.privateTab.usePrivateWindowStyle</em> = false).<br>
 `x` Исправлена ширина кликабельной области кнопки «Новая приватная вкладка» после последней вкладки в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/137">#137</a>).<br>
