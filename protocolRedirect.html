@@ -75,6 +75,8 @@ try {
 
 	if(!spec)
 		throw new Error("No URI");
+	if(!/^[^:]+:/.test(spec))
+		spec = "http://" + spec;
 	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
 
 	try {
