@@ -11,8 +11,11 @@ window.onhashchange = function() {
 };
 try {
 	Components.utils.import("resource://gre/modules/Services.jsm");
-	// private:///#http://example.com/ (legacy) or private:http://example.com/
-	var spec = location.href.replace(/^\w+:\/*#?/, "");
+	// Example: private:///#http://example.com/ (legacy) or private:http://example.com/
+	// Note: we use protocolRedirect.html#http://..., but we never (?) have it here
+	var spec = location.protocol == "private:"
+		? location.href.replace(/^\w+:\/*#?/, "")
+		: location.hash.substr(1);
 
 	try {
 		var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
