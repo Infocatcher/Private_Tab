@@ -65,7 +65,7 @@ var privateProtocol = {
 		var schemePrefix = P_SCHEME + ":";
 		// Example: private:///#http://example.com/ (legacy) or private:http://example.com/
 		if(spec && spec.startsWith(schemePrefix))
-			newSpec = spec.substr(0, schemePrefix.length).replace(/^\/*#?/, "");
+			newSpec = spec.substr(schemePrefix.length).replace(/^\/*#?/, "");
 		_log("[protocol] newChannel(): newSpec = " + newSpec);
 
 		// We can't use newChannel(newSpec, ...) here - strange things happens
