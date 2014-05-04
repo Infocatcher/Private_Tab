@@ -2163,11 +2163,15 @@ var windowsObserver = {
 	initToolbarButton: function(document) {
 		var window = document.defaultView;
 		var tbId = this.toolbarButtonId;
+		var shortLabel = this.isAustralis // for Australis menu
+			&& this.getLocalized("openNewPrivateTabShortInAustralis") == "true"
+			? "Short"
+			: "";
 		var tb = this.createNode(document, "toolbarbutton", tbId, {
 			id: tbId,
 			"class": "toolbarbutton-1 chromeclass-toolbar-additional",
 			removable: "true",
-			label: this.getLocalized("openNewPrivateTab"),
+			label: this.getLocalized("openNewPrivateTab" + shortLabel),
 			tooltiptext: this.getLocalized("openNewPrivateTabTip"),
 			"privateTab-command": "openNewPrivateTab"
 		});
