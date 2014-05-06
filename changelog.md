@@ -122,7 +122,7 @@
 `x` Correctly fix App button width: wait for third-party styles.<br>
 `x` Fixed: toggle tab private hotkey works for wrong tab sometimes.<br>
 `*` Allow setup multiple hotkeys for one command: <em>extensions.privateTab.key.</em>%command%<em>#</em>%alias_name%.<br>
-`x` Fixed (hopefully): hotkeys doesn't work on non-Latin keyboard layouts.<br>
+`x` Fixed (hopefully): hotkeys doesn't work on non-Latin keyboard layouts (<a href="https://github.com/Infocatcher/Private_Tab/issues/19">#19</a>).<br>
 `*` Small optimizations.<br>
 
 ##### 0.1.0b4 (2013-03-26)
