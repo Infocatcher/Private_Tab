@@ -1713,19 +1713,12 @@ var windowsObserver = {
 	},
 	clickHandler: function(e) {
 		if(e.currentTarget.id == "tabbrowser-tabs") {
-			var trg = e.originalTarget || e.target;
-			if(
-				e.button == 0
-				&& (
-					trg.classList.contains("toolbarbutton-icon")
-					&& trg.parentNode.classList.contains("tabs-newtab-button")
-					|| trg.classList.contains("tabs-newtab-button")
-				)
-				&& prefs.get("fixAfterTabsButtonsAccessibility")
-			) {
+			if(e.button != 0 || !prefs.get("fixAfterTabsButtonsAccessibility"))
+				return;
+			var btn = this.getNewTabButtonFromChild(e.originalTarget || e.target);
+			if(btn) {
 				e.preventDefault();
 				e.stopPropagation();
-				var btn = trg.localName == "image" ? trg.parentNode : trg;
 				btn.doCommand();
 				_log(e.type + " on .tabs-newtab-button => doCommand()");
 			}
@@ -1733,6 +1726,12 @@ var windowsObserver = {
 		}
 		if(e.button == 1 && e.target.getAttribute("disabled") != "true")
 			this.handleCommandFromEvent(e, true, true);
+	},
+	getNewTabButtonFromChild: function(node) {
+		var btn = node.localName == "image" ? node.parentNode : node;
+		if(btn.classList.contains("tabs-newtab-button"))
+			return btn;
+		return null;
 	},
 	handleCommandFromEvent: function(e, shifted, closeMenus) {
 		var trg = e.target;
@@ -2188,10 +2187,10 @@ var windowsObserver = {
 				// if our button is placed before "New Tab" button
 				tb2.setAttribute("onmouseover", newTabBtn.getAttribute("onmouseover") || "");
 				tb2.setAttribute("onmouseout",  newTabBtn.getAttribute("onmouseout")  || "");
-				tb2.addEventListener("mouseover", this, true);
-				tb2.addEventListener("mouseout", this, true);
-				newTabBtn.addEventListener("mouseover", this, true);
-				newTabBtn.addEventListener("mouseout", this, true);
+				// Note: we should use parent node here, looks like we don't receives
+				// all mouse events due to "pointer-events: none"
+				newTabBtn.parentNode.addEventListener("mouseover", this, true);
+				newTabBtn.parentNode.addEventListener("mouseout", this, true);
 			}
 			this.initNodeEvents(tb2);
 			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
@@ -2364,11 +2363,12 @@ var windowsObserver = {
 		this.updateButtonAfterTabs(window);
 	},
 	filterMouseEvent: function(e) {
-		var btn = e.originalTarget || e.target;
-		if(btn.localName == "image")
-			btn = btn.parentNode;
+		var btn = this.getNewTabButtonFromChild(e.originalTarget || e.target);
+		if(!btn)
+			return;
 		for(var ps = btn.previousSibling; ps; ps = ps.previousSibling) {
-			if(btn.id == "tabbrowser-tabs")
+			var ln = ps.localName;
+			if(ln == "tab" || ln == "children") // XBL <children>? D'oh...
 				break;
 			if(ps.boxObject && ps.boxObject.width) { // Found visible node before button
 				e.stopPropagation();
@@ -2681,6 +2681,8 @@ var windowsObserver = {
 		if(newTabBtn) {
 			newTabBtn.removeEventListener("mouseover", this, true);
 			newTabBtn.removeEventListener("mouseout", this, true);
+			newTabBtn.parentNode.removeEventListener("mouseover", this, true);
+			newTabBtn.parentNode.removeEventListener("mouseout", this, true);
 		}
 
 		if(this.isAustralis) {
