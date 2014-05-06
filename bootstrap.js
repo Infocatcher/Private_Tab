@@ -2671,16 +2671,10 @@ var windowsObserver = {
 		this.destroyNode(this.getPaletteButton(window), force);
 		// Force destroy toolbar button in Australis menu
 		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
-		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
-		if(afterTabsBtn) {
-			afterTabsBtn.removeEventListener("mouseover", this, true);
-			afterTabsBtn.removeEventListener("mouseout", this, true);
-			this.destroyNode(afterTabsBtn, force);
-		}
+		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
+
 		var newTabBtn = this.getNewTabButton(window);
 		if(newTabBtn) {
-			newTabBtn.removeEventListener("mouseover", this, true);
-			newTabBtn.removeEventListener("mouseout", this, true);
 			newTabBtn.parentNode.removeEventListener("mouseover", this, true);
 			newTabBtn.parentNode.removeEventListener("mouseout", this, true);
 		}
