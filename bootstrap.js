@@ -2180,6 +2180,7 @@ var windowsObserver = {
 			var tb2 = tb.cloneNode(true);
 			tb2.id = this.afterTabsButtonId;
 			tb2.className = "tabs-newtab-button";
+			var btnBar = newTabBtn.parentNode;
 			if(newTabBtn.hasAttribute("onmouseover")) {
 				// See view-source:chrome://browser/content/tabbrowser.xml
 				// gBrowser.tabContainer._enterNewTab()/_leaveNewTab()
@@ -2189,11 +2190,11 @@ var windowsObserver = {
 				tb2.setAttribute("onmouseout",  newTabBtn.getAttribute("onmouseout")  || "");
 				// Note: we should use parent node here, looks like we don't receives
 				// all mouse events due to "pointer-events: none"
-				newTabBtn.parentNode.addEventListener("mouseover", this, true);
-				newTabBtn.parentNode.addEventListener("mouseout", this, true);
+				btnBar.addEventListener("mouseover", this, true);
+				btnBar.addEventListener("mouseout", this, true);
 			}
 			this.initNodeEvents(tb2);
-			newTabBtn.parentNode.insertBefore(tb2, newTabBtn.nextSibling);
+			btnBar.insertBefore(tb2, newTabBtn.nextSibling);
 			window.addEventListener("aftercustomization", this, false);
 		}
 
