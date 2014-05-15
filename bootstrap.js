@@ -2954,6 +2954,7 @@ var windowsObserver = {
 			|| tabLabel == "chrome://fvd.speeddial/content/fvd_about_blank.html"
 			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
 			|| tabLabel == "chrome://superstart/content/index.html"
+			|| tabLabel == "about:superstart" // Super Start 7.0+
 			|| tabLabel == "chrome://fastdial/content/fastdial.html"
 		)
 			return true;
