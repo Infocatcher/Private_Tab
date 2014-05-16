@@ -23,13 +23,13 @@ function install(params, reason) {
 function uninstall(params, reason) {
 }
 function startup(params, reason) {
-	windowsObserver.init(reason);
+	privateTab.init(reason);
 }
 function shutdown(params, reason) {
-	windowsObserver.destroy(reason);
+	privateTab.destroy(reason);
 }
 
-var windowsObserver = {
+var privateTab = {
 	initialized: false,
 	init: function(reason) {
 		if(this.initialized)
@@ -3789,7 +3789,7 @@ var windowsObserver = {
 	}
 };
 
-var privateTabInternal = windowsObserver;
+var privateTabInternal = privateTab;
 function API(window) {
 	this.window = window;
 }
@@ -3864,7 +3864,7 @@ var prefs = {
 		}
 		//~ todo: add condition when https://bugzilla.mozilla.org/show_bug.cgi?id=564675 will be fixed
 		this.loadDefaultPrefs();
-		if(windowsObserver.isSeaMonkey) {
+		if(privateTab.isSeaMonkey) {
 			var defaultBranch = Services.prefs.getDefaultBranch("");
 			this.setPref(this.ns + "dragAndDropTabsBetweenDifferentWindows", false, defaultBranch);
 			this.setPref(this.ns + "patchDownloads", false, defaultBranch);
@@ -3895,7 +3895,7 @@ var prefs = {
 		var shortName = pName.substr(this.ns.length);
 		var val = this.getPref(pName);
 		this._cache[shortName] = val;
-		windowsObserver.prefChanged(shortName, val);
+		privateTab.prefChanged(shortName, val);
 	},
 
 	loadDefaultPrefs: function() {
