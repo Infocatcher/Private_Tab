@@ -1130,7 +1130,7 @@ var windowsObserver = {
 		}
 		var tabLabel = tab.getAttribute("label") || "";
 		_log(
-			"Tab opened: " + tabLabel.substr(0, 256)
+			"Tab opened: " + tabLabel.substr(0, 256) + (isEmpty ? " (empty)" : "")
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
@@ -2955,6 +2955,7 @@ var windowsObserver = {
 			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
 			|| tabLabel == "chrome://superstart/content/index.html"
 			|| tabLabel == "about:superstart" // Super Start 7.0+
+			|| tabLabel == "Super Start"
 			|| tabLabel == "chrome://fastdial/content/fastdial.html"
 		)
 			return true;
