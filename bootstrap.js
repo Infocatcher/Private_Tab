@@ -76,6 +76,21 @@ var privateTab = {
 			this.unloadStyles();
 			this.restoreAppButtonWidth();
 			this.patchPrivateBrowsingUtils(false);
+
+			if(reason != ADDON_DISABLE) {
+				var emptyLabels = { __proto__: null };
+				var hasData = false;
+				for(var label in this.emptyTabLabels) {
+					if(this.emptyTabLabels[label] == "API") {
+						hasData = true;
+						emptyLabels[label] = "API";
+					}
+				}
+				if(hasData) {
+					_log("Save data from privateTab.tabLabelIsEmpty() API");
+					this.Application.storage.set("privateTab:emptyTabLabels", emptyLabels);
+				}
+			}
 		}
 
 		prefs.destroy();
@@ -358,6 +373,20 @@ var privateTab = {
 			window.setTimeout(function() {
 				this.patchWarnAboutClosingWindow(window, true);
 			}.bind(this), 50);
+			// Import data from privateTab.tabLabelIsEmpty() API
+			if(!this.emptyTabLabelsImported) {
+				this.emptyTabLabelsImported = true;
+				var emptyLabels = this.Application.storage.get("privateTab:emptyTabLabels", null);
+				if(emptyLabels) {
+					this.Application.storage.set("privateTab:emptyTabLabels", null);
+					for(var label in emptyLabels) {
+						if(!(label in this.emptyTabLabels)) {
+							_log("Import tabLabelIsEmpty() API: \"" + label + "\"");
+							this.emptyTabLabels[label] = "API";
+						}
+					}
+				}
+			}
 		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
@@ -485,6 +514,16 @@ var privateTab = {
 		}
 		delete this.isAustralis;
 		return this.isAustralis = "CustomizableUI" in window;
+	},
+	get Application() {
+		delete this.Application;
+		return this.Application = (
+			Components.classes["@mozilla.org/fuel/application;1"] // Firefox
+			|| Components.classes["@mozilla.org/smile/application;1"] // SeaMonkey
+		).getService(
+			Components.interfaces.fuelIApplication // Firefox
+			|| Components.interfaces.smileIApplication // SeaMonkey
+		);
 	},
 	get windows() {
 		var isSeaMonkey = this.isSeaMonkey;
@@ -2959,6 +2998,7 @@ var privateTab = {
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
 		return tabLabel == emptyTabLabel;
 	},
+	emptyTabLabelsImported: false,
 	emptyTabLabels: {
 		"": true,
 		"undefined": true,
