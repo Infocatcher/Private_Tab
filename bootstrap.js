@@ -2947,8 +2947,11 @@ var privateTab = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
-		if(tabLabel in this.emptyTabLabels)
+		if(tabLabel in this.emptyTabLabels) {
+			if(_dbg && this.emptyTabLabels[tabLabel] == "API")
+				_log("isEmptyTab() + API: detect \"" + tabLabel + "\" as empty");
 			return true;
+		}
 		if(/^\w+:\S*$/.test(tabLabel))
 			return false;
 		// We should check tab label for SeaMonkey and old Firefox
@@ -3844,6 +3847,26 @@ API.prototype = {
 	stopToOpenTabs: function  privateTab_stopToOpenTabs() {
 		this._openNewTabsPrivate = undefined;
 		this.window.removeEventListener("TabOpen", this, true);
+	},
+	tabLabelIsEmpty: function(tabLabel, isEmpty) {
+		var emptyLabels = privateTabInternal.emptyTabLabels;
+		if(isEmpty === undefined)
+			return tabLabel in emptyLabels;
+		if(tabLabel in emptyLabels && emptyLabels[tabLabel] != "API") {
+			var stack = Components.stack.caller;
+			Components.utils.reportError(new Error(
+				LOG_PREFIX + "tabLabelIsEmpty(): \"" + tabLabel + "\" => you can't modify built-in entries!",
+				stack.filename,
+				stack.lineNumber
+			));
+			return true;
+		}
+		if(isEmpty)
+			emptyLabels[tabLabel] = "API";
+		else
+			delete emptyLabels[tabLabel];
+		_log("tabLabelIsEmpty(): \"" + tabLabel + "\" => " + isEmpty);
+		return isEmpty;
 	}
 };
 
