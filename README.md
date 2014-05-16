@@ -54,6 +54,7 @@ boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
 <br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
 <br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
+<br>boolean [privateTab.tabLabelIsEmpty](#privatetabtablabelisempty)(in string tabLabel[, in boolean isEmpty])
 
 ###### privateTab.isTabPrivate()
 Investigates that the tab are private (`true`) or not (`false`), example:
@@ -101,6 +102,22 @@ gBrowser.addTab("https://addons.mozilla.org/");
 // ...
 privateTab.stopToOpenTabs();
 ```
+###### privateTab.tabLabelIsEmpty()
+Mark tab label as empty (or non-empty), example:
+```javascript
+// Mark tab label/URI as empty:
+if("tabLabelIsEmpty" in privateTab) // Private Tab 0.1.7.2+
+	privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul", true);
+```
+```javascript
+// Check state:
+var isEmpty = privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul");
+```
+```javascript
+// Restore state (e.g. for restartless extensions):
+privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul", false);
+```
+Note: used global storage for labels (not per-window)! So, it's enough to call this function only once.
 
 ##### Backward compatibility:
 Check for Private Tab installed (and enabled):
