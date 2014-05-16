@@ -2947,17 +2947,7 @@ var windowsObserver = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
-		if(
-			!tabLabel
-			|| tabLabel == "undefined"
-			|| tabLabel == "about:blank"
-			|| tabLabel == "chrome://fvd.speeddial/content/fvd_about_blank.html"
-			|| tabLabel == "chrome://speeddial/content/speeddial.xul"
-			|| tabLabel == "chrome://superstart/content/index.html"
-			|| tabLabel == "about:superstart" // Super Start 7.0+
-			|| tabLabel == "Super Start"
-			|| tabLabel == "chrome://fastdial/content/fastdial.html"
-		)
+		if(tabLabel in this.emptyTabLabels)
 			return true;
 		if(/^\w+:\S*$/.test(tabLabel))
 			return false;
@@ -2965,6 +2955,18 @@ var windowsObserver = {
 		var emptyTabLabel = this.getTabBrowserString("tabs.emptyTabTitle", gBrowser)
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
 		return tabLabel == emptyTabLabel;
+	},
+	emptyTabLabels: {
+		"": true,
+		"undefined": true,
+		"about:blank": true,
+		"chrome://fvd.speeddial/content/fvd_about_blank.html": true,
+		"chrome://speeddial/content/speeddial.xul": true,
+		"chrome://superstart/content/index.html": true,
+		"about:superstart": true, // Super Start 7.0+
+		"Super Start": true, // Super Start 7.0+, extensions.superstart.page.preload = true
+		"chrome://fastdial/content/fastdial.html": true,
+		__proto__: null
 	},
 	isBlankTab: function(tab) {
 		var window = tab.ownerDocument.defaultView;
