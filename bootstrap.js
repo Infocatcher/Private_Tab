@@ -260,7 +260,7 @@ var privateTab = {
 			return;
 		this._jumpListsInitialized = init;
 
-		var global = Components.utils.import("resource:///modules/WindowsJumpLists.jsm", {});
+		var global = Components.utils.import("resource://app/modules/WindowsJumpLists.jsm", {});
 		if(!("tasksCfg" in global)) {
 			_log('setupJumpLists() failed: "tasksCfg" not found in WindowsJumpLists.jsm');
 			return;
@@ -487,7 +487,7 @@ var privateTab = {
 		window.removeEventListener("SSWindowStateReady", this, true);
 		window.removeEventListener("aftercustomization", this, false);
 		if(reason != WINDOW_CLOSED) {
-			// See resource:///modules/sessionstore/SessionStore.jsm
+			// See resource://app/modules/sessionstore/SessionStore.jsm
 			// "domwindowclosed" => onClose() => "SSWindowClosing"
 			// This may happens after our "domwindowclosed" notification!
 			this.destroyWindowClosingHandler(window);
@@ -2099,7 +2099,7 @@ var privateTab = {
 		if(window.toolbar.visible)
 			return window;
 		if(prefs.get("dontUseTabsInPopupWindows")) try {
-			Components.utils.import("resource:///modules/RecentWindow.jsm");
+			Components.utils.import("resource://app/modules/RecentWindow.jsm");
 			return RecentWindow.getMostRecentBrowserWindow({
 				allowPopups: false
 			});
@@ -3421,7 +3421,7 @@ var privateTab = {
 		pt._updateDownloadPanelTimer = window.setTimeout(function() {
 			// See chrome://browser/content/downloads/downloads.js,
 			// chrome://browser/content/downloads/indicator.js,
-			// resource:///modules/DownloadsCommon.jsm
+			// resource://app/modules/DownloadsCommon.jsm
 			// Clear download panel:
 			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
 				if("onDataInvalidated" in window.DownloadsView) {
