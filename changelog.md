@@ -10,6 +10,7 @@
 `x` Corrected label for “New Private Tab” button in Russian and French locales in Firefox 29+ (Australis): now used short variant due to small available length in new menu (<a href="https://github.com/Infocatcher/Private_Tab/issues/141">#141</a>).<br>
 `x` Corrected previous fix for appearance of hovered “New Private Tab” button after last tab in Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/138">#138</a>).<br>
 `+` Added Turkish locale (tr), thanks to <a href="http://www.babelzilla.org/forum/index.php?showuser=17436">alfapegasi</a>.<br>
+`x` Fixed: closed private tabs are wrongly cleared in private windows (<a href="https://github.com/Infocatcher/Private_Tab/issues/145">#145</a>).<br>
 
 ##### 0.1.7.1 (2014-04-20)
 `+` Display hotkey in toolbar button's tooltip in Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/136">#136</a>).<br>
