@@ -10,6 +10,8 @@
 `x` Подправлена подпись кнопки «Новая приватная вкладка» в русской и французской локалях в Firefox 29+ (Australis): теперь используется короткий вариант из-за небольшой доступной длины в новом меню (<a href="https://github.com/Infocatcher/Private_Tab/issues/141">#141</a>).<br>
 `x` Подкорректировано предыдущее исправление вида кнопки «Новая приватная вкладка» после последней вкладки при наведении курсора в Firefox 29+ (Australis) (<a href="https://github.com/Infocatcher/Private_Tab/issues/138">#138</a>).<br>
 `+` Добавлена турецкая локаль (tr), спасибо <a href="http://www.babelzilla.org/forum/index.php?showuser=17436">alfapegasi</a>.<br>
+`x` Исправлено определение страниц от <a href="https://addons.mozilla.org/addon/super-start/">Super Start</a> 7.0+ как пустых (<a href="https://github.com/Infocatcher/Private_Tab/issues/142">#142</a>).<br>
+`+` Добавлено: <a href="https://github.com/Infocatcher/Private_Tab#privatetabtablabelisempty">privateTab.tabLabelIsEmpty()</a> API для других расширений (<a href="https://github.com/Infocatcher/Private_Tab/issues/143">#143</a>).<br>
 `x` Исправлено: закрытые приватные вкладки по ошибке удалялись в приватных окнах (<a href="https://github.com/Infocatcher/Private_Tab/issues/145">#145</a>).<br>
 
 ##### 0.1.7.1 (2014-04-20)
