@@ -1273,6 +1273,10 @@ var privateTab = {
 		if(!this.isPrivateTab(tab))
 			return;
 		var window = tab.ownerDocument.defaultView;
+		if(this.isPrivateWindow(window)) {
+			_log("Ignore closed private tab in private window");
+			return;
+		}
 		_log(
 			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
