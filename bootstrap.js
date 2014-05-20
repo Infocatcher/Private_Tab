@@ -1176,8 +1176,14 @@ var privateTab = {
 			this.toggleTabPrivate(tab, isPrivate);
 		else {
 			window.setTimeout(function() {
-				if(tab.parentNode) // Handle only not yet closed tabs + check attribute from nsISessionStore
-					this.setTabState(tab, tab.hasAttribute(this.privateAttr) || undefined);
+				if(!tab.parentNode) // Ignore, if tab was closed
+					return;
+				var isPrivate = tab.hasAttribute(this.privateAttr) || undefined;
+				if(!isPrivate && this.isPrivateWindow(window)) {
+					_log("Restored not private tab in private window");
+					isPrivate = false;
+				}
+				this.setTabState(tab, isPrivate);
 			}.bind(this), 0);
 		}
 
