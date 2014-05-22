@@ -7,6 +7,7 @@
 
 ##### master/HEAD
 `x` Correctly restore closed non-private tabs in private windows.<br>
+`*` Improved favicons support in private:… bookmarks (<a href="https://github.com/Infocatcher/Private_Tab/issues/147">#147</a>).<br>
 
 ##### 0.1.7.2 (2014-05-18)
 `*` Added ability to use simple links like private:example.com, `http://` prefix will be added automatically to all links without protocol.<br>
