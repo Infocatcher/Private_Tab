@@ -82,12 +82,13 @@ try {
 		spec = "http://" + spec;
 	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
 
-	try {
-		setFavicon(uri.scheme + "://" + uri.hostPort + "/favicon.ico");
-	}
-	catch(e2) {
-	}
-
+	//try {
+	//	setFavicon(uri.scheme + "://" + uri.hostPort + "/favicon.ico");
+	//}
+	//catch(e2) {
+	//}
+	if(tab && "privateTab" in win && location.protocol == "private:")
+		win.privateTab._updateBookmarkFavicon(document.documentURIObject, tab, browser);
 	location.replace(spec);
 }
 catch(e) {

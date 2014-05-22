@@ -3878,6 +3878,33 @@ API.prototype = {
 			privateTabInternal.patchBrowserLoadURI(window, true);
 		}, 50);
 	},
+	_updateBookmarkFavicon: function(bookmarkURI, tab, browser) {
+		_log("_updateBookmarkFavicon()");
+		function onLoaded(e) {
+			e && browser.removeEventListener(e.type, onLoaded, true);
+			_dbgv && _log("_updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
+			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
+				_dbgv && _log("_updateBookmarkFavicon(): delay");
+				var icon = (tab.getAttribute("image") || "")
+					.replace(/#-moz-resolution=.*$/, "");
+				if(!icon)
+					return;
+				_log("_updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
+				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
+					.getService(Components.interfaces.mozIAsyncFavicons);
+				faviconService.setAndFetchFaviconForPage(
+					bookmarkURI,
+					Services.io.newURI(icon, null, null),
+					false /*aForceReload*/,
+					faviconService.FAVICON_LOAD_PRIVATE
+				);
+			}, 0);
+		}
+		if(browser.webNavigation.isLoadingDocument)
+			browser.addEventListener("load", onLoaded, true);
+		else
+			onLoaded();
+	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
 		return privateTabInternal.isPrivateTab(tab);
