@@ -3884,6 +3884,8 @@ API.prototype = {
 			e && browser.removeEventListener(e.type, onLoaded, true);
 			_dbgv && _log("_updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
 			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
+				if(!tab.parentNode) // Tab was closed
+					return;
 				_dbgv && _log("_updateBookmarkFavicon(): delay");
 				var icon = (tab.getAttribute("image") || "")
 					.replace(/#-moz-resolution=.*$/, "");
