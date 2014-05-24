@@ -58,7 +58,7 @@ boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
 
 ###### privateTab.isTabPrivate()
 Investigates that the tab are private (`true`) or not (`false`), example:
-```javascript
+```js
 // Close all (visible) private tabs:
 Array.slice(gBrowser.visibleTabs || gBrowser.tabs).forEach(function(tab) {
 	if(privateTab.isTabPrivate(tab))
@@ -70,7 +70,7 @@ Changes tab private state:
 <br>Toggle: `privateTab.toggleTabPrivate(tab)`
 <br>Make private: `privateTab.toggleTabPrivate(tab, true)`
 <br>Make not private: `privateTab.toggleTabPrivate(tab, false)`
-```javascript
+```js
 // Make all (visible) tabs private:
 Array.forEach(
 	gBrowser.visibleTabs || gBrowser.tabs,
@@ -82,19 +82,19 @@ Array.forEach(
 ```
 ###### privateTab.readyToOpenTab()
 Allows to open private or not private tab (independent of any inheritance mechanism), example:
-```javascript
+```js
 // Open in private tab:
 privateTab.readyToOpenTab(true);
 gBrowser.addTab("https://mozilla.org/");
 ```
-```javascript
+```js
 // Open in not private tab:
 privateTab.readyToOpenTab(false);
 gBrowser.addTab("https://mozilla.org/");
 ```
 ###### privateTab.readyToOpenTabs()
 Allows to open many private or not private tabs (independent of any inheritance mechanism), example:
-```javascript
+```js
 // Open in private tabs:
 privateTab.readyToOpenTabs(true);
 gBrowser.addTab("https://mozilla.org/");
@@ -104,16 +104,16 @@ privateTab.stopToOpenTabs();
 ```
 ###### privateTab.tabLabelIsEmpty()
 Mark tab label as empty (or non-empty), example:
-```javascript
+```js
 // Mark tab label/URI as empty:
 if("tabLabelIsEmpty" in privateTab) // Private Tab 0.1.7.2+
 	privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul", true);
 ```
-```javascript
+```js
 // Check state:
 var isEmpty = privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul");
 ```
-```javascript
+```js
 // Restore state (e.g. for restartless extensions):
 privateTab.tabLabelIsEmpty("chrome://speeddial/content/speeddial.xul", false);
 ```
@@ -121,7 +121,7 @@ Note: used global storage for labels (not per-window)! So, it's enough to call t
 
 ##### Backward compatibility:
 Check for Private Tab installed (and enabled):
-```javascript
+```js
 if("privateTab" in window) {
 	// Do something with "privateTab" object
 }
