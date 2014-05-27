@@ -89,6 +89,10 @@ var privateProtocol = {
 				return channel.open.apply(this, arguments);
 			}
 		};
+		Services.tm.mainThread.dispatch(function() {
+			_log("[protocol] fallback delay => ensurePrivate()");
+			ensurePrivate();
+		}, Components.interfaces.nsIThread.DISPATCH_NORMAL);
 		return channelWrapper;
 	},
 
