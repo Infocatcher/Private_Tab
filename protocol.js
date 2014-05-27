@@ -72,17 +72,20 @@ var privateProtocol = {
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
 		var redirect = "chrome://privatetab/content/protocolRedirect.html#" + newSpec;
 		var channel = Services.io.newChannel(redirect, null, null);
+		var ensurePrivate = function() {
+			this.makeChannelPrivate(channel);
+			ensurePrivate = function() {}; // Don't call again in case of success
+		}.bind(this);
 		var channelWrapper = {
 			__proto__: channel,
-			_makePrivate: this.makeChannelPrivate.bind(this, channel),
 			asyncOpen: function(aListener, aContext) {
-				_log("[protocol] nsIChannel.asyncOpen()");
-				this._makePrivate();
+				_log("[protocol] nsIChannel.asyncOpen() => ensurePrivate()");
+				ensurePrivate();
 				return channel.asyncOpen.apply(this, arguments);
 			},
 			open: function() {
-				_log("[protocol] nsIChannel.open()");
-				this._makePrivate();
+				_log("[protocol] nsIChannel.open() => ensurePrivate()");
+				ensurePrivate();
 				return channel.open.apply(this, arguments);
 			}
 		};
