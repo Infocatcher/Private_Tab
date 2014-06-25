@@ -922,6 +922,8 @@ var privateTab = {
 		}
 		if(applyPatch) {
 			_log("Patch browser.__proto__.swapDocShells() method");
+			// Note: we can't use "SwapDocShells" event: we should do our corrections after swapDocShells() call,
+			// see https://github.com/Infocatcher/Private_Tab/issues/115
 			var _this = this;
 			patcher.wrapFunction(
 				browserProto, "swapDocShells", "browser.swapDocShells",
