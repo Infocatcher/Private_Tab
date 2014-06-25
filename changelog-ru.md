@@ -10,6 +10,7 @@
 `*` Улучшена поддержка иконок у private:… закладок (<a href="https://github.com/Infocatcher/Private_Tab/issues/147">#147</a>).<br>
 `*` Обновлена вьетнамская локаль (vi), спасибо <a href="https://github.com/leof36">Leof36</a>.<br>
 `x` Исправлен протокол «private» в Firefox 20 и 21 (<a href="https://github.com/Infocatcher/Private_Tab/issues/150">#150</a>).<br>
+`*` Увеличена <a href="https://developer.mozilla.org/en-US/Add-ons/Install_Manifests#iconURL">иконка расширения, отображающаяся в управлении дополнениями</a>: теперь используется 48×48px вместо 32×32px.<br>
 
 ##### 0.1.7.2 (2014-05-18)
 `*` Добавлена возможность использовать простые ссылки вида private:example.com, префикс `http://` будет автоматически добавлен ко всем ссылкам без протокола.<br>
