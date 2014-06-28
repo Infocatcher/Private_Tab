@@ -1171,7 +1171,7 @@ var privateTab = {
 		}
 		var tabLabel = tab.getAttribute("label") || "";
 		_log(
-			"Tab opened: " + tabLabel.substr(0, 256) + (isEmpty ? " (empty)" : "")
+			"Tab opened: " + tabLabel.substr(0, 256) + (isEmpty ? " (empty)" : "(not empty)")
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
@@ -2998,6 +2998,9 @@ var privateTab = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
+		// See https://github.com/Infocatcher/Private_Tab/issues/152
+		if(!tabLabel && this.platformVersion >= 33 && !this.isSeaMonkey)
+			return false;
 		if(tabLabel in this.emptyTabLabels) {
 			if(_dbg && this.emptyTabLabels[tabLabel] == "API")
 				_log("isEmptyTab() + API: detect \"" + tabLabel + "\" as empty");
