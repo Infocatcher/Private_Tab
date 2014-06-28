@@ -2,7 +2,7 @@
 
 PROG=false
 XPI=private_tab-latest.xpi
-FILES='install.rdf *.manifest *.js *.jsm *.xul *.xml *.html license* *.png defaults modules components locale chrome idl'
+FILES='install.rdf *.manifest *.js *.jsm *.xul *.xml *.html *.css license* *.png defaults modules components locale chrome idl'
 
 for z in 7za 7z zip
 do
