@@ -3893,7 +3893,7 @@ API.prototype = {
 					return;
 				_dbgv && _log("_updateBookmarkFavicon(): delay");
 				var icon = (tab.getAttribute("image") || "")
-					.replace(/#-moz-resolution=.*$/, "");
+					.replace(/[&#]-moz-resolution=\d+,\d+$/, ""); // Firefox 22+
 				if(!icon)
 					return;
 				_log("_updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
