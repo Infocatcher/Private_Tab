@@ -3892,7 +3892,7 @@ API.prototype = {
 				if(!tab.parentNode) // Tab was closed
 					return;
 				_dbgv && _log("_updateBookmarkFavicon(): delay");
-				var icon = (tab.getAttribute("image") || "")
+				var icon = (tab.image || "")
 					.replace(/[&#]-moz-resolution=\d+,\d+$/, ""); // Firefox 22+
 				if(!icon)
 					return;
