@@ -11,7 +11,7 @@
 `*` Updated Vietnamese locale (vi), thanks to <a href="https://github.com/leof36">Leof36</a>.<br>
 `x` Fixed “private” protocol in Firefox 20 and 21 (<a href="https://github.com/Infocatcher/Private_Tab/issues/150">#150</a>).<br>
 `*` Enlarged <a href="https://developer.mozilla.org/en-US/Add-ons/Install_Manifests#iconURL">extension icon for Add-on Manager</a>: now used 48×48px instead of 32×32px.<br>
-`x` Fixed detection of emty tabs in Firefox 33 (non-empty tabs was wrongly detected as empty and becomes non-private) (<a href="https://github.com/Infocatcher/Private_Tab/issues/152">#152</a>).<br>
+`x` Fixed detection of emty tabs in Firefox 33+ (non-empty tabs was wrongly detected as empty and becomes non-private) (<a href="https://github.com/Infocatcher/Private_Tab/issues/152">#152</a>).<br>
 
 ##### 0.1.7.2 (2014-05-18)
 `*` Added ability to use simple links like private:example.com, `http://` prefix will be added automatically to all links without protocol.<br>

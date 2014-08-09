@@ -11,7 +11,7 @@
 `*` Обновлена вьетнамская локаль (vi), спасибо <a href="https://github.com/leof36">Leof36</a>.<br>
 `x` Исправлен протокол «private» в Firefox 20 и 21 (<a href="https://github.com/Infocatcher/Private_Tab/issues/150">#150</a>).<br>
 `*` Увеличена <a href="https://developer.mozilla.org/en-US/Add-ons/Install_Manifests#iconURL">иконка расширения, отображающаяся в управлении дополнениями</a>: теперь используется 48×48px вместо 32×32px.<br>
-`x` Исправлено определение пустых вкладок в Firefox 33 (не пустые вкладки некорректно определялись как пустые и становились не приватными) (<a href="https://github.com/Infocatcher/Private_Tab/issues/152">#152</a>).<br>
+`x` Исправлено определение пустых вкладок в Firefox 33+ (не пустые вкладки некорректно определялись как пустые и становились не приватными) (<a href="https://github.com/Infocatcher/Private_Tab/issues/152">#152</a>).<br>
 
 ##### 0.1.7.2 (2014-05-18)
 `*` Добавлена возможность использовать простые ссылки вида private:example.com, префикс `http://` будет автоматически добавлен ко всем ссылкам без протокола.<br>
