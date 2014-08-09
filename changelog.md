@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.1.7.3 (2014-08-09)
 `x` Correctly restore closed non-private tabs in private windows.<br>
 `*` Improved favicons support in private:… bookmarks (<a href="https://github.com/Infocatcher/Private_Tab/issues/147">#147</a>).<br>
 `*` Updated Vietnamese locale (vi), thanks to <a href="https://github.com/leof36">Leof36</a>.<br>
