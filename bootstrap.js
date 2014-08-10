@@ -140,6 +140,7 @@ var privateTab = {
 			case "SSTabRestoring":            this.tabRestoringHandler(e);   break;
 			case "TabSelect":                 this.tabSelectHandler(e);      break;
 			case "TabClose":                  this.tabCloseHandler(e);       break;
+			case "SSTabClosing":              this.tabClosingHandler(e);     break;
 			case "dragstart":                 this.dragStartHandler(e);      break;
 			case "dragend":                   this.dragEndHandler(e);        break;
 			case "drop":                      this.dropHandler(e);           break;
@@ -212,6 +213,7 @@ var privateTab = {
 	destroyWindowClosingHandler: function(window) {
 		window.removeEventListener("TabClose", this, true);
 		window.removeEventListener("TabClose", this, false);
+		window.removeEventListener("SSTabClosing", this, false);
 		window.removeEventListener("SSWindowClosing", this, true);
 		window.removeEventListener("close", this, false);
 		window.removeEventListener("beforeunload", this, false);
@@ -419,6 +421,7 @@ var privateTab = {
 		window.addEventListener("TabSelect", this, false);
 		window.addEventListener("TabClose", this, true);
 		window.addEventListener("TabClose", this, false);
+		window.addEventListener("SSTabClosing", this, false);
 		window.addEventListener("dragstart", this, true);
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
@@ -1231,6 +1234,43 @@ var privateTab = {
 			this.checkForLastPrivateTab(e);
 		else
 			this.cleanupClosedTab(e);
+	},
+	tabClosingHandler: function(e) {
+		if(this.platformVersion < 29 || !prefs.get("rememberClosedPrivateTabs"))
+			return;
+		var tab = e.originalTarget || e.target;
+		if(!tab.hasAttribute(this.privateAttr))
+			return;
+		var window = tab.ownerDocument.defaultView;
+		if(this.isPrivateWindow(window))
+			return;
+		// See SessionStoreInternal.onTabClose() in resource://app/modules/sessionstore/SessionStore.jsm
+		//~ todo: find some way to not copy code from SessionStore.jsm
+		var {TabState} = Components.utils.import("resource://app/modules/sessionstore/TabState.jsm", {});
+		var tabState = TabState.collect(tab);
+		if(!tabState.isPrivate)
+			return;
+		var {SessionStoreInternal} = Components.utils.import("resource://app/modules/sessionstore/SessionStore.jsm", {});
+		var maxTabsUndo = SessionStoreInternal._max_tabs_undo;
+		if(maxTabsUndo <= 0)
+			return;
+		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
+			var tabTitle = tab.label;
+			var gBrowser = window.gBrowser;
+			tabTitle = SessionStoreInternal._replaceLoadingTitle(tabTitle, gBrowser, tab);
+			var data = SessionStoreInternal._windows[window.__SSi];
+			var closedTabs = data._closedTabs;
+			closedTabs.unshift({
+				state: tabState,
+				title: tabTitle,
+				image: gBrowser.getIcon(tab),
+				pos: tab._tPos,
+				closedAt: Date.now()
+			});
+			var length = closedTabs.length;
+			if(length > maxTabsUndo)
+				closedTabs.splice(maxTabsUndo, length - maxTabsUndo);
+		}
 	},
 	checkForLastPrivateTab: function(e) {
 		var tab = e.originalTarget || e.target;
