@@ -1251,13 +1251,16 @@ var privateTab = {
 		if(!tabState.isPrivate)
 			return;
 		var {SessionStoreInternal} = Components.utils.import("resource://app/modules/sessionstore/SessionStore.jsm", {});
-		var maxTabsUndo = SessionStoreInternal._max_tabs_undo;
+		var maxTabsUndo = "_max_tabs_undo" in SessionStoreInternal
+			? SessionStoreInternal._max_tabs_undo
+			: prefs.getPref("browser.sessionstore.max_tabs_undo", 0);
 		if(maxTabsUndo <= 0)
 			return;
 		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
 			var tabTitle = tab.label;
 			var gBrowser = window.gBrowser;
-			tabTitle = SessionStoreInternal._replaceLoadingTitle(tabTitle, gBrowser, tab);
+			if("_replaceLoadingTitle" in SessionStoreInternal)
+				tabTitle = SessionStoreInternal._replaceLoadingTitle(tabTitle, gBrowser, tab);
 			var data = SessionStoreInternal._windows[window.__SSi];
 			var closedTabs = data._closedTabs;
 			closedTabs.unshift({
