@@ -50,7 +50,7 @@ var privateTab = {
 		for(var window in this.windows)
 			this.initWindow(window, reason);
 		Services.ww.registerNotification(this);
-		if(this.platformVersion < 29 || this.isSeaMonkey) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+		if(this.oldSessionStore)
 			Services.obs.addObserver(this, "sessionstore-state-write", false);
 		else if(
 			window
@@ -78,7 +78,7 @@ var privateTab = {
 
 		if(reason != APP_SHUTDOWN) {
 			// nsISessionStore may save data after our shutdown
-			if(this.platformVersion < 29 || this.isSeaMonkey)
+			if(this.oldSessionStore)
 				Services.obs.removeObserver(this, "sessionstore-state-write");
 			else
 				this.dontSaveClosedPrivateTabs(false);
@@ -1247,11 +1247,7 @@ var privateTab = {
 			this.cleanupClosedTab(e);
 	},
 	tabClosingHandler: function(e) {
-		if(
-			this.platformVersion < 29
-			|| this.isSeaMonkey
-			|| !prefs.get("rememberClosedPrivateTabs")
-		)
+		if(this.oldSessionStore || !prefs.get("rememberClosedPrivateTabs"))
 			return;
 		var tab = e.originalTarget || e.target;
 		if(!tab.hasAttribute(this.privateAttr))
@@ -1358,7 +1354,7 @@ var privateTab = {
 			+ "\nTry don't save it in undo close history"
 		);
 		var silentFail = false;
-		if(this.platformVersion >= 29) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+		if(!this.oldSessionStore)
 			silentFail = true;
 		else if(e.detail) {
 			_log("Tab moved to another window");
@@ -3744,6 +3740,10 @@ var privateTab = {
 			Components.classes["@mozilla.org/browser/sessionstore;1"]
 			|| Components.classes["@mozilla.org/suite/sessionstore;1"]
 		).getService(Components.interfaces.nsISessionStore);
+	},
+	get oldSessionStore() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+		delete this.oldSessionStore;
+		return this.oldSessionStore = this.platformVersion < 29 || this.isSeaMonkey;
 	},
 
 	_stylesLoaded: false,
