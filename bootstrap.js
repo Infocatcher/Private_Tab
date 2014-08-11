@@ -1586,34 +1586,22 @@ var privateTab = {
 		// -> SessionStore.getCurrentState()
 		// -> PrivacyFilter.filterPrivateWindowsAndTabs()
 		// -> SessionSaverInternal._writeState()
-		// 1. We can't modify frozen PrivacyFilter object.
-		// 2. We can override PrivacyFilter in SessionSaver scope, but any change around
-		// windowState._closedTabs also change real undo close list.
-		// 3. So, we can alter SessionStoreInternal.getCurrentState() function (and return
-		// modified shallow copy of state object).
-
+		var ssGlobal = Components.utils.import("resource://app/modules/sessionstore/SessionSaver.jsm", {});
+		// Note: we can't modify frozen PrivacyFilter object!
 		_log("dontSaveClosedPrivateTabs(" + dontSave + ")");
-		var {SessionStoreInternal} = Components.utils.import("resource://app/modules/sessionstore/SessionStore.jsm", {});
-		var meth = "getCurrentState";
-		var key = "SessionStoreInternal.getCurrentState";
 		if(dontSave) {
 			var _this = this;
-			var getCurrentState = SessionStoreInternal.getCurrentState;
-			patcher.wrapFunction(
-				SessionStoreInternal, meth, key,
-				function before() {
-					var state = getCurrentState.apply(this, arguments);
-					if(!state.windows) {
-						_dbgv && _log("dontSaveClosedPrivateTabs(): missing state.windows!");
-						return { value: state };
-					}
+			var PrivacyFilter = ssGlobal._privateTabOrigPrivacyFilter = ssGlobal.PrivacyFilter;
+			ssGlobal.PrivacyFilter = {
+				__proto__: PrivacyFilter,
+				filterPrivateWindowsAndTabs: function(browserState) {
 					function shallowCopy(o) {
 						var out = {};
 						for(var p in o)
 							out[p] = o[p];
 						return out;
 					}
-					state.windows.forEach(function(windowState, i) {
+					browserState.windows.forEach(function(windowState, i) {
 						if(!windowState.isPrivate && windowState._closedTabs) {
 							var windowChanged = false;
 							var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
@@ -1626,17 +1614,18 @@ var privateTab = {
 							if(windowChanged) {
 								var clonedWindowState = shallowCopy(windowState);
 								clonedWindowState._closedTabs = closedTabs;
-								state.windows[i] = clonedWindowState;
+								browserState.windows[i] = clonedWindowState;
 								_dbgv && _log("dontSaveClosedPrivateTabs(): cleanup windowState._closedTabs");
 							}
 						}
 					});
-					return { value: state };
+					return PrivacyFilter.filterPrivateWindowsAndTabs.apply(this, arguments);
 				}
-			);
+			};
 		}
 		else {
-			patcher.unwrapFunction(SessionStoreInternal, meth, key, true);
+			ssGlobal.PrivacyFilter = ssGlobal._privateTabOrigPrivacyFilter;
+			delete ssGlobal._privateTabOrigPrivacyFilter;
 		}
 	},
 	tabSelectHandler: function(e) {
