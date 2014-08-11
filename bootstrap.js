@@ -1273,6 +1273,7 @@ var privateTab = {
 			return;
 		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
 			this.dontSaveClosedPrivateTabs(true);
+			_log("tabClosingHandler(): save closed private tab in undo close history");
 			var tabTitle = tab.label;
 			var gBrowser = window.gBrowser;
 			if("_replaceLoadingTitle" in SessionStoreInternal)
