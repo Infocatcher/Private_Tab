@@ -1595,13 +1595,13 @@ var privateTab = {
 		var logPrefix = "dontSaveClosedPrivateTabs(" + dontSave + "): ";
 		if(dontSave) {
 			var _this = this;
+			var shallowCopy = function(o) {
+				var out = {};
+				for(var p in o)
+					out[p] = o[p];
+				return out;
+			};
 			var filterPrivateWindowsAndTabs = function privateTabWrapper(browserState) {
-				function shallowCopy(o) {
-					var out = {};
-					for(var p in o)
-						out[p] = o[p];
-					return out;
-				}
 				browserState.windows.forEach(function(windowState, i) {
 					if(!windowState.isPrivate && windowState._closedTabs) {
 						var windowChanged = false;
