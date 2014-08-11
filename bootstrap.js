@@ -1588,45 +1588,77 @@ var privateTab = {
 		// -> SessionSaverInternal._writeState()
 		var ssGlobal = Components.utils.import("resource://app/modules/sessionstore/SessionSaver.jsm", {});
 		// Note: we can't modify frozen PrivacyFilter object!
-		_log("dontSaveClosedPrivateTabs(" + dontSave + ")");
+		const bakKey = "_privateTabPrivacyFilter";
+		const newKey = "_privateTabPrivacyFilterWrapper";
+		if(dontSave == bakKey in ssGlobal)
+			return;
+		var logPrefix = "dontSaveClosedPrivateTabs(" + dontSave + "): ";
 		if(dontSave) {
 			var _this = this;
-			var PrivacyFilter = ssGlobal._privateTabOrigPrivacyFilter = ssGlobal.PrivacyFilter;
-			ssGlobal.PrivacyFilter = {
-				__proto__: PrivacyFilter,
-				filterPrivateWindowsAndTabs: function(browserState) {
-					function shallowCopy(o) {
-						var out = {};
-						for(var p in o)
-							out[p] = o[p];
-						return out;
-					}
-					browserState.windows.forEach(function(windowState, i) {
-						if(!windowState.isPrivate && windowState._closedTabs) {
-							var windowChanged = false;
-							var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
-								var tabState = closedTabState.state || closedTabState;
-								var isPrivate = "attributes" in tabState && _this.privateAttr in tabState.attributes;
-								if(isPrivate)
-									windowChanged = true;
-								return !isPrivate;
-							});
-							if(windowChanged) {
-								var clonedWindowState = shallowCopy(windowState);
-								clonedWindowState._closedTabs = closedTabs;
-								browserState.windows[i] = clonedWindowState;
-								_dbgv && _log("dontSaveClosedPrivateTabs(): cleanup windowState._closedTabs");
-							}
-						}
-					});
-					return PrivacyFilter.filterPrivateWindowsAndTabs.apply(this, arguments);
+			var filterPrivateWindowsAndTabs = function privateTabWrapper(browserState) {
+				function shallowCopy(o) {
+					var out = {};
+					for(var p in o)
+						out[p] = o[p];
+					return out;
 				}
+				browserState.windows.forEach(function(windowState, i) {
+					if(!windowState.isPrivate && windowState._closedTabs) {
+						var windowChanged = false;
+						var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
+							var tabState = closedTabState.state || closedTabState;
+							var isPrivate = "attributes" in tabState && _this.privateAttr in tabState.attributes;
+							if(isPrivate)
+								windowChanged = true;
+							return !isPrivate;
+						});
+						if(windowChanged) {
+							var clonedWindowState = shallowCopy(windowState);
+							clonedWindowState._closedTabs = closedTabs;
+							browserState.windows[i] = clonedWindowState;
+							_dbgv && _log(logPrefix + "Cleanup windowState._closedTabs");
+						}
+					}
+				});
+				return PrivacyFilter.filterPrivateWindowsAndTabs.apply(this, arguments);
 			};
+			if(newKey in ssGlobal) {
+				var PrivacyFilter = ssGlobal[newKey].__proto__;
+				ssGlobal[bakKey] = null;
+				this.setProperty(ssGlobal[newKey], "filterPrivateWindowsAndTabs", filterPrivateWindowsAndTabs);
+				_log(logPrefix + "Will use old wrapper for PrivacyFilter");
+			}
+			else {
+				var PrivacyFilter = ssGlobal[bakKey] = ssGlobal.PrivacyFilter;
+				var PrivacyFilterWrapper = ssGlobal[newKey] = {
+					__proto__: PrivacyFilter,
+					filterPrivateWindowsAndTabs: filterPrivateWindowsAndTabs
+				};
+				this.setProperty(ssGlobal, "PrivacyFilter", PrivacyFilterWrapper);
+				_log(logPrefix + "Create wrapper for PrivacyFilter");
+			}
 		}
 		else {
-			ssGlobal.PrivacyFilter = ssGlobal._privateTabOrigPrivacyFilter;
-			delete ssGlobal._privateTabOrigPrivacyFilter;
+			if(ssGlobal.PrivacyFilter == ssGlobal[newKey] && ssGlobal[bakKey]) {
+				this.setProperty(ssGlobal, "PrivacyFilter", ssGlobal[bakKey]);
+				delete ssGlobal[newKey];
+				_log(logPrefix + "Restore PrivacyFilter");
+			}
+			else {
+				// Yes, we create some memory leaks here, but it's better than break other extensions
+				delete ssGlobal[newKey].filterPrivateWindowsAndTabs;
+				_log(logPrefix + "Can't completely restore PrivacyFilter: detected third-party wrapper");
+			}
+			delete ssGlobal[bakKey];
 		}
+	},
+	setProperty: function(o, p, v) {
+		Object.defineProperty(o, p, {
+			value: v,
+			configurable: true,
+			writable: true,
+			enumerable: true
+		});
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
