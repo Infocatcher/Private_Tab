@@ -1602,22 +1602,23 @@ var privateTab = {
 				return out;
 			};
 			var filterPrivateWindowsAndTabs = function privateTabWrapper(browserState) {
-				browserState.windows.forEach(function(windowState, i) {
-					if(!windowState.isPrivate && windowState._closedTabs) {
-						var windowChanged = false;
-						var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
-							var tabState = closedTabState.state || closedTabState;
-							var isPrivate = "attributes" in tabState && _this.privateAttr in tabState.attributes;
-							if(isPrivate)
-								windowChanged = true;
-							return !isPrivate;
-						});
-						if(windowChanged) {
-							var clonedWindowState = shallowCopy(windowState);
-							clonedWindowState._closedTabs = closedTabs;
-							browserState.windows[i] = clonedWindowState;
-							_dbgv && _log(logPrefix + "Cleanup windowState._closedTabs");
-						}
+				var windows = browserState.windows;
+				windows && windows.forEach(function(windowState, i) {
+					if(windowState.isPrivate || !windowState._closedTabs)
+						return;
+					var windowChanged = false;
+					var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
+						var tabState = closedTabState.state || closedTabState;
+						var isPrivate = "attributes" in tabState && _this.privateAttr in tabState.attributes;
+						if(isPrivate)
+							windowChanged = true;
+						return !isPrivate;
+					});
+					if(windowChanged) {
+						var clonedWindowState = shallowCopy(windowState);
+						clonedWindowState._closedTabs = closedTabs;
+						windows[i] = clonedWindowState;
+						_dbgv && _log(logPrefix + "Cleanup windowState._closedTabs");
 					}
 				});
 				return PrivacyFilter.filterPrivateWindowsAndTabs.apply(this, arguments);
