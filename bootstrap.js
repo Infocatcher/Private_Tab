@@ -1607,7 +1607,6 @@ var privateTab = {
 						_dbgv && _log("dontSaveClosedPrivateTabs(): missing state.windows!");
 						return { value: state };
 					}
-					var clonedState;
 					function shallowCopy(o) {
 						var out = {};
 						for(var p in o)
@@ -1627,14 +1626,12 @@ var privateTab = {
 							if(windowChanged) {
 								var clonedWindowState = shallowCopy(windowState);
 								clonedWindowState._closedTabs = closedTabs;
-								if(!clonedState)
-									clonedState = shallowCopy(state);
-								clonedState.windows[i] = clonedWindowState;
+								state.windows[i] = clonedWindowState;
 								_dbgv && _log("dontSaveClosedPrivateTabs(): cleanup windowState._closedTabs");
 							}
 						}
 					});
-					return { value: clonedState || state };
+					return { value: state };
 				}
 			);
 		}
