@@ -1612,11 +1612,11 @@ var privateTab = {
 						clonedState = {};
 						for(var p in state) // Shallow copy of state object
 							clonedState[p] = state[p];
-						state.windows = state.windows.slice(); // Shallow copy of state.windows
+						clonedState.windows = clonedState.windows.slice(); // Shallow copy of state.windows
 						cloneState = function() {
 							return clonedState;
 						};
-						return cloneState;
+						return clonedState;
 					}
 					state.windows.forEach(function(windowState, i) {
 						if(!windowState.isPrivate && windowState._closedTabs) {
