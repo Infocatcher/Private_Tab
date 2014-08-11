@@ -1594,6 +1594,10 @@ var privateTab = {
 				SessionStoreInternal, meth, key,
 				function before() {
 					var state = getCurrentState.apply(this, arguments);
+					if(!state.windows) {
+						_dbgv && _log("dontSaveClosedPrivateTabs(): missing state.windows!");
+						return { value: state };
+					}
 					var clonedState;
 					function cloneState() {
 						clonedState = {};
