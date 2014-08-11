@@ -50,7 +50,7 @@ var privateTab = {
 		for(var window in this.windows)
 			this.initWindow(window, reason);
 		Services.ww.registerNotification(this);
-		if(this.platformVersion < 29) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+		if(this.platformVersion < 29 || this.isSeaMonkey) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
 			Services.obs.addObserver(this, "sessionstore-state-write", false);
 		else if(
 			window
@@ -78,7 +78,7 @@ var privateTab = {
 
 		if(reason != APP_SHUTDOWN) {
 			// nsISessionStore may save data after our shutdown
-			if(this.platformVersion < 29)
+			if(this.platformVersion < 29 || this.isSeaMonkey)
 				Services.obs.removeObserver(this, "sessionstore-state-write");
 			else
 				this.dontSaveClosedPrivateTabs(false);
@@ -1247,7 +1247,11 @@ var privateTab = {
 			this.cleanupClosedTab(e);
 	},
 	tabClosingHandler: function(e) {
-		if(this.platformVersion < 29 || !prefs.get("rememberClosedPrivateTabs"))
+		if(
+			this.platformVersion < 29
+			|| this.isSeaMonkey
+			|| !prefs.get("rememberClosedPrivateTabs")
+		)
 			return;
 		var tab = e.originalTarget || e.target;
 		if(!tab.hasAttribute(this.privateAttr))
