@@ -52,6 +52,15 @@ var privateTab = {
 		Services.ww.registerNotification(this);
 		if(this.platformVersion < 29) // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
 			Services.obs.addObserver(this, "sessionstore-state-write", false);
+		else if(
+			window
+			&& reason != APP_STARTUP
+			&& prefs.get("rememberClosedPrivateTabs")
+		) { // We may already have closed private tabs
+			window.setTimeout(function() {
+				this.dontSaveClosedPrivateTabs(true);
+			}.bind(this), 50);
+		}
 	},
 	destroy: function(reason) {
 		if(!this.initialized)
@@ -71,6 +80,8 @@ var privateTab = {
 			// nsISessionStore may save data after our shutdown
 			if(this.platformVersion < 29)
 				Services.obs.removeObserver(this, "sessionstore-state-write");
+			else
+				this.dontSaveClosedPrivateTabs(false);
 
 			this.addPbExitObserver(false);
 			this.unloadStyles();
@@ -1257,6 +1268,7 @@ var privateTab = {
 		if(maxTabsUndo <= 0)
 			return;
 		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
+			this.dontSaveClosedPrivateTabs(true);
 			var tabTitle = tab.label;
 			var gBrowser = window.gBrowser;
 			if("_replaceLoadingTitle" in SessionStoreInternal)
@@ -1551,6 +1563,71 @@ var privateTab = {
 			//~ todo: what to do with empty window without tabs ?
 		}, this);
 		return sessionChanged;
+	},
+	_dontSaveClosedPrivateTabs: false,
+	dontSaveClosedPrivateTabs: function(dontSave) {
+		if(dontSave == this._dontSaveClosedPrivateTabs)
+			return;
+		this._dontSaveClosedPrivateTabs = dontSave;
+
+		// See resource://app/modules/sessionstore/SessionSaver.jsm
+		// resource://app/modules/sessionstore/SessionStore.jsm
+		// resource://app/modules/sessionstore/PrivacyFilter.jsm
+		// SessionSaverInternal._saveState()
+		// -> SessionStore.getCurrentState()
+		// -> PrivacyFilter.filterPrivateWindowsAndTabs()
+		// -> SessionSaverInternal._writeState()
+		// 1. We can't modify frozen PrivacyFilter object.
+		// 2. We can override PrivacyFilter in SessionSaver scope, but any change around
+		// windowState._closedTabs also change real undo close list.
+		// 3. So, we can alter SessionStoreInternal.getCurrentState() function (and return
+		// modified shallow copy of state object).
+
+		_log("dontSaveClosedPrivateTabs(" + dontSave + ")");
+		var {SessionStoreInternal} = Components.utils.import("resource://app/modules/sessionstore/SessionStore.jsm", {});
+		var meth = "getCurrentState";
+		var key = "SessionStoreInternal.getCurrentState";
+		if(dontSave) {
+			var _this = this;
+			var getCurrentState = SessionStoreInternal.getCurrentState;
+			patcher.wrapFunction(
+				SessionStoreInternal, meth, key,
+				function before() {
+					var state = getCurrentState.apply(this, arguments);
+					var clonedState;
+					function cloneState() {
+						clonedState = {};
+						for(var p in state) // Shallow copy of state object
+							clonedState[p] = state[p];
+						state.windows = state.windows.slice(); // Shallow copy of state.windows
+						cloneState = function() {
+							return clonedState;
+						};
+						return cloneState;
+					}
+					state.windows.forEach(function(windowState, i) {
+						if(!windowState.isPrivate && windowState._closedTabs) {
+							var windowChanged = false;
+							var closedTabs = windowState._closedTabs.filter(function(closedTabState) {
+								var tabState = closedTabState.state || closedTabState;
+								var isPrivate = "attributes" in tabState && _this.privateAttr in tabState.attributes;
+								if(isPrivate)
+									windowChanged = true;
+								return !isPrivate;
+							});
+							if(windowChanged) {
+								cloneState().windows[i]._closedTabs = closedTabs;
+								_dbgv && _log("dontSaveClosedPrivateTabs(): cleanup windowState._closedTabs");
+							}
+						}
+					});
+					return { value: clonedState || state };
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(SessionStoreInternal, meth, key, true);
+		}
 	},
 	tabSelectHandler: function(e) {
 		var tab = e.originalTarget || e.target;
