@@ -1608,15 +1608,11 @@ var privateTab = {
 						return { value: state };
 					}
 					var clonedState;
-					function cloneState() {
-						clonedState = {};
-						for(var p in state) // Shallow copy of state object
-							clonedState[p] = state[p];
-						clonedState.windows = clonedState.windows.slice(); // Shallow copy of state.windows
-						cloneState = function() {
-							return clonedState;
-						};
-						return clonedState;
+					function shallowCopy(o) {
+						var out = {};
+						for(var p in o)
+							out[p] = o[p];
+						return out;
 					}
 					state.windows.forEach(function(windowState, i) {
 						if(!windowState.isPrivate && windowState._closedTabs) {
@@ -1629,7 +1625,11 @@ var privateTab = {
 								return !isPrivate;
 							});
 							if(windowChanged) {
-								cloneState().windows[i]._closedTabs = closedTabs;
+								var clonedWindowState = shallowCopy(windowState);
+								clonedWindowState._closedTabs = closedTabs;
+								if(!clonedState)
+									clonedState = shallowCopy(state);
+								clonedState.windows[i] = clonedWindowState;
 								_dbgv && _log("dontSaveClosedPrivateTabs(): cleanup windowState._closedTabs");
 							}
 						}
