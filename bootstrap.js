@@ -1618,7 +1618,7 @@ var privateTab = {
 						var clonedWindowState = shallowCopy(windowState);
 						clonedWindowState._closedTabs = closedTabs;
 						windows[i] = clonedWindowState;
-						_dbgv && _log(logPrefix + "Cleanup windowState._closedTabs");
+						_dbgv && _log(logPrefix + "cleanup windowState._closedTabs");
 					}
 				});
 				return PrivacyFilter.filterPrivateWindowsAndTabs.apply(this, arguments);
@@ -1627,7 +1627,7 @@ var privateTab = {
 				var PrivacyFilter = ssGlobal[newKey].__proto__;
 				ssGlobal[bakKey] = null;
 				this.setProperty(ssGlobal[newKey], "filterPrivateWindowsAndTabs", filterPrivateWindowsAndTabs);
-				_log(logPrefix + "Will use old wrapper for PrivacyFilter");
+				_log(logPrefix + "will use old wrapper for PrivacyFilter");
 			}
 			else {
 				var PrivacyFilter = ssGlobal[bakKey] = ssGlobal.PrivacyFilter;
@@ -1636,19 +1636,19 @@ var privateTab = {
 					filterPrivateWindowsAndTabs: filterPrivateWindowsAndTabs
 				};
 				this.setProperty(ssGlobal, "PrivacyFilter", PrivacyFilterWrapper);
-				_log(logPrefix + "Create wrapper for PrivacyFilter");
+				_log(logPrefix + "create wrapper for PrivacyFilter");
 			}
 		}
 		else {
 			if(ssGlobal.PrivacyFilter == ssGlobal[newKey] && ssGlobal[bakKey]) {
 				this.setProperty(ssGlobal, "PrivacyFilter", ssGlobal[bakKey]);
 				delete ssGlobal[newKey];
-				_log(logPrefix + "Restore PrivacyFilter");
+				_log(logPrefix + "restore PrivacyFilter");
 			}
 			else {
 				// Yes, we create some memory leaks here, but it's better than break other extensions
 				delete ssGlobal[newKey].filterPrivateWindowsAndTabs;
-				_log(logPrefix + "Can't completely restore PrivacyFilter: detected third-party wrapper");
+				_log(logPrefix + "can't completely restore PrivacyFilter: detected third-party wrapper");
 			}
 			delete ssGlobal[bakKey];
 		}
