@@ -1282,7 +1282,7 @@ var privateTab = {
 			closedTabs.unshift({
 				state: tabState,
 				title: tabTitle,
-				image: gBrowser.getIcon(tab),
+				image: this.getTabIcon(tab),
 				pos: tab._tPos,
 				closedAt: Date.now()
 			});
@@ -1290,6 +1290,14 @@ var privateTab = {
 			if(length > maxTabsUndo)
 				closedTabs.splice(maxTabsUndo, length - maxTabsUndo);
 		}
+	},
+	getTabIcon: function(tab) {
+		var window = tab.ownerDocument.defaultView;
+		var gBrowser = window.gBrowser;
+		if("getIcon" in gBrowser)
+			return gBrowser.getIcon(tab);
+		return (tab.image || "")
+			.replace(/[&#]-moz-resolution=\d+,\d+$/, ""); // Firefox 22+
 	},
 	checkForLastPrivateTab: function(e) {
 		var tab = e.originalTarget || e.target;
@@ -4020,8 +4028,7 @@ API.prototype = {
 				if(!tab.parentNode) // Tab was closed
 					return;
 				_dbgv && _log("_updateBookmarkFavicon(): delay");
-				var icon = (tab.image || "")
-					.replace(/[&#]-moz-resolution=\d+,\d+$/, ""); // Firefox 22+
+				var icon = privateTabInternal.getTabIcon(tab);
 				if(!icon)
 					return;
 				_log("_updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
