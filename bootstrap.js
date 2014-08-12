@@ -1595,7 +1595,7 @@ var privateTab = {
 		var logPrefix = "dontSaveClosedPrivateTabs(" + dontSave + "): ";
 		if(dontSave) {
 			var _this = this;
-			var shallowCopy = "assign" in Object
+			var shallowCopy = "assign" in Object // Firefox 34+
 				? function(o) {
 					return Object.assign({}, o);
 				}
@@ -1619,6 +1619,7 @@ var privateTab = {
 						return !isPrivate;
 					});
 					if(windowChanged) {
+						// Note: we can't modify original windowState object (will change real undo close history)
 						var clonedWindowState = shallowCopy(windowState);
 						clonedWindowState._closedTabs = closedTabs;
 						windows[i] = clonedWindowState;
