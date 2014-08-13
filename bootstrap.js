@@ -44,7 +44,6 @@ var privateTab = {
 			this.initPrivateProtocol(reason);
 
 		this.patchPrivateBrowsingUtils(true);
-		this.initHotkeys();
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
 		for(var window in this.windows)
@@ -442,8 +441,11 @@ var privateTab = {
 		window.addEventListener("SSWindowClosing", this, true);
 		window.addEventListener("close", this, false);
 		window.addEventListener("beforeunload", this, false);
-		if(this.hotkeys)
-			window.addEventListener(this.keyEvent, this, this.keyHighPriority);
+		window.setTimeout(function() {
+			this.initHotkeys();
+			if(this.hotkeys)
+				window.addEventListener(this.keyEvent, this, this.keyHighPriority);
+		}.bind(this), 0);
 		window.setTimeout(function() {
 			this.initControls(document);
 			window.setTimeout(function() {
@@ -2971,7 +2973,7 @@ var privateTab = {
 	get keyHighPriority() {
 		return prefs.get("keysHighPriority");
 	},
-	hotkeys: null,
+	hotkeys: undefined,
 	get accelKey() {
 		var accelKey = "ctrlKey";
 		var ke = Components.interfaces.nsIDOMKeyEvent;
@@ -2982,7 +2984,9 @@ var privateTab = {
 		delete this.accelKey;
 		return this.accelKey = accelKey;
 	},
-	initHotkeys: function() {
+	initHotkeys: function(force) {
+		if(this.hotkeys !== undefined && !force)
+			return;
 		_log("initHotkeys()");
 		var hasKeys = false;
 		var keys = { __proto__: null };
@@ -3129,7 +3133,7 @@ var privateTab = {
 	},
 	updateHotkeys: function(updateAll) {
 		_log("updateHotkeys(" + (updateAll || "") + ")");
-		updateAll && this.initHotkeys();
+		updateAll && this.initHotkeys(true);
 		var hasHotkeys = !!this.hotkeys;
 		var keyEvent = this.keyEvent;
 		var keyHighPriority = this.keyHighPriority;
