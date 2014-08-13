@@ -1606,7 +1606,8 @@ var privateTab = {
 					return out;
 				};
 			var filterPrivateWindowsAndTabs = function privateTabWrapper(browserState) {
-				var windows = browserState.windows;
+				var windows = !prefs.get("savePrivateTabsInSessions")
+					&& browserState.windows;
 				windows && windows.forEach(function(windowState, i) {
 					if(windowState.isPrivate || !windowState._closedTabs)
 						return;
