@@ -155,6 +155,7 @@ var privateTab = {
 			case "dragend":                   this.dragEndHandler(e);        break;
 			case "drop":                      this.dropHandler(e);           break;
 			case "popupshowing":              this.popupShowingHandler(e);   break;
+			case "ViewShowing":               this.viewShowingHandler(e);    break;
 			case "command":                   this.commandHandler(e);        break;
 			case "click":                     this.clickHandler(e);          break;
 			case "keydown":
@@ -1851,6 +1852,10 @@ var privateTab = {
 		)
 			this.updateTabTooltip(window);
 	},
+	viewShowingHandler: function(e) {
+		if(e.target.id == "PanelUI-history")
+			this.updateUndoCloseTabs(e.target);
+	},
 	updatePageContext: function(window) {
 		_log("updatePageContext()");
 		var document = window.document;
@@ -2885,16 +2890,24 @@ var privateTab = {
 		if(init) {
 			if(undoPopup)
 				undoPopup.addEventListener("popupshowing", this, false);
+			if(this.isAustralis)
+				window.addEventListener("ViewShowing", this, false);
 		}
 		else {
 			if(undoPopup)
 				undoPopup.removeEventListener("popupshowing", this, false);
+			if(this.isAustralis)
+				window.removeEventListener("ViewShowing", this, false);
 		}
 	},
 	updateUndoCloseTabs: function(popup) {
 		_log("updateUndoCloseTabs()");
 		var window = popup.ownerDocument.defaultView;
-		var items = popup.getElementsByTagName("menuitem");
+		var items = popup.getElementsByTagName(
+			popup.localName == "menupopup"
+				? "menuitem"
+				: "toolbarbutton" // History list in Australis menu
+		);
 		var undoTabItems = JSON.parse(this.ss.getClosedTabData(window));
 		Array.forEach(items, function(item) {
 			var indx = item.getAttribute("value");
@@ -3885,7 +3898,8 @@ var privateTab = {
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '],\n\
-				.menuitem-iconic[' + this.privateAttr + '] {\n\
+				.menuitem-iconic[' + this.privateAttr + '],\n\
+				.subviewbutton[' + this.privateAttr + '] {\n\
 					text-decoration: underline' + important + ';\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext' + important + ';\n\
 					' + prefix + 'text-decoration-style: dashed' + important + ';\n\
