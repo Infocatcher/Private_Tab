@@ -1840,7 +1840,7 @@ var privateTab = {
 			this.updatePageContext(window);
 		else if(id == "alltabs-popup" || id == "tm-tabsList-menu")
 			this.updateListAllTabs(window, popup);
-		else if(id == "historyUndoPopup")
+		else if(id == "historyUndoPopup" || id == "menu_recentTabsPopup")
 			this.updateUndoCloseTabs(popup);
 		else if(id == "tabContextMenu")
 			this.updateTabContext(window);
@@ -2886,7 +2886,9 @@ var privateTab = {
 			mi.removeAttribute(this.privateAttr);
 	},
 	setupUndoCloseTabs: function(window, init) {
-		var undoPopup = window.document.getElementById("historyUndoPopup");
+		var document = window.document;
+		var undoPopup = document.getElementById("historyUndoPopup")
+			|| document.getElementById("menu_recentTabsPopup"); // SeaMonkey
 		if(init) {
 			if(undoPopup)
 				undoPopup.addEventListener("popupshowing", this, false);
@@ -2915,7 +2917,10 @@ var privateTab = {
 				return;
 			// Original: undoCloseTab(0);
 			// Tab Mix Plus: TMP_ClosedTabs.restoreTab('original', 0);
-			if(!/undoCloseTab|restoreTab/i.test(item.getAttribute("oncommand")))
+			if(
+				!/undoCloseTab|restoreTab/i.test(item.getAttribute("oncommand"))
+				&& popup.id != "menu_recentTabsPopup" // SeaMonkey
+			)
 				return;
 			var undoItem = undoTabItems[indx];
 			var state = undoItem && undoItem.state;
@@ -3898,7 +3903,7 @@ var privateTab = {
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '],\n\
-				.menuitem-iconic[' + this.privateAttr + '],\n\
+				menuitem[' + this.privateAttr + '],\n\
 				.subviewbutton[' + this.privateAttr + '] {\n\
 					text-decoration: underline' + important + ';\n\
 					' + prefix + 'text-decoration-color: -moz-nativehyperlinktext' + important + ';\n\
