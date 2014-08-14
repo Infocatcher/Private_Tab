@@ -450,6 +450,7 @@ var privateTab = {
 			this.initControls(document);
 			window.setTimeout(function() {
 				this.setupListAllTabs(window, true);
+				this.setupUndoCloseTabs(window, true);
 			}.bind(this), 0);
 			window.setTimeout(function() {
 				this.setHotkeysText(document);
@@ -509,6 +510,7 @@ var privateTab = {
 			this.destroyWindowClosingHandler(window);
 		}
 		this.setupListAllTabs(window, false);
+		this.setupUndoCloseTabs(window, false);
 		this.destroyControls(window, force);
 
 		window.privateTab._destroy();
@@ -1837,6 +1839,8 @@ var privateTab = {
 			this.updatePageContext(window);
 		else if(id == "alltabs-popup" || id == "tm-tabsList-menu")
 			this.updateListAllTabs(window, popup);
+		else if(id == "historyUndoPopup")
+			this.updateUndoCloseTabs(popup);
 		else if(id == "tabContextMenu")
 			this.updateTabContext(window);
 		else if(
@@ -2875,6 +2879,42 @@ var privateTab = {
 			mi.setAttribute(this.privateAttr, "true");
 		else
 			mi.removeAttribute(this.privateAttr);
+	},
+	setupUndoCloseTabs: function(window, init) {
+		var undoPopup = window.document.getElementById("historyUndoPopup");
+		if(init) {
+			if(undoPopup)
+				undoPopup.addEventListener("popupshowing", this, false);
+		}
+		else {
+			if(undoPopup)
+				undoPopup.removeEventListener("popupshowing", this, false);
+		}
+	},
+	updateUndoCloseTabs: function(popup) {
+		_log("updateUndoCloseTabs()");
+		var window = popup.ownerDocument.defaultView;
+		var items = popup.getElementsByTagName("menuitem");
+		var undoTabItems = JSON.parse(this.ss.getClosedTabData(window));
+		Array.forEach(items, function(item) {
+			var indx = item.getAttribute("value");
+			if(!/^\d+$/.test(indx))
+				return;
+			// Original: undoCloseTab(0);
+			// Tab Mix Plus: TMP_ClosedTabs.restoreTab('original', 0);
+			if(!/undoCloseTab|restoreTab/i.test(item.getAttribute("oncommand")))
+				return;
+			var undoItem = undoTabItems[indx];
+			var state = undoItem && undoItem.state;
+			if(
+				state
+				&& "attributes" in state
+				&& this.privateAttr in state.attributes
+			)
+				item.setAttribute(this.privateAttr, "true");
+			else
+				item.removeAttribute(this.privateAttr);
+		}, this);
 	},
 	destroyControls: function(window, force) {
 		_log("destroyControls(), force: " + force);
