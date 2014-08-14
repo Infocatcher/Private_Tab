@@ -1930,8 +1930,8 @@ var privateTab = {
 			if(btn) {
 				e.preventDefault();
 				e.stopPropagation();
-				btn.doCommand();
 				_log(e.type + " on .tabs-newtab-button => doCommand()");
+				btn.doCommand();
 			}
 			return;
 		}
