@@ -2308,13 +2308,21 @@ var privateTab = {
 				autoReload = !autoReload;
 			if(autoReload) {
 				var browser = tab.linkedBrowser;
-				if(!browser.webProgress.isLoadingDocument) {
-					var typed = browser.userTypedValue;
-					browser.reload();
-					if(typed != null) window.setTimeout(function() {
-						browser.userTypedValue = typed;
-					}, 0);
+				var typed = browser.userTypedValue;
+				// Note: contains initial URL, if loading is just started, but typically this is
+				// value that typed in location bar (and that's why we prefer reload)
+				if(browser.webProgress.isLoadingDocument) {
+					if(browser.currentURI.spec == "about:blank" && /^[\w-]+:\S*$/.test(typed))
+						browser.loadURI(typed);
+					else
+						browser.reload();
 				}
+				else {
+					browser.reload();
+				}
+				if(typed != null) window.setTimeout(function() {
+					browser.userTypedValue = typed;
+				}, 0);
 			}
 		}
 		if(tab.getAttribute("selected") == "true") { // Only for hotkey
