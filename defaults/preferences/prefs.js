@@ -44,6 +44,7 @@ pref("extensions.privateTab.sendRefererHeader", 2);
 // 1 - only if private tab opened from private tab
 // 2 - always send (as Firefox itself do for "Open Link in New Private Window")
 pref("extensions.privateTab.toggleTabPrivateAutoReload", true);
+pref("extensions.privateTab.toggleTabPrivateAutoReload.stopLoading", true);
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);

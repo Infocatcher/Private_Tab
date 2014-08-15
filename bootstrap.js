@@ -2306,15 +2306,18 @@ var privateTab = {
 		}
 		else {
 			var autoReload = prefs.get("toggleTabPrivateAutoReload");
+			var stopLoading = prefs.get("toggleTabPrivateAutoReload.stopLoading");
 			if(toggleReload)
 				autoReload = !autoReload;
+			var browser = tab.linkedBrowser;
 			if(autoReload) {
-				var browser = tab.linkedBrowser;
 				var typed = browser.userTypedValue;
 				// Note: contains initial URL, if loading is just started, but typically this is
 				// value that typed in location bar (and that's why we prefer reload)
 				if(browser.webProgress.isLoadingDocument) {
-					if(browser.currentURI.spec == "about:blank" && /^[\w-]+:\S*$/.test(typed)) {
+					if(!stopLoading)
+						_log("toggleContextTabPrivate() -> isLoadingDocument -> don't reload");
+					else if(browser.currentURI.spec == "about:blank" && /^[\w-]+:\S*$/.test(typed)) {
 						_log("toggleContextTabPrivate() -> isLoadingDocument -> load typed URL");
 						browser.loadURI(typed);
 					}
@@ -2330,6 +2333,10 @@ var privateTab = {
 				if(typed != null) window.setTimeout(function() {
 					browser.userTypedValue = typed;
 				}, 0);
+			}
+			else if(stopLoading && browser.webProgress.isLoadingDocument) {
+				_log("toggleContextTabPrivate() -> stop()");
+				browser.stop();
 			}
 		}
 		if(tab.getAttribute("selected") == "true") { // Only for hotkey
