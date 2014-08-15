@@ -6,6 +6,10 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Fixed ability to remember closed private tabs in Firefox 29+ (<em>extensions.privateTab.rememberClosedPrivateTabs</em> preference) (<a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
+`+` Added highlighting for closed private tabs inside “Recently Closed Tabs” menu (<a href="https://github.com/Infocatcher/Private_Tab/issues/154">#154</a>).<br>
+`*` Now “Private Tab” checkbox (in tab context menu) works better for loading tabs (<em>extensions.privateTab.toggleTabPrivateAutoReload.stopLoading</em> preference).<br>
+
 ##### 0.1.7.3 (2014-08-09)
 `x` Correctly restore closed non-private tabs in private windows.<br>
 `*` Improved favicons support in private:… bookmarks (<a href="https://github.com/Infocatcher/Private_Tab/issues/147">#147</a>).<br>
