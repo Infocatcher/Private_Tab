@@ -3777,8 +3777,7 @@ var privateTab = {
 		return tab && this.getTabPrivacyContext(tab).usePrivateBrowsing;
 	},
 	isPendingTab: function(tab) {
-		return tab.hasAttribute("pending")
-			|| tab.linkedBrowser.contentDocument.readyState == "uninitialized";
+		return tab.hasAttribute("pending");
 	},
 
 	isLastPrivate: function(tabOrWindow) {
