@@ -2300,8 +2300,10 @@ var privateTab = {
 		var tab = this.getContextTab(window, true)
 			|| window.gBrowser.selectedTab; // For hotkey
 		var isPrivate = this.toggleTabPrivate(tab);
-		if(this.isPendingTab(tab))
+		if(this.isPendingTab(tab)) {
+			_log("toggleContextTabPrivate() -> isPendingTab -> fixTabState()");
 			this.fixTabState(tab, isPrivate);
+		}
 		else {
 			var autoReload = prefs.get("toggleTabPrivateAutoReload");
 			if(toggleReload)
@@ -2312,12 +2314,17 @@ var privateTab = {
 				// Note: contains initial URL, if loading is just started, but typically this is
 				// value that typed in location bar (and that's why we prefer reload)
 				if(browser.webProgress.isLoadingDocument) {
-					if(browser.currentURI.spec == "about:blank" && /^[\w-]+:\S*$/.test(typed))
+					if(browser.currentURI.spec == "about:blank" && /^[\w-]+:\S*$/.test(typed)) {
+						_log("toggleContextTabPrivate() -> isLoadingDocument -> load typed URL");
 						browser.loadURI(typed);
-					else
+					}
+					else {
+						_log("toggleContextTabPrivate() -> isLoadingDocument -> reload()");
 						browser.reload();
+					}
 				}
 				else {
+					_log("toggleContextTabPrivate() -> reload()");
 					browser.reload();
 				}
 				if(typed != null) window.setTimeout(function() {
