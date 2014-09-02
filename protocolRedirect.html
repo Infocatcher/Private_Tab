@@ -82,8 +82,8 @@ try {
 		spec = "http://" + spec;
 	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
 
-	//try {
-	//	setFavicon(uri.scheme + "://" + uri.hostPort + "/favicon.ico");
+	//try { // See useDefaultIcon() in chrome://browser/content/tabbrowser.xml
+	//	setFavicon(uri.prePath + "/favicon.ico");
 	//}
 	//catch(e2) {
 	//}
