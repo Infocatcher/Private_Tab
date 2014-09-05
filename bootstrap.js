@@ -1243,6 +1243,11 @@ var privateTab = {
 		}
 	},
 	tabCloseHandler: function(e) {
+		if(e.detail) {
+			if(e.eventPhase == e.CAPTURING_PHASE)
+				_log(e.type + ": tab moved to another window, ignore");
+			return;
+		}
 		// We can't open new private tab in bubbling phase:
 		// Error: TypeError: preview is undefined
 		// Source file: resource://app/modules/WindowsPreviewPerTab.jsm
@@ -1361,10 +1366,6 @@ var privateTab = {
 		var silentFail = false;
 		if(!this.oldSessionStore)
 			silentFail = true;
-		else if(e.detail) {
-			_log("Tab moved to another window");
-			silentFail = true;
-		}
 		else if(tab.hasAttribute("closedownloadtabs-closed")) {
 			// https://github.com/Infocatcher/Close_Download_Tabs
 			_log('Found "closedownloadtabs-closed" attribute');
