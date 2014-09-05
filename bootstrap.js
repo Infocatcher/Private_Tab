@@ -1259,6 +1259,7 @@ var privateTab = {
 	tabClosingHandler: function(e) {
 		if(this.oldSessionStore || !prefs.get("rememberClosedPrivateTabs"))
 			return;
+		//~ hack: manually add closed private tab to undo close history
 		var tab = e.originalTarget || e.target;
 		if(!tab.hasAttribute(this.privateAttr))
 			return;
@@ -1290,7 +1291,7 @@ var privateTab = {
 				state: tabState,
 				title: tabTitle,
 				image: this.getTabIcon(tab),
-				pos: tab._tPos,
+				pos: tab._tPos, // Note: missing in SeaMonkey, but SeaMonkey still use old nsISessionStore
 				closedAt: Date.now()
 			});
 			var length = closedTabs.length;
