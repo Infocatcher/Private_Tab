@@ -268,7 +268,7 @@ var privateTab = {
 	setupJumpLists: function(init, lazy) {
 		if(
 			!this.hasJumpLists
-			|| !init ^ this._jumpListsInitialized
+			|| init == this._jumpListsInitialized
 		)
 			return;
 		this._jumpListsInitialized = init;
@@ -352,7 +352,7 @@ var privateTab = {
 	},
 	_hasDelayedStartupObserver: false,
 	setupJumpListsLazy: function(init) {
-		if(!init ^ this._hasDelayedStartupObserver)
+		if(init == this._hasDelayedStartupObserver)
 			return;
 		this._hasDelayedStartupObserver = init;
 		// Like _onFirstWindowLoaded() from resource://app/components/nsBrowserGlue.js
@@ -897,7 +897,7 @@ var privateTab = {
 			return;
 		}
 		var bakKey = "privateTabOrig::usePrivateBrowsing";
-		if(!applyPatch ^ bakKey in searchBar)
+		if(applyPatch == bakKey in searchBar)
 			return;
 		_log("patchSearchBar(" + applyPatch + ")");
 		if(applyPatch) {
@@ -1500,7 +1500,7 @@ var privateTab = {
 	},
 	_hasPbExitObserver: false,
 	addPbExitObserver: function(add) {
-		if(!add ^ this._hasPbExitObserver)
+		if(add == this._hasPbExitObserver)
 			return;
 		this._hasPbExitObserver = add;
 		if(add)
@@ -2553,7 +2553,7 @@ var privateTab = {
 		}.bind(this), 10);
 	},
 	watchTabBarChanges: function(tabsToolbar, watch) {
-		if(!tabsToolbar || !watch ^ "_privateTabMutationObserver" in tabsToolbar)
+		if(!tabsToolbar || watch == "_privateTabMutationObserver" in tabsToolbar)
 			return;
 		_log("watchTabBarChanges(" + watch + ")");
 		// Detect changes of tabs toolbar orientation, for extensions like Tree Style Tab
@@ -3292,7 +3292,7 @@ var privateTab = {
 	setTabState: function(tab, isPrivate) {
 		if(isPrivate === undefined)
 			isPrivate = this.isPrivateTab(tab);
-		if(!isPrivate ^ tab.hasAttribute(this.privateAttr))
+		if(isPrivate == tab.hasAttribute(this.privateAttr))
 			return;
 		if(isPrivate) {
 			tab.setAttribute(this.privateAttr, "true");
