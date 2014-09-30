@@ -3790,10 +3790,10 @@ var privateTab = {
 			);
 		}
 		var window = tab.linkedBrowser.contentWindow;
-		if(!window) {
+		if(!window || !("QueryInterface" in window)) {
 			Components.utils.reportError(
 				LOG_PREFIX
-				+ "getTabPrivacyContext(): tab.linkedBrowser.contentWindow is null. Electrolysis?"
+				+ "getTabPrivacyContext(): tab.linkedBrowser.contentWindow is null or not usable. Electrolysis?"
 			);
 		}
 		return this.getPrivacyContext(window);
