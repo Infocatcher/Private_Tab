@@ -4017,6 +4017,9 @@ var privateTab = {
 			&& prefs.get("fixAfterTabsButtonsAccessibility")
 			&& this.getNewTabButton(window);
 		if(newTabBtn) {
+			var origStyle = newTabBtn.hasAttribute("style") && newTabBtn.getAttribute("style");
+			// Force show to get correct size (may be hidden, if there is many tabs)
+			newTabBtn.style.visibility = "visible";
 			var cs = window.getComputedStyle(newTabBtn, null);
 			var origBinding = cs.MozBinding;
 			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
@@ -4039,6 +4042,8 @@ var privateTab = {
 					- parseFloat(csi.marginLeft || 0) - parseFloat(csi.marginRight || 0)
 				)/2) + "px"
 			);
+			if(origStyle !== false)
+				newTabBtn.setAttribute("style", origStyle);
 			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
 			var btnBinding = this.trimMultilineString('\
 				<?xml version="1.0"?>\n\
