@@ -4042,7 +4042,9 @@ var privateTab = {
 					- parseFloat(csi.marginLeft || 0) - parseFloat(csi.marginRight || 0)
 				)/2) + "px"
 			);
-			if(origStyle !== false)
+			if(origStyle === false)
+				newTabBtn.removeAttribute("style");
+			else
 				newTabBtn.setAttribute("style", origStyle);
 			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
 			var btnBinding = this.trimMultilineString('\
