@@ -32,7 +32,9 @@ try {
 
 		// Link may be loaded in current tab, so we should send notification
 		var tab;
-		if("_getTabForBrowser" in gBrowser)
+		if("getTabForBrowser" in gBrowser) // Firefox 35+
+			tab = gBrowser.getTabForBrowser(browser);
+		else if("_getTabForBrowser" in gBrowser)
 			tab = gBrowser._getTabForBrowser(browser);
 		else { // SeaMonkey
 			for(var i = 0, tabs = gBrowser.tabs, l = tabs.length; i < l; ++i) {
