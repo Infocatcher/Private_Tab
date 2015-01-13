@@ -3243,6 +3243,12 @@ var privateTab = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
+		if( // https://addons.mozilla.org/addon/fast-dial/
+			!tabLabel
+			&& "Fd" in tab.ownerDocument.defaultView
+			&& prefs.getPref("extensions.fastdial.enable")
+		)
+			return true;
 		// See https://github.com/Infocatcher/Private_Tab/issues/152
 		if(!tabLabel && this.platformVersion >= 33 && !this.isSeaMonkey)
 			return false;
