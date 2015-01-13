@@ -3250,6 +3250,7 @@ var privateTab = {
 		)
 			return true;
 		// See https://github.com/Infocatcher/Private_Tab/issues/152
+		// Note: new tabs now have labels, but some pages like about:addons have empty labels
 		if(!tabLabel && this.platformVersion >= 33 && !this.isSeaMonkey)
 			return false;
 		if(tabLabel in this.emptyTabLabels) {
