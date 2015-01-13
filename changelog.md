@@ -71,7 +71,7 @@
 `+` Added Indonesian (id) locale, thanks to <a href="https://addons.mozilla.org/user/daisukeDan/">Daisuke Bjm Project</a>.<br>
 `+` Added Ukrainian (uk) locale, thanks to <a href="https://addons.mozilla.org/user/dbv92/">dbv92</a>.<br>
 `+` Added Arabic (ar) locale, thanks to <a href="https://addons.mozilla.org/user/slax/">infinity</a>.<br>
-`*` Improved compatibility with extensions like <a href="https://addons.mozilla.org/addon/fast-dial-5721/">Fast Dial</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/84">#84</a>).<br>
+`*` Improved compatibility with extensions like <a href="https://addons.mozilla.org/addon/fast-dial/">Fast Dial</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/84">#84</a>).<br>
 `x` Fixed incompatibility with <a href="https://addons.mozilla.org/addon/tile-tabs/">Tile Tabs</a> 10.0 (<a href="https://github.com/Infocatcher/Private_Tab/issues/83">#83</a>).<br>
 `x` Corrected for changes in Mozilla bug <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=885177">#885177</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/85">#85</a>).<br>
 `*` Preserve text in URL Bar after auto reloading (<a href="https://github.com/Infocatcher/Private_Tab/issues/86">#86</a>).<br>

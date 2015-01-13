@@ -71,7 +71,7 @@
 `+` Добавлена индонезийская (id) локаль, спасибо <a href="https://addons.mozilla.org/user/daisukeDan/">Daisuke Bjm Project</a>.<br>
 `+` Добавлена украинская (uk) локаль, спасибо <a href="https://addons.mozilla.org/user/dbv92/">dbv92</a>.<br>
 `+` Добавлена арабская (ar) локаль, спасибо <a href="https://addons.mozilla.org/user/slax/">infinity</a>.<br>
-`*` Улучшена совместимость с расширениями типа <a href="https://addons.mozilla.org/addon/fast-dial-5721/">Fast Dial</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/84">#84</a>).<br>
+`*` Улучшена совместимость с расширениями типа <a href="https://addons.mozilla.org/addon/fast-dial/">Fast Dial</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/84">#84</a>).<br>
 `x` Исправлена несовместимость с расширением <a href="https://addons.mozilla.org/addon/tile-tabs/">Tile Tabs</a> 10.0 (<a href="https://github.com/Infocatcher/Private_Tab/issues/83">#83</a>).<br>
 `x` Добавлены исправления для бага Mozilla <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=885177">#885177</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/85">#85</a>).<br>
 `*` Добавлено сохранение текста в адресной строке после автоматической перезагрузке (<a href="https://github.com/Infocatcher/Private_Tab/issues/86">#86</a>).<br>
