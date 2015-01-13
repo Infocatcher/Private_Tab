@@ -14,7 +14,7 @@ License.
 The Original Code is Private Tab.
 The Initial Developer of the Original Code is Infocatcher.
 
-Portions created by the Initial Developer are Copyright (C) 2013-2014
+Portions created by the Initial Developer are Copyright (C) 2013-2015
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
