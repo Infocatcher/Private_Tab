@@ -3243,14 +3243,8 @@ var privateTab = {
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
 		var tabLabel = tab.getAttribute("label") || "";
-		if( // https://addons.mozilla.org/addon/fast-dial/
-			!tabLabel
-			&& "Fd" in tab.ownerDocument.defaultView
-			&& prefs.getPref("extensions.fastdial.enable")
-		)
-			return true;
 		// See https://github.com/Infocatcher/Private_Tab/issues/152
-		// Note: new tabs now have labels, but some pages like about:addons have empty labels
+		// Note: looks like only new blank tabs have "New Tab" label, all other have empty label
 		if(!tabLabel && this.platformVersion >= 33 && !this.isSeaMonkey)
 			return false;
 		if(tabLabel in this.emptyTabLabels) {
