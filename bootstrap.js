@@ -172,7 +172,7 @@ var privateTab = {
 		}
 	},
 	loadHandler: function(e) {
-		var window = e.originalTarget.defaultView;
+		var window = e.currentTarget;
 		window.removeEventListener("load", this, false);
 		this.initWindow(window, WINDOW_LOADED);
 	},
