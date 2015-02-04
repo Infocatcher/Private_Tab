@@ -2541,14 +2541,13 @@ var privateTab = {
 			) {
 				_log("updateShowAfterTabs(): set " + this.fixAfterTabsA11yAttr + "=true");
 				tabsToolbar.setAttribute(this.fixAfterTabsA11yAttr, "true");
-				var window = document.defaultView;
 				// Make buttons clickable with our binding
 				window.gBrowser.tabContainer.addEventListener("click", this, true);
 			}
 			else {
 				_log("updateShowAfterTabs(): remove " + this.fixAfterTabsA11yAttr);
 				tabsToolbar.removeAttribute(this.fixAfterTabsA11yAttr);
-				document.defaultView.gBrowser.tabContainer.removeEventListener("click", this, true);
+				window.gBrowser.tabContainer.removeEventListener("click", this, true);
 			}
 			this.watchTabBarChanges(tabsToolbar, showAfterTabs);
 		}.bind(this), 10);
