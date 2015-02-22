@@ -3745,12 +3745,10 @@ var privateTab = {
 						|| stack.indexOf("\ndoSearch@chrome://tabmixplus/content/changecode.js:") != -1;
 					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads") && (
 						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
-						|| stack.indexOf("@resource://app/modules/DownloadsCommon.jsm:") != -1
-						|| stack.indexOf("@resource://app/components/DownloadsUI.js:") != -1
-						|| stack.indexOf("@resource://gre/modules/DownloadsCommon.jsm:") != -1
-						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
-						|| stack.indexOf("@resource:///modules/DownloadsCommon.jsm:") != -1
-						|| stack.indexOf("@resource:///components/DownloadsUI.js:") != -1
+						|| stack.indexOf("/modules/DownloadsCommon.jsm:") != -1
+							&& /@resource:\/\/(?:app|gre)?\/modules\/DownloadsCommon\.jsm:/.test(stack)
+						|| stack.indexOf("/components/DownloadsUI.js:") != -1
+							&& /@resource:\/\/(?:app|gre)?\/components\/DownloadsUI\.jsm:/.test(stack);
 					);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads) try {
