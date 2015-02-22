@@ -273,7 +273,7 @@ var privateTab = {
 			return;
 		this._jumpListsInitialized = init;
 
-		var global = Components.utils.import("resource://app/modules/WindowsJumpLists.jsm", {});
+		var global = Components.utils.import("resource:///modules/WindowsJumpLists.jsm", {});
 		if(!("tasksCfg" in global)) {
 			_log('setupJumpLists() failed: "tasksCfg" not found in WindowsJumpLists.jsm');
 			return;
@@ -355,7 +355,7 @@ var privateTab = {
 		if(init == this._hasDelayedStartupObserver)
 			return;
 		this._hasDelayedStartupObserver = init;
-		// Like _onFirstWindowLoaded() from resource://app/components/nsBrowserGlue.js
+		// Like _onFirstWindowLoaded() from resource:///components/nsBrowserGlue.js
 		if(init)
 			Services.obs.addObserver(this, "browser-delayed-startup-finished", false);
 		else
@@ -505,7 +505,7 @@ var privateTab = {
 		window.removeEventListener("SSWindowStateReady", this, true);
 		window.removeEventListener("aftercustomization", this, false);
 		if(reason != WINDOW_CLOSED) {
-			// See resource://app/modules/sessionstore/SessionStore.jsm
+			// See resource:///modules/sessionstore/SessionStore.jsm
 			// "domwindowclosed" => onClose() => "SSWindowClosing"
 			// This may happens after our "domwindowclosed" notification!
 			this.destroyWindowClosingHandler(window);
@@ -1251,7 +1251,7 @@ var privateTab = {
 		}
 		// We can't open new private tab in bubbling phase:
 		// Error: TypeError: preview is undefined
-		// Source file: resource://app/modules/WindowsPreviewPerTab.jsm
+		// Source file: resource:///modules/WindowsPreviewPerTab.jsm
 		if(e.eventPhase == e.CAPTURING_PHASE)
 			this.checkForLastPrivateTab(e);
 		else
@@ -1267,13 +1267,13 @@ var privateTab = {
 		var window = tab.ownerDocument.defaultView;
 		if(this.isPrivateWindow(window))
 			return;
-		// See SessionStoreInternal.onTabClose() in resource://app/modules/sessionstore/SessionStore.jsm
+		// See SessionStoreInternal.onTabClose() in resource:///modules/sessionstore/SessionStore.jsm
 		//~ todo: find some way to not copy code from SessionStore.jsm
-		var {TabState} = Components.utils.import("resource://app/modules/sessionstore/TabState.jsm", {});
+		var {TabState} = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
 		var tabState = TabState.collect(tab);
 		if(!tabState.isPrivate)
 			return;
-		var {SessionStoreInternal} = Components.utils.import("resource://app/modules/sessionstore/SessionStore.jsm", {});
+		var {SessionStoreInternal} = Components.utils.import("resource:///modules/sessionstore/SessionStore.jsm", {});
 		var maxTabsUndo = "_max_tabs_undo" in SessionStoreInternal
 			? SessionStoreInternal._max_tabs_undo
 			: prefs.getPref("browser.sessionstore.max_tabs_undo", 0);
@@ -1587,14 +1587,14 @@ var privateTab = {
 			return;
 		this._dontSaveClosedPrivateTabs = dontSave;
 
-		// See resource://app/modules/sessionstore/SessionSaver.jsm
-		// resource://app/modules/sessionstore/SessionStore.jsm
-		// resource://app/modules/sessionstore/PrivacyFilter.jsm
+		// See resource:///modules/sessionstore/SessionSaver.jsm
+		// resource:///modules/sessionstore/SessionStore.jsm
+		// resource:///modules/sessionstore/PrivacyFilter.jsm
 		// SessionSaverInternal._saveState()
 		// -> SessionStore.getCurrentState()
 		// -> PrivacyFilter.filterPrivateWindowsAndTabs()
 		// -> SessionSaverInternal._writeState()
-		var ssGlobal = Components.utils.import("resource://app/modules/sessionstore/SessionSaver.jsm", {});
+		var ssGlobal = Components.utils.import("resource:///modules/sessionstore/SessionSaver.jsm", {});
 		// Note: we can't modify frozen PrivacyFilter object!
 		const bakKey = "_privateTabPrivacyFilter";
 		const newKey = "_privateTabPrivacyFilterWrapper";
@@ -2279,7 +2279,7 @@ var privateTab = {
 		if(window.toolbar.visible)
 			return window;
 		if(prefs.get("dontUseTabsInPopupWindows")) try {
-			Components.utils.import("resource://app/modules/RecentWindow.jsm");
+			Components.utils.import("resource:///modules/RecentWindow.jsm");
 			return RecentWindow.getMostRecentBrowserWindow({
 				allowPopups: false
 			});
@@ -3677,7 +3677,7 @@ var privateTab = {
 		pt._updateDownloadPanelTimer = window.setTimeout(function() {
 			// See chrome://browser/content/downloads/downloads.js,
 			// chrome://browser/content/downloads/indicator.js,
-			// resource://app/modules/DownloadsCommon.jsm
+			// resource:///modules/DownloadsCommon.jsm
 			// Clear download panel:
 			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
 				if("onDataInvalidated" in window.DownloadsView) {
@@ -3749,6 +3749,8 @@ var privateTab = {
 						|| stack.indexOf("@resource://app/components/DownloadsUI.js:") != -1
 						|| stack.indexOf("@resource://gre/modules/DownloadsCommon.jsm:") != -1
 						|| stack.indexOf("@resource://gre/components/DownloadsUI.js:") != -1
+						|| stack.indexOf("@resource:///modules/DownloadsCommon.jsm:") != -1
+						|| stack.indexOf("@resource:///components/DownloadsUI.js:") != -1
 					);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads) try {
