@@ -3748,7 +3748,7 @@ var privateTab = {
 						|| stack.indexOf("/modules/DownloadsCommon.jsm:") != -1
 							&& /@resource:\/\/(?:app|gre)?\/modules\/DownloadsCommon\.jsm:/.test(stack)
 						|| stack.indexOf("/components/DownloadsUI.js:") != -1
-							&& /@resource:\/\/(?:app|gre)?\/components\/DownloadsUI\.jsm:/.test(stack);
+							&& /@resource:\/\/(?:app|gre)?\/components\/DownloadsUI\.jsm:/.test(stack)
 					);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads) try {
