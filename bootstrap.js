@@ -2276,15 +2276,17 @@ var privateTab = {
 		}, 0);
 	},
 	getNotPopupWindow: function(window) {
-		if(window.toolbar.visible)
+		if(window.toolbar && window.toolbar.visible)
 			return window;
 		if(prefs.get("dontUseTabsInPopupWindows")) try {
-			Components.utils.import("resource:///modules/RecentWindow.jsm");
+			var {RecentWindow} = Components.utils.import("resource:///modules/RecentWindow.jsm", {});
 			return RecentWindow.getMostRecentBrowserWindow({
 				allowPopups: false
 			});
 		}
 		catch(e) {
+			if(RecentWindow || !this.isSeaMonkey)
+				Components.utils.reportError(e);
 		}
 		return null;
 	},
