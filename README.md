@@ -54,6 +54,8 @@ boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
 <br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
 <br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
+<br>boolean [privateTab.hasClosedTabs](#privatetabhasclosedtabs)
+<br>void [privateTab.forgetClosedTabs](#privatetabforgetclosedtabs)()
 <br>boolean [privateTab.tabLabelIsEmpty](#privatetabtablabelisempty)(in string tabLabel[, in boolean isEmpty])
 
 ###### privateTab.isTabPrivate()
@@ -101,6 +103,22 @@ gBrowser.addTab("https://mozilla.org/");
 gBrowser.addTab("https://addons.mozilla.org/");
 // ...
 privateTab.stopToOpenTabs();
+```
+###### privateTab.hasClosedTabs
+Only for <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true, Private Tab 0.1.7.4+.
+<br>Return true, if there is at least one private tab in undo close list, example:
+```js
+if(privateTab.hasClosedTabs)
+	alert("We have at least one closed private tabs");
+else
+	alert("We don't have closed private tabs");
+```
+###### privateTab.forgetClosedTabs()
+Only for <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true, Private Tab 0.1.7.4+.
+<br>Forget about all closed private tabs in window, example:
+```js
+// Forget about all closed private tabs in window
+privateTab.forgetClosedTabs();
 ```
 ###### privateTab.tabLabelIsEmpty()
 Mark tab label as empty (or non-empty), example:
