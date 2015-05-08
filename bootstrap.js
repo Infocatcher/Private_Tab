@@ -1826,8 +1826,7 @@ var privateTab = {
 	},
 	isEditableNode: function(node) {
 		var cs = node.ownerDocument.defaultView.getComputedStyle(node, null);
-		var userModify = "userModify" in cs ? cs.userModify : cs.MozUserModify;
-		return userModify == "read-write";
+		return (cs.userModify || cs.MozUserModify) == "read-write";
 	},
 	popupShowingHandler: function(e) {
 		if(e.defaultPrevented)
