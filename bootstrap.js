@@ -4184,9 +4184,17 @@ API.prototype = {
 		this._openNewTabsPrivate = isPrivate;
 		this.window.addEventListener("TabOpen", this, true);
 	},
-	stopToOpenTabs: function  privateTab_stopToOpenTabs() {
+	stopToOpenTabs: function privateTab_stopToOpenTabs() {
 		this._openNewTabsPrivate = undefined;
 		this.window.removeEventListener("TabOpen", this, true);
+	},
+	get hasClosedTabs() {
+		for(var i in privateTabInternal.getClosedPrivateTabs(this.window))
+			return true;
+		return false;
+	},
+	forgetClosedTabs: function privateTab_forgetClosedTabs() {
+		privateTabInternal.forgetClosedTabs(this.window);
 	},
 	tabLabelIsEmpty: function(tabLabel, isEmpty) {
 		var emptyLabels = privateTabInternal.emptyTabLabels;
