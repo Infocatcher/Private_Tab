@@ -9,7 +9,7 @@
 ##### 0.1.7.4 (2015-05-10)
 `x` Исправлена возможность запоминать закрытые приватные вкладки в Firefox 29+ (настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
 `+` Добавлена подсветка закрытых приватных вкладок в меню «Недавно закрытые вкладки» (<a href="https://github.com/Infocatcher/Private_Tab/issues/154">#154</a>).<br>
-`*` Улучшена работа галочки «Приватная вкладка» (в контекстном меню вкладок) для загружающихся вкладок (<em>extensions.privateTab.toggleTabPrivateAutoReload.stopLoading</em> preference).<br>
+`*` Улучшена работа галочки «Приватная вкладка» (в контекстном меню вкладок) для загружающихся вкладок (настройка <em>extensions.privateTab.toggleTabPrivateAutoReload.stopLoading</em>).<br>
 `x` Исправлен размер кнопки «Новая приватная вкладка» после последней вкладки, если открыто много вкладок и кнопка была скрыта на момент запуска.<br>
 `x` Исправлена совместимость с Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/165">#165</a>).<br>
 `+` Добавлено: <a href="https://github.com/Infocatcher/Private_Tab#privatetabhasclosedtabs">privateTab.hasClosedTabs</a> и <a href="https://github.com/Infocatcher/Private_Tab#privatetabforgetclosedtabs">privateTab.forgetClosedTabs</a> API для других расширений.<br>
