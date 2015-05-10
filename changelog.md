@@ -12,7 +12,7 @@
 `*` Now “Private Tab” checkbox (in tab context menu) works better for loading tabs (<em>extensions.privateTab.toggleTabPrivateAutoReload.stopLoading</em> preference).<br>
 `x` Fixed size of “New Private Tab” button after last tab, if there is many tabs and button was hidden at startup.<br>
 `x` Fixed compatibility with Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/165">#165</a>).<br>
-`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabhasclosedtabs">privateTab.hasClosedTabs</a> and <a href="https://github.com/Infocatcher/Private_Tab#privatetabforgetclosedtabs">privateTab.forgetClosedTabs</a> API for other extensions.<br>
+`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabhasclosedtabs">privateTab.hasClosedTabs</a> and <a href="https://github.com/Infocatcher/Private_Tab#privatetabforgetclosedtabs">privateTab.forgetClosedTabs()</a> API for other extensions.<br>
 
 ##### 0.1.7.3 (2014-08-09)
 `x` Correctly restore closed non-private tabs in private windows.<br>
