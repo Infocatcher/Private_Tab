@@ -10,7 +10,7 @@
 		<em:multiprocessCompatible>true</em:multiprocessCompatible>
 		-->
 		<em:name>Private Tab</em:name>
-		<em:version>0.1.7.3</em:version>
+		<em:version>0.1.7.4</em:version>
 		<em:description>Adds private tabs</em:description>
 		<em:creator>Infocatcher</em:creator>
 		<em:updateURL>http://infocatcher.ucoz.net/ext/fx/private_tab/update.rdf</em:updateURL>
