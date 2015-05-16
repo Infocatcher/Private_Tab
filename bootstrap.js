@@ -3690,8 +3690,12 @@ var privateTab = {
 					window.DownloadsPanel.terminate();
 					window.DownloadsView.richListBox.textContent = "";
 					// We can't use {} and [] here because of memory leaks!
-					window.DownloadsView._viewItems = new window.Object();
-					window.DownloadsView._dataItems = new window.Array();
+					if("_downloads" in window.DownloadsView) // Firefox 38+
+						window.DownloadsView._downloads = new window.Array();
+					else {
+						window.DownloadsView._viewItems = new window.Object();
+						window.DownloadsView._dataItems = new window.Array();
+					}
 					_log("updateDownloadPanel() => DownloadsPanel.terminate() + cleanup manually");
 				}
 				window.DownloadsPanel.initialize(function() {
