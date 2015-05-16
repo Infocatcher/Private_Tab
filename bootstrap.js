@@ -3680,25 +3680,27 @@ var privateTab = {
 			// chrome://browser/content/downloads/indicator.js,
 			// resource:///modules/DownloadsCommon.jsm
 			// Clear download panel:
-			if(window.DownloadsPanel._state != window.DownloadsPanel.kStateUninitialized) {
-				if("onDataInvalidated" in window.DownloadsView) {
-					window.DownloadsView.onDataInvalidated(); // This calls DownloadsPanel.terminate();
+			var DownloadsPanel = window.DownloadsPanel;
+			var DownloadsView = window.DownloadsView;
+			if(DownloadsPanel._state != DownloadsPanel.kStateUninitialized) {
+				if("onDataInvalidated" in DownloadsView) {
+					DownloadsView.onDataInvalidated(); // This calls DownloadsPanel.terminate();
 					_log("updateDownloadPanel() => DownloadsView.onDataInvalidated()");
 				}
 				else { // Firefox 28.0a1+
 					// Based on code from chrome://browser/content/downloads/downloads.js in Firefox 25.0
-					window.DownloadsPanel.terminate();
-					window.DownloadsView.richListBox.textContent = "";
+					DownloadsPanel.terminate();
+					DownloadsView.richListBox.textContent = "";
 					// We can't use {} and [] here because of memory leaks!
-					if("_downloads" in window.DownloadsView) // Firefox 38+
-						window.DownloadsView._downloads = new window.Array();
+					if("_downloads" in DownloadsView) // Firefox 38+
+						DownloadsView._downloads = new window.Array();
 					else {
-						window.DownloadsView._viewItems = new window.Object();
-						window.DownloadsView._dataItems = new window.Array();
+						DownloadsView._viewItems = new window.Object();
+						DownloadsView._dataItems = new window.Array();
 					}
 					_log("updateDownloadPanel() => DownloadsPanel.terminate() + cleanup manually");
 				}
-				window.DownloadsPanel.initialize(function() {
+				DownloadsPanel.initialize(function() {
 					_log("updateDownloadPanel() => DownloadsPanel.initialize() done");
 				});
 				_log("updateDownloadPanel() => DownloadsPanel.initialize()");
