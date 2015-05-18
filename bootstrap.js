@@ -2845,7 +2845,7 @@ var privateTab = {
 		mp._privateTabTriggerNode = mp.triggerNode; // When we handle click, triggerNode is already null
 		var _this = this;
 		mp.addEventListener("popuphiding", function destroyPlacesContext(e) {
-			if(e.originalTarget != mp)
+			if((e.originalTarget || e.target) != mp)
 				return;
 			mp.removeEventListener(e.type, destroyPlacesContext, true);
 			window.removeEventListener("command", waitForTab, true);
