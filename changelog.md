@@ -6,6 +6,8 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Correctly reinitialize download panel after switch between private and non-private tabs in Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>
+
 ##### 0.1.7.4 (2015-05-10)
 `x` Fixed ability to remember closed private tabs in Firefox 29+ (<em>extensions.privateTab.rememberClosedPrivateTabs</em> preference) (<a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
 `+` Added highlighting for closed private tabs inside “Recently Closed Tabs” menu (<a href="https://github.com/Infocatcher/Private_Tab/issues/154">#154</a>).<br>

@@ -6,6 +6,8 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправлено обновление панели загрузок при переключении между приватными и обычными вкладками в Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>
+
 ##### 0.1.7.4 (2015-05-10)
 `x` Исправлена возможность запоминать закрытые приватные вкладки в Firefox 29+ (настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
 `+` Добавлена подсветка закрытых приватных вкладок в меню «Недавно закрытые вкладки» (<a href="https://github.com/Infocatcher/Private_Tab/issues/154">#154</a>).<br>
