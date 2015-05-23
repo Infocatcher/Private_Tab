@@ -15,6 +15,9 @@ You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_menu_icons">add icons to menu items</a>
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_hide_items">hide some menu items</a>
 
+#### Keyboard shortcuts:
+You can modify keyboard shortcuts through <a href="http://kb.mozillazine.org/About:config">about:config</a> page, see notes about <em>extensions.privateTab.key.</em>\* preferences in <a href="https://github.com/Infocatcher/Private_Tab/blob/master/defaults/preferences/prefs.js">defaults/preferences/prefs.js</a>.
+
 #### API for other extensions:
 ##### Events:
 You can listen for following events:
