@@ -98,7 +98,7 @@ var privateTab = {
 				}
 				if(hasData) {
 					_log("Save data from privateTab.tabLabelIsEmpty() API");
-					this.storage.set("privateTab:emptyTabLabels", emptyLabels);
+					this.storage.set("emptyTabLabels", emptyLabels);
 				}
 			}
 		}
@@ -389,7 +389,7 @@ var privateTab = {
 			// Import data from privateTab.tabLabelIsEmpty() API
 			if(!this.emptyTabLabelsImported) {
 				this.emptyTabLabelsImported = true;
-				var emptyLabels = this.storage.get("privateTab:emptyTabLabels", null);
+				var emptyLabels = this.storage.get("emptyTabLabels", null);
 				var legacyStorage = !emptyLabels
 					&& "Application" in window
 					&& "storage" in window.Application
@@ -399,7 +399,7 @@ var privateTab = {
 					emptyLabels && legacyStorage.set("privateTab:emptyTabLabels", null);
 				}
 				if(emptyLabels) {
-					this.storage.set("privateTab:emptyTabLabels", null);
+					this.storage.set("emptyTabLabels", null);
 					for(var label in emptyLabels) {
 						if(!(label in this.emptyTabLabels)) {
 							_log("Import tabLabelIsEmpty() API: \"" + label + "\"");
