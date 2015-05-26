@@ -98,7 +98,7 @@ var privateTab = {
 				}
 				if(hasData) {
 					_log("Save data from privateTab.tabLabelIsEmpty() API");
-					this.Application.storage.set("privateTab:emptyTabLabels", emptyLabels);
+					this.storage.set("privateTab:emptyTabLabels", emptyLabels);
 				}
 			}
 		}
@@ -389,9 +389,9 @@ var privateTab = {
 			// Import data from privateTab.tabLabelIsEmpty() API
 			if(!this.emptyTabLabelsImported) {
 				this.emptyTabLabelsImported = true;
-				var emptyLabels = this.Application.storage.get("privateTab:emptyTabLabels", null);
+				var emptyLabels = this.storage.get("privateTab:emptyTabLabels", null);
 				if(emptyLabels) {
-					this.Application.storage.set("privateTab:emptyTabLabels", null);
+					this.storage.set("privateTab:emptyTabLabels", null);
 					for(var label in emptyLabels) {
 						if(!(label in this.emptyTabLabels)) {
 							_log("Import tabLabelIsEmpty() API: \"" + label + "\"");
@@ -534,15 +534,26 @@ var privateTab = {
 		delete this.isAustralis;
 		return this.isAustralis = "CustomizableUI" in window;
 	},
-	get Application() {
-		delete this.Application;
-		return this.Application = (
-			Components.classes["@mozilla.org/fuel/application;1"] // Firefox
-			|| Components.classes["@mozilla.org/smile/application;1"] // SeaMonkey
-		).getService(
-			Components.interfaces.fuelIApplication // Firefox
-			|| Components.interfaces.smileIApplication // SeaMonkey
-		);
+	get storage() {
+		// Simple replacement for Application.storage
+		// See https://bugzilla.mozilla.org/show_bug.cgi?id=1090880
+		var global = Components.utils.getGlobalForObject(Services);
+		var ns = "_privateTabStorage";
+		var storage = global[ns] || (global[ns] = global.Object.create(null));
+		delete this.storage;
+		return this.storage = {
+			get: function(key, defaultVal) {
+				if(key in storage)
+					return storage[key];
+				return defaultVal;
+			},
+			set: function(key, val) {
+				if(key === null)
+					delete storage[key];
+				else
+					storage[key] = val;
+			}
+		};
 	},
 	get windows() {
 		var isSeaMonkey = this.isSeaMonkey;
