@@ -6,6 +6,8 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправлена совместимость с будущими версиями Firefox (баг <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
+
 ##### 0.1.7.5 (2015-05-21)
 `x` Исправлено обновление панели загрузок при переключении между приватными и обычными вкладками в Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>
 
