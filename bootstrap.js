@@ -4091,6 +4091,8 @@ var privateTab = {
 					}\n\
 					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
 						pointer-events: auto;\n\
+						width: auto !important;\n\
+						height: auto !important;\n\
 						padding: ' + padding + ' !important;\n\
 					}\n\
 				}';
