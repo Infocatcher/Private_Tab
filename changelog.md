@@ -7,6 +7,7 @@
 
 ##### master/HEAD
 `x` Fixed compatibility with future Firefox versions (bug <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
+`x` Fixed icons of buttons after last tab in Firefox 41+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
 
 ##### 0.1.7.5 (2015-05-21)
 `x` Correctly reinitialize download panel after switch between private and non-private tabs in Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>
