@@ -293,6 +293,14 @@ var privateTab = {
 				title:       this.getLocalized("taskBarOpenNewPrivateTab" + sm),
 				description: this.getLocalized("taskBarOpenNewPrivateTabDesc" + sm),
 				get args() {
+					try { // Firefox 42+
+						var {NewTabURL} = Components.utils.import("resource:///modules/NewTabURL.jsm", {});
+						return "-new-tab private:" + NewTabURL.get();
+					}
+					catch(e) {
+						if(NewTabURL)
+							Components.utils.reportError(e);
+					}
 					return "-new-tab private:" + (prefs.getPref("browser.newtab.url") || "about:blank");
 				},
 				iconIndex:   this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
