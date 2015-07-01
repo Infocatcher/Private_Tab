@@ -288,16 +288,17 @@ var privateTab = {
 			return -1;
 		}
 		if(init) {
-			var _getString = this.getLocalized.bind(this);
 			var sm = this.isSeaMonkey ? "SM" : "";
 			var ptEntry = {
-				get title()       _getString("taskBarOpenNewPrivateTab" + sm),
-				get description() _getString("taskBarOpenNewPrivateTabDesc" + sm),
-				get args()        "-new-tab private:" + (prefs.getPref("browser.newtab.url") || "about:blank"),
-				iconIndex:        this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
-				open:             true,
-				close:            true,
-				_privateTab:      true
+				title:       this.getLocalized("taskBarOpenNewPrivateTab" + sm),
+				description: this.getLocalized("taskBarOpenNewPrivateTabDesc" + sm),
+				get args() {
+					return "-new-tab private:" + (prefs.getPref("browser.newtab.url") || "about:blank");
+				},
+				iconIndex:   this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
+				open:        true,
+				close:       true,
+				_privateTab: true
 			};
 			var i = getEntryIndex(function(entry) {
 				return entry.args == "-new-tab about:blank";
