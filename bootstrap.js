@@ -321,6 +321,7 @@ var privateTab = {
 			}
 			this.updateJumpList = updateJumpList;
 			Services.prefs.addObserver("browser.newtab.url", updateJumpList, false);
+			Services.obs.addObserver(updateJumpList, "newtab-url-changed", false); // Firefox 42+
 		}
 		else {
 			var i = getEntryIndex(function(entry) {
@@ -334,6 +335,7 @@ var privateTab = {
 				_log("setupJumpLists(): item not found and can't be removed");
 			}
 			Services.prefs.removeObserver("browser.newtab.url", this.updateJumpList);
+			Services.obs.removeObserver(this.updateJumpList, "newtab-url-changed"); // Firefox 42+
 			delete this.updateJumpList;
 		}
 		function updateJumpList() {
