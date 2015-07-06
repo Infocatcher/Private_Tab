@@ -392,10 +392,11 @@ var privateTab = {
 		window.setTimeout(function() {
 			// We don't need patched functions right after window "load", so it's better to
 			// apply patches after any other extensions
-			this.patchTabBrowserDND(window, gBrowser, true);
 			this.patchBrowserThumbnails(window, true);
 			window.setTimeout(function() {
 				this.patchWarnAboutClosingWindow(window, true);
+				// Wait to not break BROWSER_NEW_TAB_URL in detached window
+				this.patchTabBrowserDND(window, gBrowser, true);
 			}.bind(this), 50);
 			// Import data from privateTab.tabLabelIsEmpty() API
 			if(!this.emptyTabLabelsImported) {
