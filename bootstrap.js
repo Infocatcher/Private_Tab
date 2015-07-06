@@ -251,7 +251,7 @@ var privateTab = {
 		this.privateProtocol.destroy();
 		delete this.privateProtocol;
 
-		if(reason != APP_SHUTDOWN && prefs.get("showItemInTaskBarJumpList")) {
+		if(prefs.get("showItemInTaskBarJumpList")) {
 			this.setupJumpListsLazy(false);
 			this.setupJumpLists(false);
 		}
