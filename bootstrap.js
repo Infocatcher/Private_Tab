@@ -1063,7 +1063,7 @@ var privateTab = {
 				function before(tab, uri) {
 					if(!uri || _this.isPrivateWindow(window))
 						return;
-					var isPrivate = _this.isPrivateTab(tab);
+					var isPrivate = _this.isPrivateTab(tab); //~ todo: may work wrong with Electrolysis
 					if(!isPrivate)
 						return;
 					_log("[patcher] " + key + "(): isPrivate = " + isPrivate);
@@ -3828,16 +3828,31 @@ var privateTab = {
 			);
 		}
 		var window = tab.linkedBrowser.contentWindow;
-		if(!window || !("QueryInterface" in window)) {
+		try { // Yes, even this simple check may raise "cross-process JS call failed" error
+			if(!window || !("QueryInterface" in window))
+				throw "not usable";
+		}
+		catch(e) {
+			if(e != "not usable")
+				Components.utils.reportError(e);
 			Components.utils.reportError(
 				LOG_PREFIX
 				+ "getTabPrivacyContext(): tab.linkedBrowser.contentWindow is null or not usable. Electrolysis?"
+				+ "\nCall stack:\n" + new Error().stack
 			);
+			return null; // Nothing to do, sorry
 		}
 		return this.getPrivacyContext(window);
 	},
 	isPrivateTab: function(tab) {
-		return tab && this.getTabPrivacyContext(tab).usePrivateBrowsing;
+		var privacyContext = tab && this.getTabPrivacyContext(tab);
+		if(!privacyContext) {
+			Components.utils.reportError(
+				LOG_PREFIX
+				+ "isPrivateTab(): getTabPrivacyContext() failed. Electrolysis?"
+			);
+		}
+		return privacyContext && privacyContext.usePrivateBrowsing;
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
