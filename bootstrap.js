@@ -2092,11 +2092,12 @@ var privateTab = {
 		var doc = gContextMenu.target.ownerDocument;
 		var principal = doc.nodePrincipal;
 		if(
-			"gContextMenu" in window
+			"gContextMenuContentData" in window
+			&& "gContextMenu" in window
 			&& window.gContextMenu
-			&& "_unremotePrincipal" in window.gContextMenu // Electrolysis
+			&& window.gContextMenu.isRemote // Electrolysis
 		) try {
-			principal = window.gContextMenu._unremotePrincipal(principal);
+			principal = window.gContextMenuContentData.principal;
 		}
 		catch(e) {
 			Components.utils.reportError(e);
