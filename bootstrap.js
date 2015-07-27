@@ -3395,8 +3395,20 @@ var privateTab = {
 					isPrivate = !privacyContext.usePrivateBrowsing;\n\
 				if(privacyContext.usePrivateBrowsing != isPrivate)\n\
 					privacyContext.usePrivateBrowsing = isPrivate;\n\
+				sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });\n\
 			';
+			var feedback = function(msg) {
+				mm.removeMessageListener("PrivateTab:PrivateChanged", feedback);
+				var isPrivate = msg.data.isPrivate;
+				_log(
+					"Received message from frame script: usePrivateBrowsing = " + isPrivate
+					+ "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255)
+				);
+				if(!_silent)
+					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+			}.bind(this);
 			var mm = tab.linkedBrowser.messageManager;
+			mm.addMessageListener("PrivateTab:PrivateChanged", feedback);
 			mm.loadFrameScript("data:application/javascript;charset=UTF-8," + encodeURIComponent(data), false);
 			return;
 		}
