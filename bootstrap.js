@@ -3387,6 +3387,7 @@ var privateTab = {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(!privacyContext) { // Electrolysis
 			//~ todo: find way to use only one frame script
+			// Also there is no way to unload frame script: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
 			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
 			var data = '\
 				var isPrivate = ' + isPrivate + '\n\
