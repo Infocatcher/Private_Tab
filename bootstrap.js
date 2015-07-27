@@ -3385,6 +3385,21 @@ var privateTab = {
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
 		var window = tab.ownerDocument.defaultView;
 		var privacyContext = this.getTabPrivacyContext(tab);
+		if(!privacyContext) { // Electrolysis
+			//~ todo: find way to use only one frame script
+			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
+			var data = '\
+				var isPrivate = ' + isPrivate + '\n\
+				var privacyContext = docShell.QueryInterface(Components.interfaces.nsILoadContext);\n\
+				if(isPrivate === undefined)\n\
+					isPrivate = !privacyContext.usePrivateBrowsing;\n\
+				if(privacyContext.usePrivateBrowsing != isPrivate)\n\
+					privacyContext.usePrivateBrowsing = isPrivate;\n\
+			';
+			var mm = tab.linkedBrowser.messageManager;
+			mm.loadFrameScript("data:application/javascript;charset=UTF-8," + encodeURIComponent(data), false);
+			return;
+		}
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 
