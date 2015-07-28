@@ -3390,12 +3390,11 @@ var privateTab = {
 			// Also there is no way to unload frame script: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
 			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
 			var data = '\
-				var isPrivate = ' + isPrivate + '\n\
+				var isPrivate = ' + isPrivate + ';\n\
 				var privacyContext = docShell.QueryInterface(Components.interfaces.nsILoadContext);\n\
 				if(isPrivate === undefined)\n\
 					isPrivate = !privacyContext.usePrivateBrowsing;\n\
-				if(privacyContext.usePrivateBrowsing != isPrivate)\n\
-					privacyContext.usePrivateBrowsing = isPrivate;\n\
+				privacyContext.usePrivateBrowsing = isPrivate;\n\
 				sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });\n\
 			';
 			var feedback = function(msg) {
@@ -3410,7 +3409,7 @@ var privateTab = {
 			}.bind(this);
 			var mm = tab.linkedBrowser.messageManager;
 			mm.addMessageListener("PrivateTab:PrivateChanged", feedback);
-			mm.loadFrameScript("data:application/javascript;charset=UTF-8," + encodeURIComponent(data), false);
+			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), false);
 			return;
 		}
 		if(isPrivate === undefined)
