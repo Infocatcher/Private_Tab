@@ -627,12 +627,13 @@ var privateTab = {
 		}
 		vsPageDesc instanceof Components.interfaces.nsISHEntry;
 		opener.gBrowser.browsers.some(function(browser, i) {
-			var content = getSourceWindow(browser.contentWindow);
+			var contentWindow = browser.contentWindow || browser.contentWindowAsCPOW;
+			var content = getSourceWindow(contentWindow);
 			if(!content)
 				return false;
 			_log(
 				"setViewSourcePrivacy(): found source tab #" + i + ":\n" + browser.currentURI.spec
-				+ (content == browser.contentWindow ? "" : "\n=> " + content.location.href)
+				+ (content == contentWindow ? "" : "\n=> " + content.location.href)
 			);
 			var isPrivate = this.isPrivateWindow(content);
 			var privacyContext = this.getPrivacyContext(window);
@@ -712,7 +713,7 @@ var privateTab = {
 			_log("inheritWindowState(): Ignore already private window");
 			return;
 		}
-		if(!this.isPrivateWindow(opener.content))
+		if(!this.isPrivateContent(opener))
 			return;
 		_log("Inherit private state from current tab of the opener window");
 		this.toggleWindowPrivate(window, true);
@@ -880,7 +881,7 @@ var privateTab = {
 				function before(aURI, aFlags, aReferrerURI, aCharset, aPostData) {
 					if(
 						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
-						&& _this.isPrivateWindow(this.contentWindow)
+						&& _this.isPrivateWindow(this.contentWindow || this.contentWindowAsCPOW)
 					) {
 						// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
 						var stack = new Error().stack;
@@ -932,12 +933,13 @@ var privateTab = {
 			return;
 		_log("patchSearchBar(" + applyPatch + ")");
 		if(applyPatch) {
+			var _this = this;
 			searchBar[bakKey] = Object.getOwnPropertyDescriptor(searchBar, "usePrivateBrowsing");
 			Object.defineProperty(searchBar, "usePrivateBrowsing", {
 				get: function() {
 					_log("patchSearchBar(): return state of selected tab");
 					var window = this.ownerDocument.defaultView.top;
-					var isPrivate = window.PrivateBrowsingUtils.isWindowPrivate(window.content);
+					var isPrivate = _this.isPrivateContent(window);
 					if("privateTab" in window) {
 						var pt = window.privateTab;
 						pt._clearSearchBarUndo = true;
@@ -1138,7 +1140,7 @@ var privateTab = {
 				args = Array.slice(args);
 				try {
 					var browser = this.linkedBrowser;
-					var doc = browser.contentDocument;
+					var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
 					if(doc instanceof Components.interfaces.nsIImageDocument) {
 						// Will use base64 representation for icons of image documents
 						var req = doc.imageRequest;
@@ -1175,7 +1177,7 @@ var privateTab = {
 			patcher.wrapFunction(
 				gBrowserThumbnails, meth, key,
 				function before(browser) {
-					if(_this.isPrivateWindow(window.content)) {
+					if(_this.isPrivateContent(window)) {
 						_log(key + ": forbid capturing from " + browser.currentURI.spec.substr(0, 255));
 						return { value: false };
 					}
@@ -1206,7 +1208,7 @@ var privateTab = {
 		if(!isEmpty || makeEmptyTabPrivate == -1) {
 			if(isEmpty)
 				_log("Inherit private state for new empty tab");
-			if(this.isPrivateWindow(window.content))
+			if(this.isPrivateContent(window))
 				isPrivate = true;
 			else if(this.isPrivateWindow(window))
 				isPrivate = false; // Override browser behavior!
@@ -1743,7 +1745,7 @@ var privateTab = {
 	},
 	dragStartHandler: function(e) {
 		var window = e.currentTarget;
-		var sourceNode = this._dndPrivateNode = this.isPrivateWindow(window.content)
+		var sourceNode = this._dndPrivateNode = this.isPrivateContent(window)
 			? e.originalTarget || e.target
 			: null;
 		sourceNode && _log(e.type + ": mark <" + sourceNode.nodeName + "> " + sourceNode + " node as private");
@@ -1911,7 +1913,7 @@ var privateTab = {
 		var mi = document.getElementById(this.contextId);
 		mi.hidden = noLink;
 
-		var hideNotPrivate = this.isPrivateWindow(window.content);
+		var hideNotPrivate = this.isPrivateContent(window);
 		// Hide "Open Link in New Tab/Window" from page context menu on private tabs:
 		// we inherit private state, so here should be only "Open Link in New Private Tab/Window"
 		var inNewWin = document.getElementById("context-openlink");
@@ -3443,7 +3445,7 @@ var privateTab = {
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
 		if(isPrivate === undefined)
-			isPrivate = !this.isPrivateWindow(window.content);
+			isPrivate = !this.isPrivateContent(window);
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
 		_log("Make all tabs in window " + (isPrivate ? "private" : "not private"));
@@ -3625,7 +3627,7 @@ var privateTab = {
 		var document = gBrowser.ownerDocument;
 		var window = document.defaultView;
 		if(isPrivate === undefined)
-			isPrivate = this.isPrivateWindow(window.content);
+			isPrivate = this.isPrivateContent(window);
 		var root = document.documentElement;
 		var tm = isPrivate
 			? root.getAttribute("titlemodifier_privatebrowsing")
@@ -3817,7 +3819,7 @@ var privateTab = {
 					);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads) try {
-						var isPrivate = _this.isPrivateWindow(window.content);
+						var isPrivate = _this.isPrivateContent(window);
 						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
 						if(fromSearchBar && "privateTab" in window) {
 							var pt = window.privateTab;
@@ -3847,14 +3849,23 @@ var privateTab = {
 	isPrivateWindow: function(window) {
 		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
+	isPrivateContent: function(window) {
+		return this.isPrivateWindow(this.getContentWindow(window));
+	},
+	getContentWindow: function(window) {
+		return window.content
+			|| window.gBrowser.contentWindow
+			|| window.gBrowser.contentWindowAsCPOW;
+	},
 	getTabPrivacyContext: function(tab) {
-		if(!tab.linkedBrowser) {
+		var browser = tab.linkedBrowser;
+		if(!browser) {
 			Components.utils.reportError(
 				LOG_PREFIX + "getTabPrivacyContext() called for already destroyed tab, call stack:\n"
 				+ new Error().stack
 			);
 		}
-		var window = tab.linkedBrowser.contentWindow;
+		var window = browser.contentWindow || browser.contentWindowAsCPOW;
 		try { // Yes, even this simple check may raise "cross-process JS call failed" error
 			if(!window || !("QueryInterface" in window))
 				throw "not usable";
