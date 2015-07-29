@@ -3883,14 +3883,15 @@ var privateTab = {
 		return this.getPrivacyContext(window);
 	},
 	isPrivateTab: function(tab) {
-		var privacyContext = tab && this.getTabPrivacyContext(tab);
+		var privacyContext = this.getTabPrivacyContext(tab);
 		if(!privacyContext) {
 			Components.utils.reportError(
 				LOG_PREFIX
 				+ "isPrivateTab(): getTabPrivacyContext() failed. Electrolysis?"
 			);
+			return tab.getAttribute(this.privateAttr) == "true";
 		}
-		return privacyContext && privacyContext.usePrivateBrowsing;
+		return privacyContext.usePrivateBrowsing;
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
