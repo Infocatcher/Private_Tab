@@ -6,9 +6,7 @@
 		<em:id>privateTab@infocatcher</em:id>
 		<em:type>2</em:type>
 		<em:bootstrap>true</em:bootstrap>
-		<!-- Uncomment to fix some strange things on Nightly with disabled e10s
 		<em:multiprocessCompatible>true</em:multiprocessCompatible>
-		-->
 		<em:name>Private Tab</em:name>
 		<em:version>0.1.7.5</em:version>
 		<em:description>Adds private tabs</em:description>
