@@ -3443,7 +3443,7 @@ var privateTab = {
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
 		if(isPrivate === undefined)
-			this.isPrivateWindow(window.content);
+			isPrivate = !this.isPrivateWindow(window.content);
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
 		_log("Make all tabs in window " + (isPrivate ? "private" : "not private"));
