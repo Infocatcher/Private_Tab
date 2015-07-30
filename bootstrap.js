@@ -2050,6 +2050,16 @@ var privateTab = {
 				var window = e.currentTarget;
 				if(k.forbidInTextFields) {
 					var fe = window.document.commandDispatcher.focusedElement;
+					if(
+						fe instanceof window.XULElement
+						&& fe.localName == "browser"
+						&& fe.getAttribute("remote") == "true"
+					) {
+						var doc = fe.contentDocument || fe.contentDocumentAsCPOW;
+						fe = doc.activeElement;
+						while(fe instanceof window.HTMLFrameElement)
+							fe = fe.contentDocument.activeElement;
+					}
 					if(fe && this.isEditableNode(fe)) {
 						_log("Don't use single char hotkey in editable node");
 						return;
