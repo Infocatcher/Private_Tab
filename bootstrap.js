@@ -1778,8 +1778,20 @@ var privateTab = {
 		_log(e.type + ": from " + (isPrivateSource ? "private" : "not private") + " tab");
 
 		var targetTab;
-		if(e.view.top == window) {
-			var trg = e.originalTarget || e.target;
+		var trg = e.originalTarget || e.target;
+		var inChildProcess = trg.localName == "browser" && trg.getAttribute("remote") == "true";
+		if(inChildProcess || e.view.top == window.content) {
+			var node = e.target;
+			if(inChildProcess) {
+				//~ todo: we can only use frame script here?
+			}
+			if(this.isEditableNode(node)) {
+				_log("Dropped into editable node, ignore");
+				return;
+			}
+			targetTab = window.gBrowser.selectedTab;
+		}
+		else if(e.view.top == window) {
 			targetTab = this.getTabFromChild(trg);
 			if(
 				sourceNode instanceof window.XULElement
@@ -1790,13 +1802,6 @@ var privateTab = {
 				_log(e.type + ": tab was dragged into tab or tab bar in the same window, ignore");
 				return;
 			}
-		}
-		else if(e.view.top == window.content) {
-			if(this.isEditableNode(e.target)) {
-				_log("Dropped into editable node, ignore");
-				return;
-			}
-			targetTab = window.gBrowser.selectedTab;
 		}
 
 		var isPrivateTarget = targetTab
