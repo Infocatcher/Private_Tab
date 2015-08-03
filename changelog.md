@@ -10,6 +10,7 @@
 `x` Fixed icons of buttons after last tab in Firefox 41+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
 `x` Use correct URL to open private tab from Windows task bar in Firefox 42+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1118285">bug 1118285</a>).<br>
 `x` Some compatibility fixes for multi-process mode (Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>
+`x` Fixed detection of externally opened tabs in Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/184">#184</a>).<br>
 
 ##### 0.1.7.5 (2015-05-21)
 `x` Correctly reinitialize download panel after switch between private and non-private tabs in Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>

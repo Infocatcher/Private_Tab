@@ -10,6 +10,7 @@
 `x` Исправлены иконки кнопок после последней вкладки в Firefox 41+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
 `x` Используется правильный адрес при открытии приватной вкладки через панель задач Windows в Firefox 42+ (см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1118285">bug 1118285</a>).<br>
 `x` Некоторые исправления для мультипроцессного режима (Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>
+`x` Исправлено определение вкладок, открытых из внешнего приложения в Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/184">#184</a>).<br>
 
 ##### 0.1.7.5 (2015-05-21)
 `x` Исправлено обновление панели загрузок при переключении между приватными и обычными вкладками в Firefox 38+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/176">#176</a>).<br>
