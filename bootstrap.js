@@ -879,6 +879,10 @@ var privateTab = {
 			patcher.wrapFunction(
 				browserProto, "loadURIWithFlags", "browser.loadURIWithFlags",
 				function before(aURI, aFlags, aReferrerURI, aCharset, aPostData) {
+					var params = aFlags;
+					if(params && typeof params == "object") // Firefox 38+
+						aFlags = params.flags;
+					_dbgv && _log("loadURIWithFlags() flags: " + aFlags);
 					if(
 						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
 						&& _this.isPrivateWindow(this.contentWindow || this.contentWindowAsCPOW)
