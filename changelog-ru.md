@@ -7,7 +7,7 @@
 
 ##### master/HEAD
 ##### 0.1.8 (2015-08-12)
-`x` Исправлена совместимость с будущими версиями Firefox (баг <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
+`x` Исправлена совместимость с будущими версиями Firefox (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">bug 1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
 `x` Исправлены иконки кнопок после последней вкладки в Firefox 40+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
 `x` Используется правильный адрес при открытии приватной вкладки через панель задач Windows в Firefox 42+ (см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1118285">bug 1118285</a>).<br>
 `x` Некоторые исправления для мультипроцессного режима (Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>

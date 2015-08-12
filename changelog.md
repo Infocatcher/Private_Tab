@@ -7,7 +7,7 @@
 
 ##### master/HEAD
 ##### 0.1.8 (2015-08-12)
-`x` Fixed compatibility with future Firefox versions (bug <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
+`x` Fixed compatibility with future Firefox versions (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">bug 1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
 `x` Fixed icons of buttons after last tab in Firefox 40+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
 `x` Use correct URL to open private tab from Windows task bar in Firefox 42+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1118285">bug 1118285</a>).<br>
 `x` Some compatibility fixes for multi-process mode (Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>
