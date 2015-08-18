@@ -3829,13 +3829,8 @@ var privateTab = {
 					var stack = new Error().stack;
 					var fromSearchBar = stack.indexOf("@chrome://browser/content/search/search.xml:") != -1
 						|| stack.indexOf("\ndoSearch@chrome://tabmixplus/content/changecode.js:") != -1;
-					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads") && (
-						stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
-						|| stack.indexOf("/modules/DownloadsCommon.jsm:") != -1
-							&& /@resource:\/\/(?:app|gre)?\/modules\/DownloadsCommon\.jsm:/.test(stack)
-						|| stack.indexOf("/components/DownloadsUI.js:") != -1
-							&& /@resource:\/\/(?:app|gre)?\/components\/DownloadsUI\.jsm:/.test(stack)
-					);
+					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads")
+						&& _this.isStackFromDownloads(stack);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads) try {
 						var isPrivate = _this.isPrivateContent(window);
@@ -3860,6 +3855,57 @@ var privateTab = {
 			delete PrivateBrowsingUtils._privateTabOrigIsWindowPrivate;
 		}
 		_log("patchPrivateBrowsingUtils(" + applyPatch + ")");
+		if("isContentWindowPrivate" in PrivateBrowsingUtils)
+			this.patchPrivateBrowsingUtilsContent(applyPatch);
+	},
+	patchPrivateBrowsingUtilsContent: function(applyPatch) {
+		var meth = "isContentWindowPrivate";
+		var key = "PrivateBrowsingUtils.isContentWindowPrivate";
+		if(applyPatch) {
+			var _this = this;
+			var pbu = PrivateBrowsingUtils;
+			pbu._privateTabOrigIsContentWindowPrivate = pbu.isContentWindowPrivate;
+			patcher.wrapFunction(pbu, meth, key,
+				function before(window) {
+					if(
+						!window
+						|| !(window instanceof Components.interfaces.nsIDOMChromeWindow)
+						|| !_this.isTargetWindow(window)
+					)
+						return false;
+					var isPrivate = _this._overrideIsPrivate;
+					if(isPrivate !== undefined) {
+						_log(key + "(): override to " + isPrivate);
+						return { value: isPrivate };
+					}
+					var stack = new Error().stack;
+					var fromDownloads = prefs.get("patchDownloads")
+						&& _this.isStackFromDownloads(stack);
+					_dbgv && _log(key + "():\n" + stack);
+					if(fromDownloads) try {
+						var isPrivate = _this.isPrivateContent(window);
+						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
+						return { value: isPrivate };
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+					}
+					return false;
+				}
+			);
+		}
+		else {
+			patcher.unwrapFunction(PrivateBrowsingUtils, meth, key);
+			delete PrivateBrowsingUtils._privateTabOrigIsContentWindowPrivate;
+		}
+		_log("patchPrivateBrowsingUtilsContent(" + applyPatch + ")");
+	},
+	isStackFromDownloads: function(stack) {
+		return stack.indexOf("@chrome://browser/content/downloads/downloads.js:") != -1
+			|| stack.indexOf("/modules/DownloadsCommon.jsm:") != -1
+				&& /@resource:\/\/(?:app|gre)?\/modules\/DownloadsCommon\.jsm:/.test(stack)
+			|| stack.indexOf("/components/DownloadsUI.js:") != -1
+				&& /@resource:\/\/(?:app|gre)?\/components\/DownloadsUI\.jsm:/.test(stack);
 	},
 
 	getPrivacyContext: function(window) {
