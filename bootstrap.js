@@ -3809,9 +3809,9 @@ var privateTab = {
 	patchPrivateBrowsingUtils: function(applyPatch) {
 		var meth = "isWindowPrivate";
 		var key = "PrivateBrowsingUtils.isWindowPrivate";
+		var pbu = PrivateBrowsingUtils;
 		if(applyPatch) {
 			var _this = this;
-			var pbu = PrivateBrowsingUtils;
 			pbu._privateTabOrigIsWindowPrivate = pbu.isWindowPrivate;
 			patcher.wrapFunction(pbu, meth, key,
 				function before(window) {
@@ -3851,8 +3851,8 @@ var privateTab = {
 			);
 		}
 		else {
-			patcher.unwrapFunction(PrivateBrowsingUtils, meth, key);
-			delete PrivateBrowsingUtils._privateTabOrigIsWindowPrivate;
+			patcher.unwrapFunction(pbu, meth, key);
+			delete pbu._privateTabOrigIsWindowPrivate;
 		}
 		_log("patchPrivateBrowsingUtils(" + applyPatch + ")");
 		if("isContentWindowPrivate" in PrivateBrowsingUtils)
@@ -3861,9 +3861,9 @@ var privateTab = {
 	patchPrivateBrowsingUtilsContent: function(applyPatch) {
 		var meth = "isContentWindowPrivate";
 		var key = "PrivateBrowsingUtils.isContentWindowPrivate";
+		var pbu = PrivateBrowsingUtils;
 		if(applyPatch) {
 			var _this = this;
-			var pbu = PrivateBrowsingUtils;
 			pbu._privateTabOrigIsContentWindowPrivate = pbu.isContentWindowPrivate;
 			patcher.wrapFunction(pbu, meth, key,
 				function before(window) {
@@ -3895,8 +3895,8 @@ var privateTab = {
 			);
 		}
 		else {
-			patcher.unwrapFunction(PrivateBrowsingUtils, meth, key);
-			delete PrivateBrowsingUtils._privateTabOrigIsContentWindowPrivate;
+			patcher.unwrapFunction(pbu, meth, key);
+			delete pbu._privateTabOrigIsContentWindowPrivate;
 		}
 		_log("patchPrivateBrowsingUtilsContent(" + applyPatch + ")");
 	},
