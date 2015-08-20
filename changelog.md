@@ -6,6 +6,8 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Fixed support for private downloads in download panel in Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/186">#186</a>).<br>
+
 ##### 0.1.8 (2015-08-12)
 `x` Fixed compatibility with future Firefox versions (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">bug 1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
 `x` Fixed icons of buttons after last tab in Firefox 40+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/180">#180</a>).<br>
