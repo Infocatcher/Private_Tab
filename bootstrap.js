@@ -1262,14 +1262,17 @@ var privateTab = {
 	},
 	tabRestoringHandler: function(e) {
 		var tab = e.originalTarget || e.target;
-		_log("Tab restored: " + (tab.getAttribute("label") || "").substr(0, 256));
+		var isPrivate = tab.hasAttribute(this.privateAttr);
+		_log(
+			"Tab restored, has private attribute: " + isPrivate
+			+ ", label: " + (tab.getAttribute("label") || "").substr(0, 256)
+		);
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
 			_log("Leave restored tab as is");
 			this.setTabState(tab); // Private tab may be restored using our API
 			return;
 		}
-		var isPrivate = tab.hasAttribute(this.privateAttr);
 		if(this.isPrivateTab(tab) != isPrivate) {
 			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
 			this.toggleTabPrivate(tab, isPrivate);
