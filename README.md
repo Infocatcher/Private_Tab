@@ -18,6 +18,15 @@ You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window
 #### Keyboard shortcuts:
 You can modify keyboard shortcuts through <a href="http://kb.mozillazine.org/About:config">about:config</a> page, see notes about <em>extensions.privateTab.key.</em>\* preferences in <a href="https://github.com/Infocatcher/Private_Tab/blob/master/defaults/preferences/prefs.js">defaults/preferences/prefs.js</a>.
 
+#### Troubleshooting:
+Try <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">new clean Firefox profile</a> to ensure that there are no conflicts with another extensions or some specific configuration.
+##### Debug logs:
+Options in <a href="http://kb.mozillazine.org/About:config">about:config</a>:
+* <em>extensions.privateTab.debug</em> – enable debug logs
+* <em>extensions.privateTab.debug.verbose</em> – additionally enable detailed debug logs (not needed in most cases)
+
+Then use <a href="https://developer.mozilla.org/en-US/docs/Tools/Browser_Console">Browser Console</a> (formerly <a href="https://developer.mozilla.org/en-US/docs/Error_Console">Error Console</a>, Ctrl+Shift+J) to see messages like `[Private Tab] …`.
+
 #### API for other extensions:
 ##### Events:
 You can listen for following events:
