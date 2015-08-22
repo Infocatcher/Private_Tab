@@ -1311,8 +1311,10 @@ var privateTab = {
 		//~ todo: find some way to not copy code from SessionStore.jsm
 		var {TabState} = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
 		var tabState = TabState.collect(tab);
-		if(!tabState.isPrivate)
+		if(!tabState.isPrivate) {
+			_log("tabClosingHandler(): tab has private attribute, but TabState.jsm doesn't return isPrivate flag");
 			return;
+		}
 		var {SessionStoreInternal} = Components.utils.import("resource:///modules/sessionstore/SessionStore.jsm", {});
 		var maxTabsUndo = "_max_tabs_undo" in SessionStoreInternal
 			? SessionStoreInternal._max_tabs_undo
