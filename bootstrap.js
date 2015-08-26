@@ -1324,6 +1324,15 @@ var privateTab = {
 		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
 			this.dontSaveClosedPrivateTabs(true);
 			_log("tabClosingHandler(): save closed private tab in undo close history");
+			if(
+				!("attributes" in tabState)
+				|| !(this.privateAttr in tabState.attributes)
+			) {
+				var attrs = tabState.attributes
+					|| (tabState.attributes = new (Components.utils.getGlobalForObject(tabState)).Object());
+				attrs[this.privateAttr] = "true";
+				_log("tabClosingHandler(): fix private attribute");
+			}
 			var tabTitle = tab.label;
 			var gBrowser = window.gBrowser;
 			if("_replaceLoadingTitle" in SessionStoreInternal)
