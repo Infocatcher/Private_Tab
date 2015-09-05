@@ -1309,7 +1309,8 @@ var privateTab = {
 			return;
 		// See SessionStoreInternal.onTabClose() in resource:///modules/sessionstore/SessionStore.jsm
 		//~ todo: find some way to not copy code from SessionStore.jsm
-		var {TabState} = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
+		var tabStateScope = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
+		var TabState = tabStateScope.TabState;
 		var tabState = TabState.collect(tab);
 		if(!tabState.isPrivate) {
 			_log("tabClosingHandler(): tab has private attribute, but TabState.jsm doesn't return isPrivate flag");
@@ -1329,7 +1330,7 @@ var privateTab = {
 				|| !(this.privateAttr in tabState.attributes)
 			) {
 				var attrs = tabState.attributes
-					|| (tabState.attributes = new (Components.utils.getGlobalForObject(tabState)).Object());
+					|| (tabState.attributes = new tabStateScope.Object());
 				attrs[this.privateAttr] = "true";
 				_log("tabClosingHandler(): fix private attribute");
 			}
@@ -1337,15 +1338,23 @@ var privateTab = {
 			var gBrowser = window.gBrowser;
 			if("_replaceLoadingTitle" in SessionStoreInternal)
 				tabTitle = SessionStoreInternal._replaceLoadingTitle(tabTitle, gBrowser, tab);
-			var data = SessionStoreInternal._windows[window.__SSi];
-			var closedTabs = data._closedTabs;
-			closedTabs.unshift({
+			var _undoData = {
 				state: tabState,
 				title: tabTitle,
 				image: this.getTabIcon(tab),
 				pos: tab._tPos, // Note: missing in SeaMonkey, but SeaMonkey still use old nsISessionStore
 				closedAt: Date.now()
-			});
+			};
+			var undoData = new tabStateScope.Object();
+			if("assign" in Object) // Firefox 34+
+				Object.assign(undoData, _undoData);
+			else {
+				for(var p in _undoData) if(_undoData.hasOwnProperty(p))
+					undoData[p] = _undoData[p];
+			}
+			var data = SessionStoreInternal._windows[window.__SSi];
+			var closedTabs = data._closedTabs;
+			closedTabs.unshift(undoData);
 			var length = closedTabs.length;
 			if(length > maxTabsUndo)
 				closedTabs.splice(maxTabsUndo, length - maxTabsUndo);
