@@ -7,6 +7,7 @@
 
 ##### master/HEAD
 `x` Fixed support for private downloads in download panel in Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/186">#186</a>).<br>
+`x` Fixed: <em>extensions.privateTab.rememberClosedPrivateTabs</em> may not work in some cases (see <a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
 
 ##### 0.1.8 (2015-08-12)
 `x` Fixed compatibility with future Firefox versions (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090880">bug 1090880</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/178">#178</a>).<br>
