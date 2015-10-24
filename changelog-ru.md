@@ -6,6 +6,7 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+##### 0.1.8.1 (2015-10-24)
 `x` Исправлена поддержка приватных загрузок в панели загрузок в Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/186">#186</a>).<br>
 `x` Исправлено: настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em> могла не работать в некоторых случаях (см. <a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
 
