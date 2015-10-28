@@ -289,28 +289,31 @@ var privateTab = {
 		}
 		if(init) {
 			var sm = this.isSeaMonkey ? "SM" : "";
+			var getNewTabURL = function() {
+				if("nsIAboutNewTabService" in Components.interfaces) try { // Firefox 44+
+					// See https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89
+					var aboutNewTabService = Components.classes["@mozilla.org/browser/aboutnewtab-service;1"]
+						.getService(Components.interfaces.nsIAboutNewTabService);
+					return aboutNewTabService.newTabURL;
+				}
+				catch(e) {
+					Components.utils.reportError(e);
+				}
+				try { // Firefox 42+
+					var {NewTabURL} = Components.utils.import("resource:///modules/NewTabURL.jsm", {});
+					return NewTabURL.get();
+				}
+				catch(e) {
+					if(NewTabURL)
+						Components.utils.reportError(e);
+				}
+				return prefs.getPref("browser.newtab.url") || "about:blank";
+			};
 			var ptEntry = {
 				title:       this.getLocalized("taskBarOpenNewPrivateTab" + sm),
 				description: this.getLocalized("taskBarOpenNewPrivateTabDesc" + sm),
 				get args() {
-					if("nsIAboutNewTabService" in Components.interfaces) try { // Firefox 44+
-						// See https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89
-						var aboutNewTabService = Components.classes["@mozilla.org/browser/aboutnewtab-service;1"]
-							.getService(Components.interfaces.nsIAboutNewTabService);
-						return "-new-tab private:" + aboutNewTabService.newTabURL;
-					}
-					catch(e) {
-						Components.utils.reportError(e);
-					}
-					try { // Firefox 42+
-						var {NewTabURL} = Components.utils.import("resource:///modules/NewTabURL.jsm", {});
-						return "-new-tab private:" + NewTabURL.get();
-					}
-					catch(e) {
-						if(NewTabURL)
-							Components.utils.reportError(e);
-					}
-					return "-new-tab private:" + (prefs.getPref("browser.newtab.url") || "about:blank");
+					return "-new-tab private:" + getNewTabURL();
 				},
 				iconIndex:   this.isSeaMonkey ? 0 : 4, // Private browsing mode icon
 				open:        true,
