@@ -6,6 +6,8 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`*` Используется новый API для получения адреса новой вкладки в Firefox 44+ (см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
+
 ##### 0.1.8.1 (2015-10-24)
 `x` Исправлена поддержка приватных загрузок в панели загрузок в Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/186">#186</a>).<br>
 `x` Исправлено: настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em> могла не работать в некоторых случаях (см. <a href="https://github.com/Infocatcher/Private_Tab/issues/146">#146</a>).<br>
