@@ -7,8 +7,8 @@ pref("extensions.privateTab.keysUseKeydownEvent", true); // Use "keydown" event 
 pref("extensions.privateTab.keysHighPriority", true); // Handle key* event in capturing phase
 pref("extensions.privateTab.keysIgnoreDefaultPrevented", false); // Ignore, if someone stops key* event
 // See https://developer.mozilla.org/en-US/docs/XUL/Tutorial/Keyboard_Shortcuts
-// and https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent#Virtual_key_codes
-// Syntax: [<modifiers> ]<key or keycode>
+// and https://web.archive.org/web/20140506014522/https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent#Virtual_key_codes
+// Syntax: [<modifiers> ]<key or keycode> (or leave empty to disable)
 // It's better to use VK_* codes for keysUseKeydownEvent = true.
 // You can also create alias for hotkey using extensions.privateTab.key.%command%#%alias_name%, example:
 // pref("extensions.privateTab.key.openNewPrivateTab#2", "VK_F8")
