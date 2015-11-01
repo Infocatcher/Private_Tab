@@ -1264,7 +1264,7 @@ var privateTab = {
 			&& (privateURI == "about:blank" || privateURI == window.BROWSER_NEW_TAB_URL)
 		) {
 			window.setTimeout(function() {
-				if(tab.getAttribute("selected") != "true")
+				if(!tab.selected)
 					return;
 				if("gURLBar" in window)
 					window.gURLBar.value = "";
@@ -2008,7 +2008,7 @@ var privateTab = {
 				mi.removeAttribute("checked");
 			var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
 			if(accel)
-				accel.hidden = tab.getAttribute("selected") != "true";
+				accel.hidden = !tab.selected;
 			//mi.disabled = this.isPendingTab(tab);
 		}
 	},
@@ -2121,7 +2121,7 @@ var privateTab = {
 		var tab = e.originalTarget || e.target;
 		var isPrivate = e.detail == 1;
 		this.setTabState(tab, isPrivate);
-		if(tab.getAttribute("selected") == "true") {
+		if(tab.selected) {
 			_log(e.type + " + tab is selected => updateWindowTitle()");
 			this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser, isPrivate);
 		}
@@ -2436,7 +2436,7 @@ var privateTab = {
 				browser.stop();
 			}
 		}
-		if(tab.getAttribute("selected") == "true") { // Only for hotkey
+		if(tab.selected) { // Only for hotkey
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
 			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
