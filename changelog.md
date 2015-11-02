@@ -7,6 +7,7 @@
 
 ##### master/HEAD
 `*` Use new API to get URL of new tab in Firefox 44+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
+`x` Correctly handle drag and drop of tabs between private and non-private windows in Firefox 45+.<br>
 
 ##### 0.1.8.1 (2015-10-24)
 `x` Fixed support for private downloads in download panel in Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/186">#186</a>).<br>
