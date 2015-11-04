@@ -844,7 +844,7 @@ var privateTab = {
 		// someone may patch instance instead of prototype...
 		var tabContainer = gBrowser.tabContainer;
 		var dndMeth = "_getDropEffectForTabDrag" in tabContainer
-			? "_getDropEffectForTabDrag" // Firefox 45+
+			? "_getDropEffectForTabDrag" // Firefox 44+
 			: "_setEffectAllowedForDataTransfer";
 		this.overridePrivateBrowsingUtils(
 			window,
