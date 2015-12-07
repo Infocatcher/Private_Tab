@@ -3875,8 +3875,10 @@ var privateTab = {
 						|| stack.indexOf("\ndoSearch@chrome://tabmixplus/content/changecode.js:") != -1;
 					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads")
 						&& _this.isStackFromDownloads(stack);
+					var fromTrackingProtection = !fromSearchBar && !fromDownloads
+						&& stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1;
 					_dbgv && _log(key + "():\n" + stack);
-					if(fromSearchBar || fromDownloads) try {
+					if(fromSearchBar || fromDownloads || fromTrackingProtection) try {
 						var isPrivate = _this.isPrivateContent(window);
 						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
 						if(fromSearchBar && "privateTab" in window) {
