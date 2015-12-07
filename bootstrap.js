@@ -3771,10 +3771,15 @@ var privateTab = {
 		this.privateChanged(document, isPrivate);
 	},
 	privateChanged: function(document, isPrivate) {
+		var window = document.defaultView;
 		if(prefs.get("usePrivateWindowStyle"))
 			this.updateTabsInTitlebar(document);
 		if(prefs.get("patchDownloads"))
-			this.updateDownloadPanel(document.defaultView, isPrivate);
+			this.updateDownloadPanel(window, isPrivate);
+		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() {
+			if(!window.TrackingProtection.enabled)
+				window.TrackingProtection.icon.removeAttribute("state");
+		}, 0);
 	},
 	updateTabsInTitlebar: function(document, force) {
 		var window = document.defaultView;
