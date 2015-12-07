@@ -3900,10 +3900,11 @@ var privateTab = {
 						|| stack.indexOf("\ndoSearch@chrome://tabmixplus/content/changecode.js:") != -1;
 					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads")
 						&& _this.isStackFromDownloads(stack);
-					var fromTrackingProtection = !fromSearchBar && !fromDownloads && (
-						stack.indexOf("\nTrackingProtection.enabled@chrome://browser/content/browser.js:") != -1
-						|| stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1 // Firefox 45+
-					);
+					var fromTrackingProtection = !fromSearchBar && !fromDownloads
+						&& "TrackingProtection" in window && ( // Firefox 42+
+							stack.indexOf("\nTrackingProtection.enabled@chrome://browser/content/browser.js:") != -1
+							|| stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1 // Firefox 45+
+						);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads || fromTrackingProtection) try {
 						var isPrivate = _this.isPrivateContent(window);
