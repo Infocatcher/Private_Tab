@@ -3776,7 +3776,7 @@ var privateTab = {
 			this.updateTabsInTitlebar(document);
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(window, isPrivate);
-		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() {
+		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() { // Firefox 42+
 			if(!window.TrackingProtection.enabled)
 				window.TrackingProtection.icon.removeAttribute("state");
 		}, 0);
@@ -3902,7 +3902,7 @@ var privateTab = {
 						&& _this.isStackFromDownloads(stack);
 					var fromTrackingProtection = !fromSearchBar && !fromDownloads && (
 						stack.indexOf("\nTrackingProtection.enabled@chrome://browser/content/browser.js:") != -1
-						|| stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1
+						|| stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1 // Firefox 45+
 					);
 					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads || fromTrackingProtection) try {
