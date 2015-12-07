@@ -432,6 +432,10 @@ var privateTab = {
 					}
 				}
 			}
+			if("TrackingProtection" in window) { // Firefox 42+
+				var identityPopup = document.getElementById("identity-popup");
+				identityPopup && identityPopup.addEventListener("popupshowing", this, true);
+			}
 		}.bind(this), 0);
 
 		if(reason == WINDOW_LOADED)
@@ -541,6 +545,10 @@ var privateTab = {
 			// "domwindowclosed" => onClose() => "SSWindowClosing"
 			// This may happens after our "domwindowclosed" notification!
 			this.destroyWindowClosingHandler(window);
+		}
+		if("TrackingProtection" in window) { // Firefox 42+
+			var identityPopup = document.getElementById("identity-popup");
+			identityPopup && identityPopup.removeEventListener("popupshowing", this, true);
 		}
 		this.setupListAllTabs(window, false);
 		this.setupUndoCloseTabs(window, false);
@@ -1932,6 +1940,8 @@ var privateTab = {
 			this.updateUndoCloseTabs(popup);
 		else if(id == "tabContextMenu")
 			this.updateTabContext(window);
+		else if(id == "identity-popup")
+			window.TrackingProtection.updateEnabled();
 		else if(
 			id == "tabbrowser-tab-tooltip"
 			|| this.isSeaMonkey
