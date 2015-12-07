@@ -549,6 +549,16 @@ var privateTab = {
 		if("TrackingProtection" in window) { // Firefox 42+
 			var identityPopup = document.getElementById("identity-popup");
 			identityPopup && identityPopup.removeEventListener("popupshowing", this, true);
+			if(reason != WINDOW_CLOSED) try {
+				window.TrackingProtection.updateEnabled();
+				if(!window.TrackingProtection.enabled)
+					window.TrackingProtection.icon.removeAttribute("state");
+				if(window.XULBrowserWindow && "_state" in window.XULBrowserWindow)
+					window.TrackingProtection.onSecurityChange(window.XULBrowserWindow._state, true /*aIsSimulated*/);
+			}
+			catch(e) {
+				Components.utils.reportError(e);
+			}
 		}
 		this.setupListAllTabs(window, false);
 		this.setupUndoCloseTabs(window, false);
