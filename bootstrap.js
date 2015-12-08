@@ -3777,8 +3777,13 @@ var privateTab = {
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(window, isPrivate);
 		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() { // Firefox 42+
-			if(!window.TrackingProtection.enabled)
+			if(
+				!window.TrackingProtection.enabled
+				&& window.TrackingProtection.icon.hasAttribute("state")
+			) {
 				window.TrackingProtection.icon.removeAttribute("state");
+				_log("Hide tracking protection icon");
+			}
 		}, 0);
 	},
 	updateTabsInTitlebar: function(document, force) {
