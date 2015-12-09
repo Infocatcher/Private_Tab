@@ -550,11 +550,13 @@ var privateTab = {
 			var identityPopup = document.getElementById("identity-popup");
 			identityPopup && identityPopup.removeEventListener("popupshowing", this, true);
 			if(reason != WINDOW_CLOSED) try {
-				window.TrackingProtection.updateEnabled();
-				if(!window.TrackingProtection.enabled)
-					window.TrackingProtection.icon.removeAttribute("state");
-				if(window.XULBrowserWindow && "_state" in window.XULBrowserWindow)
-					window.TrackingProtection.onSecurityChange(window.XULBrowserWindow._state, true /*aIsSimulated*/);
+				var TrackingProtection = window.TrackingProtection;
+				TrackingProtection.updateEnabled();
+				if(!TrackingProtection.enabled)
+					TrackingProtection.icon.removeAttribute("state");
+				var XULBrowserWindow = window.XULBrowserWindow;
+				if(XULBrowserWindow && "_state" in XULBrowserWindow)
+					TrackingProtection.onSecurityChange(XULBrowserWindow._state, true /*aIsSimulated*/);
 			}
 			catch(e) {
 				Components.utils.reportError(e);
@@ -3777,11 +3779,9 @@ var privateTab = {
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(window, isPrivate);
 		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() { // Firefox 42+
-			if(
-				!window.TrackingProtection.enabled
-				&& window.TrackingProtection.icon.hasAttribute("state")
-			) {
-				window.TrackingProtection.icon.removeAttribute("state");
+			var TrackingProtection = window.TrackingProtection;
+			if(!TrackingProtection.enabled && TrackingProtection.icon.hasAttribute("state")) {
+				TrackingProtection.icon.removeAttribute("state");
 				_log("Hide tracking protection icon");
 			}
 		}, 0);
