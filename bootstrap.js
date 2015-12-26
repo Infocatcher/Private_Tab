@@ -1375,7 +1375,7 @@ var privateTab = {
 			if("_replaceLoadingTitle" in SessionStoreInternal)
 				tabTitle = SessionStoreInternal._replaceLoadingTitle(tabTitle, gBrowser, tab);
 			var _undoData = {
-				permanentKey: tab.linkedBrowser, // For Firefox 40+
+				permanentKey: tab.linkedBrowser.permanentKey || null, // For Firefox 40+
 				state: tabState,
 				title: tabTitle,
 				image: this.getTabIcon(tab),
