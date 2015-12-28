@@ -8,6 +8,7 @@
 ##### master/HEAD
 `*` Используется новый API для получения адреса новой вкладки в Firefox 44+ (см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
 `x` Исправлена обработка перетаскивания вкладок между приватными и обычными окнами в Firefox 44+.<br>
+`+` Добавлена поддержка пользовательского интерфейса защиты от отслеживания в Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/196">#196</a>).<br>
 `x` Исправлено: настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em> в некоторых случаях могла ломать возможность восстановления закрытых вкладок (<a href="https://github.com/Infocatcher/Private_Tab/issues/197">#197</a>).<br>
 `+` Добавлена португальская (Португалия) локаль (pt-PT), спасибо <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/199">#199</a>).<br>
 

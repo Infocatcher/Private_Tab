@@ -8,6 +8,7 @@
 ##### master/HEAD
 `*` Use new API to get URL of new tab in Firefox 44+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
 `x` Correctly handle drag and drop of tabs between private and non-private windows in Firefox 44+.<br>
+`+` Added support for user interface for tracking protection in Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/196">#196</a>).<br>
 `x` Fixed: <em>extensions.privateTab.rememberClosedPrivateTabs</em> may break undo close tab feature in some cases (<a href="https://github.com/Infocatcher/Private_Tab/issues/197">#197</a>).<br>
 `+` Added Portuguese (Portugal) locale (pt-PT), thanks to <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/199">#199</a>).<br>
 
