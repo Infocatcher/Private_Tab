@@ -3612,14 +3612,14 @@ var privateTab = {
 	fixAppButtonWidth: function(document) {
 		if(this.appButtonCssURI || this.appButtonNA || this.appButtonDontChange)
 			return;
-		var root = document.documentElement;
-		if(root.getAttribute("privatebrowsingmode") != "temporary")
-			return;
 		var appBtn = document.getElementById("appmenu-button");
 		if(!appBtn) {
 			this.appButtonNA = true;
 			return;
 		}
+		var root = document.documentElement;
+		if(root.getAttribute("privatebrowsingmode") != "temporary")
+			return;
 		var bo = appBtn.boxObject;
 		var pbWidth = bo.width;
 		if(!pbWidth) { // App button is hidden?
