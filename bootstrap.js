@@ -1391,10 +1391,14 @@ var privateTab = {
 			}
 			var data = SessionStoreInternal._windows[window.__SSi];
 			var closedTabs = data._closedTabs;
-			closedTabs.unshift(undoData);
-			var length = closedTabs.length;
-			if(length > maxTabsUndo)
-				closedTabs.splice(maxTabsUndo, length - maxTabsUndo);
+			if("saveClosedTabData" in SessionStoreInternal) // Firefox 40+
+				SessionStoreInternal.saveClosedTabData(closedTabs, undoData);
+			else {
+				closedTabs.unshift(undoData);
+				var length = closedTabs.length;
+				if(length > maxTabsUndo)
+					closedTabs.splice(maxTabsUndo, length - maxTabsUndo);
+			}
 		}
 	},
 	getTabIcon: function(tab) {
