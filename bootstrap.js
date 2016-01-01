@@ -2152,8 +2152,13 @@ var privateTab = {
 		var isPrivate = e.detail == 1;
 		this.setTabState(tab, isPrivate);
 		if(tab.selected) {
-			_log(e.type + " + tab is selected => updateWindowTitle()");
-			this.updateWindowTitle(tab.ownerDocument.defaultView.gBrowser, isPrivate);
+			var window = tab.ownerDocument.defaultView;
+			window.setTimeout(function() { // Wait to not break just restored tab
+				if(!tab.selected)
+					return;
+				_log(e.type + " + tab is selected => updateWindowTitle()");
+				this.updateWindowTitle(window.gBrowser, isPrivate);
+			}.bind(this), 0);
 		}
 		if("mCorrespondingMenuitem" in tab && tab.mCorrespondingMenuitem) { // Opened "List all tabs" menu
 			_log("privateChangedHandler(): update tab.mCorrespondingMenuitem");
