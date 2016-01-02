@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.1.9 (2016-01-02)
 `*` Use new API to get URL of new tab in Firefox 44+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
 `x` Correctly handle drag and drop of tabs between private and non-private windows in Firefox 44+.<br>
 `+` Added support for user interface for tracking protection in Firefox 42+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/196">#196</a>).<br>
