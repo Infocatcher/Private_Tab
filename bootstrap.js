@@ -414,14 +414,6 @@ var privateTab = {
 			if(!this.emptyTabLabelsImported) {
 				this.emptyTabLabelsImported = true;
 				var emptyLabels = this.storage.get("emptyTabLabels", null);
-				var legacyStorage = !emptyLabels
-					&& "Application" in window
-					&& "storage" in window.Application
-					&& window.Application.storage;
-				if(legacyStorage) {
-					emptyLabels = legacyStorage.get("privateTab:emptyTabLabels", null);
-					emptyLabels && legacyStorage.set("privateTab:emptyTabLabels", null);
-				}
 				if(emptyLabels) {
 					this.storage.set("emptyTabLabels", null);
 					for(var label in emptyLabels) {
