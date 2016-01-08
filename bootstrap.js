@@ -1558,7 +1558,9 @@ var privateTab = {
 			Components.utils.reportError(LOG_PREFIX + "!!! " + msg);
 	},
 	forgetClosedTabs: function(window) {
-		var closedTabs = [i for(i in this.getClosedPrivateTabs(window))];
+		var closedTabs = [];
+		for(var i in this.getClosedPrivateTabs(window))
+			closedTabs.push(i);
 		closedTabs.reverse().forEach(function(i) {
 			this.ss.forgetClosedTab(window, i);
 		}, this);
