@@ -1496,14 +1496,10 @@ var privateTab = {
 		for(var window in this.windows) {
 			if(this.isPrivateWindow(window))
 				continue;
-			Array.forEach(
-				window.gBrowser.tabs,
-				function(tab) {
-					if(tab.hasAttribute(this.privateAttr))
-						++privateTabs;
-				},
-				this
-			);
+			Array.forEach(window.gBrowser.tabs, function(tab) {
+				if(tab.hasAttribute(this.privateAttr))
+					++privateTabs;
+			}, this);
 		}
 		_log("askToClosePrivateTabs(): tabs count: " + privateTabs);
 		if(!privateTabs)
