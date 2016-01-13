@@ -1253,7 +1253,7 @@ var privateTab = {
 			_log("Make new empty tab private");
 			isPrivate = true;
 		}
-		var tabLabel = tab.getAttribute("label") || "";
+		var tabLabel = tab.label || "";
 		_log(
 			"Tab opened: " + tabLabel.substr(0, 256) + (isEmpty ? " (empty)" : "(not empty)")
 			+ "\nInherit private state: " + isPrivate
@@ -1293,7 +1293,7 @@ var privateTab = {
 		var isPrivate = tab.hasAttribute(this.privateAttr);
 		_log(
 			"Tab restored, has private attribute: " + isPrivate
-			+ ", label: " + (tab.getAttribute("label") || "").substr(0, 256)
+			+ ", label: " + (tab.label || "").substr(0, 256)
 		);
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
@@ -1455,7 +1455,7 @@ var privateTab = {
 			return;
 		}
 		_log(
-			"Private tab closed: " + (tab.getAttribute("label") || "").substr(0, 256)
+			"Private tab closed: " + (tab.label || "").substr(0, 256)
 			+ "\nTry don't save it in undo close history"
 		);
 		var silentFail = false;
@@ -1486,7 +1486,7 @@ var privateTab = {
 				if(i == 0 && !hasNotPrivate)
 					gBrowser.selectedTab = gBrowser.addTab("about:blank", { skipAnimation: true });
 				gBrowser.removeTab(tab, { animate: false });
-				_log("closePrivateTabs(): remove tab: " + (tab.getAttribute("label") || "").substr(0, 256));
+				_log("closePrivateTabs(): remove tab: " + (tab.label || "").substr(0, 256));
 			}
 		}
 		return !hasNotPrivate;
@@ -2202,7 +2202,7 @@ var privateTab = {
 		var mi = e && e.target;
 		if(!mi)
 			return;
-		_log("openPlaceInNewPrivateTab(): " + mi.nodeName + " " + mi.getAttribute("label"));
+		_log("openPlaceInNewPrivateTab(): " + mi.nodeName + " " + mi.label);
 		var placesContext = mi.parentNode;
 		var view = placesContext._view;
 		var node = view.selectedNode;
@@ -2295,7 +2295,7 @@ var privateTab = {
 						}
 					}
 				}
-				_log("Owner tab: " + (ownerTab && (ownerTab.getAttribute("label") || "").substr(0, 255)));
+				_log("Owner tab: " + (ownerTab && (ownerTab.label || "").substr(0, 255)));
 			}
 		}
 
@@ -3360,7 +3360,7 @@ var privateTab = {
 
 	isEmptyTab: function(tab, gBrowser) {
 		// See "addTab" method in chrome://browser/content/tabbrowser.xml
-		var tabLabel = tab.getAttribute("label") || "";
+		var tabLabel = tab.label || "";
 		// See https://github.com/Infocatcher/Private_Tab/issues/152
 		// Note: looks like only new blank tabs have "New Tab" label, all other have empty label
 		if(!tabLabel && this.platformVersion >= 33 && !this.isSeaMonkey)
@@ -3487,7 +3487,7 @@ var privateTab = {
 				var isPrivate = msg.data.isPrivate;
 				_log(
 					"Received message from frame script: usePrivateBrowsing = " + isPrivate
-					+ "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255)
+					+ "\nTab: " + (tab.label || "").substr(0, 255)
 				);
 				if(!_silent)
 					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
@@ -3521,7 +3521,7 @@ var privateTab = {
 			delete browser._privateTabIsPrivate;
 		}, 0);
 
-		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.getAttribute("label") || "").substr(0, 255));
+		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.label || "").substr(0, 255));
 		if(!_silent)
 			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
