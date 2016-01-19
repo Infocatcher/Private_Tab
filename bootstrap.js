@@ -902,9 +902,10 @@ var privateTab = {
 			patcher.wrapFunction(
 				window, fnViewSource, fnViewSource,
 				function before(argsOrDoc) {
-					var isPrivate = this.isPrivateContent(window);
+					var w = this.getNotPopupWindow(window, true) || window;
+					var isPrivate = this.isPrivateContent(w);
 					_log(fnViewSource + "(): wait for tab to make " + (isPrivate ? "private" : "not private"));
-					this.readyToOpenTab(window, isPrivate);
+					this.readyToOpenTab(w, isPrivate);
 				}.bind(this)
 			);
 		}
@@ -2414,10 +2415,10 @@ var privateTab = {
 			callback(null);
 		}, 0);
 	},
-	getNotPopupWindow: function(window) {
+	getNotPopupWindow: function(window, force) {
 		if(window.toolbar && window.toolbar.visible)
 			return window;
-		if(prefs.get("dontUseTabsInPopupWindows")) try {
+		if(force || prefs.get("dontUseTabsInPopupWindows")) try {
 			var {RecentWindow} = Components.utils.import("resource:///modules/RecentWindow.jsm", {});
 			return RecentWindow.getMostRecentBrowserWindow({
 				allowPopups: false
