@@ -902,6 +902,8 @@ var privateTab = {
 			patcher.wrapFunction(
 				window, fnViewSource, fnViewSource,
 				function before(argsOrDoc) {
+					if(!prefs.getPref("view_source.tab"))
+						return;
 					var w = this.getNotPopupWindow(window, true) || window;
 					var isPrivate = this.isPrivateContent(w);
 					_log(fnViewSource + "(): wait for tab to make " + (isPrivate ? "private" : "not private"));
