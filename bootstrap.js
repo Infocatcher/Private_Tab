@@ -1201,11 +1201,13 @@ var privateTab = {
 					if(doc instanceof Components.interfaces.nsIImageDocument) {
 						// Will use base64 representation for icons of image documents
 						var req = doc.imageRequest;
-						if(req && req.image) {
+						var image = req && req.image;
+						var maxSize = prefs.getPref("browser.chrome.image_icons.max_size", 1024);
+						if(image && image.width <= maxSize && image.height <= maxSize) {
 							var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
 							var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-							canvas.width = req.image.width;
-							canvas.height = req.image.height;
+							canvas.width = image.width;
+							canvas.height = image.height;
 							var ctx = canvas.getContext("2d");
 							ctx.drawImage(img, 0, 0);
 							args[1] = canvas.toDataURL();
