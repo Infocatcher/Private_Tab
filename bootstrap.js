@@ -1213,6 +1213,9 @@ var privateTab = {
 							args[1] = canvas.toDataURL();
 							_log("setTabAttributeProxy() => data:");
 						}
+						else {
+							_log("setTabAttributeProxy(): image missing or too large");
+						}
 					}
 				}
 				catch(e) {
