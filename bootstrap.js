@@ -1184,7 +1184,7 @@ var privateTab = {
 			else
 				delete tabProto.setAttribute;
 		}
-		_log("Override tab.setAttribute()");
+		_log((applyPatch ? "Override" : "Restore") + " tab.setAttribute()");
 	},
 	setTabAttributeProxy: function(attr, val) {
 		var args = arguments;
