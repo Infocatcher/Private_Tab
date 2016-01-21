@@ -6,6 +6,10 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправлена синтаксическая ошибка в Firefox 46.0a1+ при использовании generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
+`x` Исправлена обработка вкладок для просмотра исходного кода страницы (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>
+`x` Учитывается настройка <em>browser.chrome.image_icons.max_size</em> при просмотре отдельных изображений.<br>
+
 ##### 0.1.9 (2016-01-02)
 `*` Используется новый API для получения адреса новой вкладки в Firefox 44+ (см. <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
 `x` Исправлена обработка перетаскивания вкладок между приватными и обычными окнами в Firefox 44+.<br>
