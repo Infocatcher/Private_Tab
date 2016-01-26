@@ -467,7 +467,8 @@ var privateTab = {
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
-		window.addEventListener("TabRemotenessChange", this, true);
+		if("gMultiProcessBrowser" in window && window.gMultiProcessBrowser)
+			window.addEventListener("TabRemotenessChange", this, true);
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
 		window.addEventListener("SSWindowClosing", this, true);
@@ -533,7 +534,8 @@ var privateTab = {
 		window.removeEventListener("drop", this, true);
 		window.removeEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
-		window.removeEventListener("TabRemotenessChange", this, true);
+		if("gMultiProcessBrowser" in window && window.gMultiProcessBrowser)
+			window.removeEventListener("TabRemotenessChange", this, true);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
 		window.removeEventListener("aftercustomization", this, false);
