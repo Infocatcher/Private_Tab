@@ -9,6 +9,8 @@
 `x` Fixed syntax error in Firefox 46.0a1+ around generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
 `x` Correctly handle view source tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>
 `x` Respect <em>browser.chrome.image_icons.max_size</em> preference for image documents.<br>
+`x` Links loaded in new private tab becomes non-private (multi-process mode: Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/202">#202</a>).<br>
+`x` Correctly update window title and private mode indication in multi-process mode.<br>
 
 ##### 0.1.9 (2016-01-02)
 `*` Use new API to get URL of new tab in Firefox 44+ (see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1204983#c89">bug 1204983</a>).<br>
