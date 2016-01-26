@@ -4041,8 +4041,9 @@ var privateTab = {
 		return this.isPrivateWindow(this.getContentWindow(window));
 	},
 	getContentWindow: function(window) {
-		return window.content
-			|| window.gBrowser.contentWindow
+		// Note: with enabled Electrolysis window.content may refers to
+		// previously selected content window right after "TabSelect"
+		return window.gBrowser.contentWindow
 			|| window.gBrowser.contentWindowAsCPOW;
 	},
 	getTabPrivacyContext: function(tab) {
