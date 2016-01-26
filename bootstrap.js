@@ -161,6 +161,7 @@ var privateTab = {
 			case "keydown":
 			case "keypress":                  this.keypressHandler(e);       break;
 			case "PrivateTab:PrivateChanged": this.privateChangedHandler(e); break;
+			case "TabRemotenessChange":       this.fixTabRemoteness(e);      break;
 			case "SSWindowStateBusy":         this.setWindowBusy(e, true);   break;
 			case "SSWindowStateReady":        this.setWindowBusy(e, false);  break;
 			case "close":
@@ -466,6 +467,7 @@ var privateTab = {
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
+		window.addEventListener("TabRemotenessChange", this, true);
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
 		window.addEventListener("SSWindowClosing", this, true);
@@ -531,6 +533,7 @@ var privateTab = {
 		window.removeEventListener("drop", this, true);
 		window.removeEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
+		window.removeEventListener("TabRemotenessChange", this, true);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
 		window.removeEventListener("aftercustomization", this, false);
@@ -2184,6 +2187,16 @@ var privateTab = {
 			_log("privateChangedHandler(): update tab.mCorrespondingMenuitem");
 			this.updateTabMenuItem(tab.mCorrespondingMenuitem, tab, isPrivate);
 		}
+	},
+	fixTabRemoteness: function(e) {
+		var tab = e.originalTarget || e.target;
+		if(!tab.hasAttribute(this.privateAttr))
+			return;
+		_log(e.type + ": force make tab private");
+		var mm = tab.linkedBrowser.messageManager;
+		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(
+			"docShell.QueryInterface(Components.interfaces.nsILoadContext).usePrivateBrowsing = true;"
+		), false);
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
