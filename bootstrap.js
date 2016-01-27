@@ -2192,12 +2192,16 @@ var privateTab = {
 	},
 	fixTabRemoteness: function(e) {
 		var tab = e.originalTarget || e.target;
-		if(!tab.hasAttribute(this.privateAttr))
+		var isPrivate = tab.hasAttribute(this.privateAttr);
+		var window = e.currentTarget;
+		if(isPrivate == this.isPrivateWindow(window)) {
+			_log(e.type + ": tab should have correct private state");
 			return;
-		_log(e.type + ": force make tab private");
+		}
+		_log(e.type + ": force make tab " + (isPrivate ? "private" : "not private"));
 		var mm = tab.linkedBrowser.messageManager;
 		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(
-			"docShell.QueryInterface(Components.interfaces.nsILoadContext).usePrivateBrowsing = true;"
+			"docShell.QueryInterface(Components.interfaces.nsILoadContext).usePrivateBrowsing = " + isPrivate + ";"
 		), false);
 	},
 	setWindowBusy: function(e, busy) {
