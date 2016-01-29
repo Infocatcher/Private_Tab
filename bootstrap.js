@@ -1288,9 +1288,8 @@ var privateTab = {
 			_log("Make new empty tab private");
 			isPrivate = true;
 		}
-		var tabLabel = tab.label || "";
 		_log(
-			"Tab opened: " + tabLabel.substr(0, 256) + (isEmpty ? " (empty)" : "(not empty)")
+			"Tab opened: " + _tab(tab) + (isEmpty ? " (empty)" : "(not empty)")
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
@@ -1309,7 +1308,7 @@ var privateTab = {
 		}
 
 		// Focus URL bar, if opened empty private tab becomes selected
-		var privateURI = /^private:\/*#?/i.test(tabLabel) && RegExp.rightContext;
+		var privateURI = /^private:\/*#?/i.test(tab.label) && RegExp.rightContext;
 		if(
 			privateURI
 			&& (privateURI == "about:blank" || privateURI == window.BROWSER_NEW_TAB_URL)
@@ -1326,10 +1325,7 @@ var privateTab = {
 	tabRestoringHandler: function(e) {
 		var tab = e.originalTarget || e.target;
 		var isPrivate = tab.hasAttribute(this.privateAttr);
-		_log(
-			"Tab restored, has private attribute: " + isPrivate
-			+ ", label: " + (tab.label || "").substr(0, 256)
-		);
+		_log("Tab restored, private attribute: " + isPrivate + ", label: " + _tab(tab));
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
 			_log("Leave restored tab as is");
@@ -1489,10 +1485,7 @@ var privateTab = {
 			_log("Ignore closed private tab in private window");
 			return;
 		}
-		_log(
-			"Private tab closed: " + (tab.label || "").substr(0, 256)
-			+ "\nTry don't save it in undo close history"
-		);
+		_log("Private tab closed: " + _tab(tab) + "\nTry don't save it in undo close history");
 		var silentFail = false;
 		if(!this.oldSessionStore)
 			silentFail = true;
@@ -1521,7 +1514,7 @@ var privateTab = {
 				if(i == 0 && !hasNotPrivate)
 					gBrowser.selectedTab = gBrowser.addTab("about:blank", { skipAnimation: true });
 				gBrowser.removeTab(tab, { animate: false });
-				_log("closePrivateTabs(): remove tab: " + (tab.label || "").substr(0, 256));
+				_log("closePrivateTabs(): remove tab: " + _tab(tab));
 			}
 		}
 		return !hasNotPrivate;
@@ -2344,7 +2337,7 @@ var privateTab = {
 						}
 					}
 				}
-				_log("Owner tab: " + (ownerTab && (ownerTab.label || "").substr(0, 255)));
+				_log("Owner tab: " + _tab(ownerTab));
 			}
 		}
 
@@ -3536,7 +3529,7 @@ var privateTab = {
 				var isPrivate = msg.data.isPrivate;
 				_log(
 					"Received message from frame script: usePrivateBrowsing = " + isPrivate
-					+ "\nTab: " + (tab.label || "").substr(0, 255)
+					+ "\nTab: " + _tab(tab)
 				);
 				if(!_silent)
 					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
@@ -3570,7 +3563,7 @@ var privateTab = {
 			delete browser._privateTabIsPrivate;
 		}, 0);
 
-		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + (tab.label || "").substr(0, 255));
+		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + _tab(tab));
 		if(!_silent)
 			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
@@ -4633,4 +4626,7 @@ function _log(s) {
 	var msg = LOG_PREFIX + ts() + s;
 	Services.console.logStringMessage(msg);
 	dump(msg + "\n");
+}
+function _tab(tab) {
+	return tab && (tab.label || "").substr(0, 255);
 }
