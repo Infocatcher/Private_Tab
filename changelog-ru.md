@@ -9,7 +9,7 @@
 `x` Исправлена синтаксическая ошибка в Firefox 46.0a1+ при использовании generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
 `x` Исправлена обработка вкладок для просмотра исходного кода страницы (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>
 `x` Учитывается настройка <em>browser.chrome.image_icons.max_size</em> при просмотре отдельных изображений.<br>
-`x` Ссылки, открытые в новой приватной вкладке становились не приватными (мультипроцессный режима: Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/202">#202</a>).<br>
+`x` Ссылки, открытые в новой приватной вкладке, становились не приватными (мультипроцессный режима: Electrolysis aka e10s) (<a href="https://github.com/Infocatcher/Private_Tab/issues/202">#202</a>).<br>
 `x` Исправлено обновление заголовка окна и индикатора приватного режима в мультипроцессном режиме.<br>
 
 ##### 0.1.9 (2016-01-02)
