@@ -1383,7 +1383,7 @@ var privateTab = {
 			return;
 		if(SessionStoreInternal._shouldSaveTabState(tabState)) {
 			this.dontSaveClosedPrivateTabs(true);
-			_log("tabClosingHandler(): save closed private tab in undo close history");
+			_log("tabClosingHandler(): save closed private tab in undo close history:\n" + _tab(tab));
 			if(
 				!("attributes" in tabState)
 				|| !(this.privateAttr in tabState.attributes)
