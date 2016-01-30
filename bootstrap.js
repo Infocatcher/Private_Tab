@@ -4035,7 +4035,14 @@ var privateTab = {
 		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
 	isPrivateContent: function(window) {
-		return this.isPrivateWindow(this.getContentWindow(window));
+		try {
+			return this.isPrivateWindow(this.getContentWindow(window));
+		}
+		catch(e) {
+			_log("isPrivateContent() failed. Electrolysis? Fallback to check private attribute");
+			Components.utils.reportError(e);
+		}
+		return window.gBrowser.selectedTab.hasAttribute(this.privateAttr);
 	},
 	getContentWindow: function(window) {
 		// Note: with enabled Electrolysis window.content may refers to
