@@ -6,6 +6,7 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+##### 0.1.9.1 (2016-02-01)
 `x` Исправлена синтаксическая ошибка в Firefox 46.0a1+ при использовании generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
 `x` Исправлена обработка вкладок для просмотра исходного кода страницы (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>
 `x` Учитывается настройка <em>browser.chrome.image_icons.max_size</em> при просмотре отдельных изображений.<br>
