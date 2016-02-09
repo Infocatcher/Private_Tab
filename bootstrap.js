@@ -2347,8 +2347,11 @@ var privateTab = {
 			if(
 				sendReferer > 0
 				&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
-			)
-				referer = sourceDocument.documentURIObject;
+			) {
+				referer = "gMultiProcessBrowser" in window && window.gMultiProcessBrowser
+					? Services.io.newURI(sourceDocument.documentURI, null, null)
+					: sourceDocument.documentURIObject;
+			}
 		}
 
 		this.readyToOpenTab(window, true);
