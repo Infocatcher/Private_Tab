@@ -1,15 +1,21 @@
+var EXPORTED_SYMBOLS = ["privateProtocol"];
+
 const P_CID = Components.ID("{e974cf10-11cb-4293-af88-e61c7dfe717c}"),
       P_CONTRACTID = "@mozilla.org/network/protocol;1?name=private",
       P_HANDLER = Components.interfaces.nsIProtocolHandler,
       P_SCHEME = "private",
       P_NAME = "Private Tab protocol handler";
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+var global = this;
+
 var privateProtocol = {
 	get compReg() {
 		return Components.manager
 			.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 	},
-	init: function() {
+	init: function(_log) {
+		global._log = _log;
 		this.compReg.registerFactory(P_CID, P_NAME, P_CONTRACTID, this);
 		_log("[protocol] Initialized");
 	},

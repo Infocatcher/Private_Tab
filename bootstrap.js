@@ -234,10 +234,8 @@ var privateTab = {
 	initPrivateProtocol: function(reason) {
 		if("privateProtocol" in this)
 			return;
-		var tmp = {};
-		Services.scriptloader.loadSubScript("chrome://privatetab/content/protocol.js", tmp, "UTF-8");
-		var privateProtocol = this.privateProtocol = tmp.privateProtocol;
-		privateProtocol.init();
+		Components.utils.import("chrome://privatetab/content/protocol.js", this);
+		this.privateProtocol.init(_log);
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
 			if(reason == APP_STARTUP)
@@ -250,6 +248,7 @@ var privateTab = {
 		if(!("privateProtocol" in this))
 			return;
 		this.privateProtocol.destroy();
+		Components.utils.unload("chrome://privatetab/content/protocol.js");
 		delete this.privateProtocol;
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
