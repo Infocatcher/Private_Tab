@@ -22,6 +22,7 @@ var privateProtocol = {
 	destroy: function() {
 		this.compReg.unregisterFactory(P_CID, this);
 		_log("[protocol] Destroyed");
+		delete global._log;
 	},
 
 	// nsIFactory
