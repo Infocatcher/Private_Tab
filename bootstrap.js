@@ -231,11 +231,16 @@ var privateTab = {
 		window.removeEventListener("beforeunload", this, false);
 	},
 
+	get frameScriptUID() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
+		delete this.frameScriptUID;
+		return this.frameScriptUID = "?" + Date.now();
+	},
 	initPrivateProtocol: function(reason) {
 		if("privateProtocol" in this)
 			return;
 		Components.utils.import("chrome://privatetab/content/protocol.jsm", this);
 		this.privateProtocol.init(_log);
+		Services.mm.loadFrameScript("chrome://privatetab/content/protocol-content.js" + this.frameScriptUID, true);
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
 			if(reason == APP_STARTUP)
@@ -250,6 +255,8 @@ var privateTab = {
 		this.privateProtocol.destroy();
 		Components.utils.unload("chrome://privatetab/content/protocol.jsm");
 		delete this.privateProtocol;
+		Services.mm.broadcastAsyncMessage("PrivateTab:Protocol:Destroy", {});
+		Services.mm.removeDelayedFrameScript("chrome://privatetab/content/protocol-content.js" + this.frameScriptUID);
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
 			this.setupJumpListsLazy(false);
