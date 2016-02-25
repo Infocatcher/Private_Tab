@@ -240,8 +240,8 @@ var privateTab = {
 			return;
 		Components.utils.import("chrome://privatetab/content/protocol.jsm", this);
 		this.privateProtocol.init(_log);
-		if("mm" in Services)
-			Services.mm.loadFrameScript("chrome://privatetab/content/protocol-content.js" + this.frameScriptUID, true);
+		if("ppmm" in Services)
+			Services.ppmm.loadProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID, true);
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
 			if(reason == APP_STARTUP)
@@ -256,9 +256,9 @@ var privateTab = {
 		this.privateProtocol.destroy();
 		Components.utils.unload("chrome://privatetab/content/protocol.jsm");
 		delete this.privateProtocol;
-		if("mm" in Services) {
-			Services.mm.broadcastAsyncMessage("PrivateTab:Protocol:Destroy", {});
-			Services.mm.removeDelayedFrameScript("chrome://privatetab/content/protocol-content.js" + this.frameScriptUID);
+		if("ppmm" in Services) {
+			Services.ppmm.broadcastAsyncMessage("PrivateTab:Protocol:Destroy", {});
+			Services.ppmm.removeDelayedProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID);
 		}
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
