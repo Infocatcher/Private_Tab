@@ -2204,7 +2204,7 @@ var privateTab = {
 		var mm = tab.linkedBrowser.messageManager;
 		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(
 			"docShell.QueryInterface(Components.interfaces.nsILoadContext).usePrivateBrowsing = " + isPrivate + ";"
-		), false);
+		), true);
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
@@ -3548,7 +3548,7 @@ var privateTab = {
 			}.bind(this);
 			var mm = tab.linkedBrowser.messageManager;
 			mm.addMessageListener("PrivateTab:PrivateChanged", feedback);
-			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), false);
+			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), true);
 			return;
 		}
 		if(isPrivate === undefined)
