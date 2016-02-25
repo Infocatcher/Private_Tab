@@ -10,25 +10,16 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var global = this;
 
 var privateProtocol = {
-	initialized: false,
 	get compReg() {
 		return Components.manager
 			.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 	},
 	init: function(_log) {
-		if(this.initialized)
-			return;
-		this.initialized = true;
-
 		global._log = _log;
 		this.compReg.registerFactory(P_CID, P_NAME, P_CONTRACTID, this);
 		_log("[protocol] Initialized");
 	},
 	destroy: function() {
-		if(!this.initialized)
-			return;
-		this.initialized = false;
-
 		this.compReg.unregisterFactory(P_CID, this);
 		_log("[protocol] Destroyed");
 		delete global._log;
