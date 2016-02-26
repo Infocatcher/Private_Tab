@@ -1341,11 +1341,14 @@ var privateTab = {
 			this.setTabState(tab); // Private tab may be restored using our API
 			return;
 		}
-		if(this.isPrivateTab(tab) != isPrivate) {
+		var window = tab.ownerDocument.defaultView;
+		if(
+			this.isMultiProcessWindow(window) // Just always set...
+			|| this.isPrivateTab(tab) != isPrivate
+		) {
 			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
 			this.toggleTabPrivate(tab, isPrivate);
 			if(isPrivate) {
-				var window = tab.ownerDocument.defaultView;
 				this.onFirstPrivateTab(window, tab);
 				window.privateTab._onFirstPrivateTab(window, tab);
 			}
