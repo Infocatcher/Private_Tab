@@ -111,12 +111,9 @@ catch(e) {
 }
 
 function setFavicon(iconURL) {
-	var icon = "__icon" in setFavicon && setFavicon.__icon;
-	if(!icon) {
-		icon = document.createElement("link");
-		icon.rel = "shortcut icon";
-		document.documentElement.insertBefore(icon, document.documentElement.firstChild);
-	}
+	var icon = document.createElement("link");
 	icon.href = iconURL;
+	icon.rel = "shortcut icon";
+	document.documentElement.insertBefore(icon, document.documentElement.firstChild);
 }
 </script>
