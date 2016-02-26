@@ -142,6 +142,10 @@ var privateTab = {
 			}.bind(this), 0, timer.TYPE_ONE_SHOT);
 		}
 	},
+	receiveMessage: function(msg) {
+		if(msg.name == "PrivateTab:Protocol:Loaded")
+			this.handleProtocolBrowser(msg.target, msg.data.URI);
+	},
 
 	handleEvent: function(e) {
 		switch(e.type) {
@@ -240,8 +244,10 @@ var privateTab = {
 			return;
 		Components.utils.import("chrome://privatetab/content/protocol.jsm", this);
 		this.privateProtocol.init(_log);
-		if("ppmm" in Services)
+		if("ppmm" in Services) {
 			Services.ppmm.loadProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID, true);
+			Services.mm.addMessageListener("PrivateTab:Protocol:Loaded", this);
+		}
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
 			if(reason == APP_STARTUP)
@@ -259,6 +265,7 @@ var privateTab = {
 		if("ppmm" in Services) {
 			Services.ppmm.broadcastAsyncMessage("PrivateTab:Protocol:Destroy", {});
 			Services.ppmm.removeDelayedProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID);
+			Services.mm.removeMessageListener("PrivateTab:Protocol:Loaded", this);
 		}
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
@@ -3470,7 +3477,11 @@ var privateTab = {
 		var tab = this.getTabForBrowser(browser);
 		_log("handleProtocolBrowser() -> setTabState()");
 		this.setTabState(tab); // Should be private, but let's ensure
-		this.updateBookmarkFavicon(bookmarkURI, tab);
+
+		var uri = typeof bookmarkURI == "string"
+			? Services.io.newURI(bookmarkURI, null, null)
+			: bookmarkURI;
+		this.updateBookmarkFavicon(uri, tab);
 	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
 		_log("updateBookmarkFavicon()");

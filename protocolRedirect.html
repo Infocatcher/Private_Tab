@@ -28,8 +28,14 @@ try {
 		if("privateTab" in win)
 			win.privateTab._handleProtocolBrowser(browser, document.documentURIObject);
 	}
-	else {
-		Components.utils.reportError("Private Tab: can't get XUL browser");
+	else { // Looks like multi-process mode
+		var mm = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIDocShell)
+			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIContentFrameMessageManager);
+		mm.sendAsyncMessage("PrivateTab:Protocol:Loaded", {
+			URI: document.documentURI
+		});
 	}
 
 	if(!spec)
