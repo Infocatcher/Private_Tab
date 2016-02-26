@@ -17,25 +17,11 @@ try {
 		? location.href.replace(/^\w+:\/*#?/, "")
 		: location.hash.substr(1);
 
-	var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
-		.getService(Components.interfaces.inIDOMUtils);
-	var browser = dwu.getParentForNode(document, true);
-	if(
-		browser instanceof Components.interfaces.nsIDOMXULElement
-		&& browser.localName.toLowerCase() == "browser"
-	) {
-		var win = browser.ownerDocument.defaultView;
-		if("privateTab" in win)
-			win.privateTab._handleProtocolBrowser(browser, document.documentURIObject);
+	try {
+		updateUI();
 	}
-	else { // Looks like multi-process mode
-		var mm = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIDocShell)
-			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIContentFrameMessageManager);
-		mm.sendAsyncMessage("PrivateTab:Protocol:Loaded", {
-			URI: document.documentURI
-		});
+	catch(e2) {
+		Components.utils.reportError(e2);
 	}
 
 	if(!spec)
@@ -63,6 +49,28 @@ catch(e) {
 	throw e;
 }
 
+function updateUI() {
+	var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+		.getService(Components.interfaces.inIDOMUtils);
+	var browser = dwu.getParentForNode(document, true);
+	if(
+		browser instanceof Components.interfaces.nsIDOMXULElement
+		&& browser.localName.toLowerCase() == "browser"
+	) {
+		var win = browser.ownerDocument.defaultView;
+		if("privateTab" in win)
+			win.privateTab._handleProtocolBrowser(browser, document.documentURIObject);
+		return;
+	}
+	// Looks like multi-process mode
+	var mm = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		.getInterface(Components.interfaces.nsIDocShell)
+		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		.getInterface(Components.interfaces.nsIContentFrameMessageManager);
+	mm.sendAsyncMessage("PrivateTab:Protocol:Loaded", {
+		URI: document.documentURI
+	});
+}
 function getLoadingTitle() {
 	function string(file, id) {
 		try {
