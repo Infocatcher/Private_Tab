@@ -476,7 +476,7 @@ var privateTab = {
 		window.addEventListener("dragend", this, true);
 		window.addEventListener("drop", this, true);
 		window.addEventListener("PrivateTab:PrivateChanged", this, false);
-		if("gMultiProcessBrowser" in window && window.gMultiProcessBrowser)
+		if(this.isMultiProcessWindow(window))
 			window.addEventListener("TabRemotenessChange", this, true);
 		window.addEventListener("SSWindowStateBusy", this, true);
 		window.addEventListener("SSWindowStateReady", this, true);
@@ -543,7 +543,7 @@ var privateTab = {
 		window.removeEventListener("drop", this, true);
 		window.removeEventListener(this.keyEvent, this, this.keyHighPriority);
 		window.removeEventListener("PrivateTab:PrivateChanged", this, false);
-		if("gMultiProcessBrowser" in window && window.gMultiProcessBrowser)
+		if(this.isMultiProcessWindow(window))
 			window.removeEventListener("TabRemotenessChange", this, true);
 		window.removeEventListener("SSWindowStateBusy", this, true);
 		window.removeEventListener("SSWindowStateReady", this, true);
@@ -2357,7 +2357,7 @@ var privateTab = {
 				sendReferer > 0
 				&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
 			) {
-				referer = "gMultiProcessBrowser" in window && window.gMultiProcessBrowser
+				referer = this.isMultiProcessWindow(window)
 					? Services.io.newURI(sourceDocument.documentURI, null, null)
 					: sourceDocument.documentURIObject;
 			}
@@ -4065,6 +4065,9 @@ var privateTab = {
 		// previously selected content window right after "TabSelect"
 		return window.gBrowser.contentWindow
 			|| window.gBrowser.contentWindowAsCPOW;
+	},
+	isMultiProcessWindow: function(window) {
+		return "gMultiProcessBrowser" in window && window.gMultiProcessBrowser;
 	},
 	getTabPrivacyContext: function(tab, _silent) {
 		var browser = tab.linkedBrowser;
