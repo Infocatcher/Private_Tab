@@ -3464,8 +3464,12 @@ var privateTab = {
 		return undefined;
 	},
 	setTabState: function(tab, isPrivate) {
-		if(isPrivate === undefined)
-			isPrivate = this.isPrivateTab(tab);
+		if(isPrivate === undefined) {
+			this.isPrivateTabAsync(tab, function(isPrivate) {
+				this.setTabState(tab, isPrivate);
+			}, this);
+			return;
+		}
 		if(isPrivate == tab.hasAttribute(this.privateAttr))
 			return;
 		if(isPrivate) {
@@ -4091,6 +4095,25 @@ var privateTab = {
 			return tab.getAttribute(this.privateAttr) == "true";
 		}
 		return privacyContext.usePrivateBrowsing;
+	},
+	isPrivateTabAsync: function(tab, feedback, context) {
+		var privacyContext = this.getTabPrivacyContext(tab, true);
+		if(privacyContext) {
+			feedback.call(context, privacyContext.usePrivateBrowsing);
+			return;
+		}
+		var receiveMessage = function(msg) {
+			mm.removeMessageListener("PrivateTab:PrivateState", receiveMessage);
+			feedback.call(context, msg.data.isPrivate);
+		};
+		var data = this.trimMultilineString('\
+			var isPrivate = docShell\n\
+				.QueryInterface(Components.interfaces.nsILoadContext)\n\
+				.usePrivateBrowsing;\n\
+			sendAsyncMessage("PrivateTab:PrivateState", { isPrivate: isPrivate });');
+		var mm = tab.linkedBrowser.messageManager;
+		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
+		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), true);
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
