@@ -1444,8 +1444,7 @@ var privateTab = {
 		}
 	},
 	getTabIcon: function(tab) {
-		var window = tab.ownerDocument.defaultView;
-		var gBrowser = window.gBrowser;
+		var gBrowser = this.getTabBrowser(tab);
 		if("getIcon" in gBrowser)
 			return gBrowser.getIcon(tab);
 		return (tab.image || "")
