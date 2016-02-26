@@ -3466,6 +3466,36 @@ var privateTab = {
 		}
 		return undefined;
 	},
+	updateBookmarkFavicon: function(bookmarkURI, tab) {
+		_log("updateBookmarkFavicon()");
+		var browser = tab.linkedBrowser;
+		var _this = this;
+		function onLoaded(e) {
+			e && browser.removeEventListener(e.type, onLoaded, true);
+			_dbgv && _log("updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
+			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
+				if(!tab.parentNode) // Tab was closed
+					return;
+				_dbgv && _log("updateBookmarkFavicon(): delay");
+				var icon = _this.getTabIcon(tab);
+				if(!icon)
+					return;
+				_log("updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
+				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
+					.getService(Components.interfaces.mozIAsyncFavicons);
+				faviconService.setAndFetchFaviconForPage(
+					bookmarkURI,
+					Services.io.newURI(icon, null, null),
+					false /*aForceReload*/,
+					faviconService.FAVICON_LOAD_PRIVATE
+				);
+			}, 0);
+		}
+		if(browser.webNavigation.isLoadingDocument)
+			browser.addEventListener("load", onLoaded, true);
+		else
+			onLoaded();
+	},
 	setTabState: function(tab, isPrivate) {
 		if(isPrivate === undefined) {
 			this.isPrivateTabAsync(tab, function(isPrivate) {
@@ -4473,33 +4503,8 @@ API.prototype = {
 			privateTabInternal.patchBrowserLoadURI(window, true);
 		}, 50);
 	},
-	_updateBookmarkFavicon: function(bookmarkURI, tab, browser) {
-		_log("_updateBookmarkFavicon()");
-		function onLoaded(e) {
-			e && browser.removeEventListener(e.type, onLoaded, true);
-			_dbgv && _log("_updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
-			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
-				if(!tab.parentNode) // Tab was closed
-					return;
-				_dbgv && _log("_updateBookmarkFavicon(): delay");
-				var icon = privateTabInternal.getTabIcon(tab);
-				if(!icon)
-					return;
-				_log("_updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
-				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
-					.getService(Components.interfaces.mozIAsyncFavicons);
-				faviconService.setAndFetchFaviconForPage(
-					bookmarkURI,
-					Services.io.newURI(icon, null, null),
-					false /*aForceReload*/,
-					faviconService.FAVICON_LOAD_PRIVATE
-				);
-			}, 0);
-		}
-		if(browser.webNavigation.isLoadingDocument)
-			browser.addEventListener("load", onLoaded, true);
-		else
-			onLoaded();
+	_updateBookmarkFavicon: function(bookmarkURI, tab) {
+		privateTabInternal.updateBookmarkFavicon(bookmarkURI, tab);
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
