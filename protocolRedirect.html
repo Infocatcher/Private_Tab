@@ -57,24 +57,8 @@ try {
 				view: win
 			}));
 		}
-
-		//win.setTimeout(function() {
-		//	gBrowser.setTabTitleLoading(tab);
-		//}, 0);
-		var getString = function(id) {
-			try {
-				return gBrowser.mStringBundle.getString(id);
-			}
-			catch(e3) {
-			}
-			return undefined;
-		}
-		document.title = getString("tabs.connecting")
-			|| getString("tabs.loading") // SeaMonkey
-			|| spec;
 	}
 	catch(e2) {
-		document.title = spec;
 		Components.utils.reportError(e2);
 	}
 
@@ -91,6 +75,7 @@ try {
 	//}
 	if(tab && "privateTab" in win && location.protocol == "private:")
 		win.privateTab._updateBookmarkFavicon(document.documentURIObject, tab, browser);
+	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
 catch(e) {
@@ -110,6 +95,18 @@ catch(e) {
 	throw e;
 }
 
+function getLoadingTitle() {
+	function string(file, id) {
+		try {
+			return Services.strings.createBundle(file).GetStringFromName(id);
+		}
+		catch(e) {
+		}
+		return "";
+	}
+	return string("chrome://browser/locale/tabbrowser.properties", "tabs.connecting") // Firefox
+		|| string("chrome://navigator/locale/tabbrowser.properties", "tabs.loading"); // SeaMonkey
+}
 function setFavicon(iconURL) {
 	var icon = document.createElement("link");
 	icon.href = iconURL;
