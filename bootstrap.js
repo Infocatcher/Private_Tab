@@ -4058,8 +4058,11 @@ var privateTab = {
 			return this.isPrivateWindow(this.getContentWindow(window));
 		}
 		catch(e) {
-			_log("isPrivateContent() failed. Electrolysis? Fallback to check private attribute");
-			Components.utils.reportError(e);
+			_log(
+				"isPrivateContent() failed. Electrolysis? Fallback to check private attribute"
+				+ (_dbgv ? ". Call stack:\n" + new Error().stack : "")
+			);
+			_dbgv && Components.utils.reportError(e);
 		}
 		return window.gBrowser.selectedTab.hasAttribute(this.privateAttr);
 	},
@@ -4085,18 +4088,22 @@ var privateTab = {
 			return this.getPrivacyContext(window);
 		}
 		catch(e) {
-			if(!_silent)
-				Components.utils.reportError(e);
-			_log("getTabPrivacyContext() failed. Electrolysis? Call stack:\n" + new Error().stack);
+			if(!_silent) {
+				_log(
+					"getTabPrivacyContext() failed. Electrolysis?"
+					+ (_dbgv ? " Call stack:\n" + new Error().stack : "")
+				);
+				_dbgv && Components.utils.reportError(e);
+			}
 		}
 		return null;
 	},
 	isPrivateTab: function(tab) {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(!privacyContext) {
-			Components.utils.reportError(
-				LOG_PREFIX
-				+ "isPrivateTab(): getTabPrivacyContext() failed. Electrolysis?"
+			_log(
+				"isPrivateTab() failed. Electrolysis? Fallback to check private attribute"
+				+ (_dbgv ? ". Call stack:\n" + new Error().stack : "")
 			);
 			return tab.getAttribute(this.privateAttr) == "true";
 		}
