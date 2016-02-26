@@ -3603,6 +3603,11 @@ var privateTab = {
 	},
 	getTabForBrowser: function(browser) {
 		var gBrowser = this.getTabBrowserFromChild(browser);
+		if("getTabForBrowser" in gBrowser) // Firefox 35+
+			return gBrowser.getTabForBrowser(browser);
+		else if("_getTabForBrowser" in gBrowser)
+			return gBrowser._getTabForBrowser(browser);
+		// Fallback for SeaMonkey
 		var browsers = gBrowser.browsers;
 		for(var i = 0, l = browsers.length; i < l; ++i)
 			if(browsers[i] == browser)
