@@ -3466,6 +3466,12 @@ var privateTab = {
 		}
 		return undefined;
 	},
+	handleProtocolBrowser: function(browser, bookmarkURI) {
+		var tab = this.getTabForBrowser(browser);
+		_log("handleProtocolBrowser() -> setTabState()");
+		this.setTabState(tab); // Should be private, but let's ensure
+		this.updateBookmarkFavicon(bookmarkURI, tab);
+	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
 		_log("updateBookmarkFavicon()");
 		var browser = tab.linkedBrowser;
@@ -4503,8 +4509,8 @@ API.prototype = {
 			privateTabInternal.patchBrowserLoadURI(window, true);
 		}, 50);
 	},
-	_updateBookmarkFavicon: function(bookmarkURI, tab) {
-		privateTabInternal.updateBookmarkFavicon(bookmarkURI, tab);
+	_handleProtocolBrowser: function(browser, bookmarkURI) {
+		privateTabInternal.handleProtocolBrowser(browser, bookmarkURI);
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {

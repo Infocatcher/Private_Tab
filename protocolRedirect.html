@@ -17,64 +17,26 @@ try {
 		? location.href.replace(/^\w+:\/*#?/, "")
 		: location.hash.substr(1);
 
-	try {
-		var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
-			.getService(Components.interfaces.inIDOMUtils);
-		var browser = dwu.getParentForNode(document, true);
-		if(
-			!(browser instanceof Components.interfaces.nsIDOMXULElement)
-			|| browser.localName.toLowerCase() != "browser"
-		)
-			throw new Error("Can't get XUL browser");
-		var doc = browser.ownerDocument;
-		var win = doc.defaultView;
-		var gBrowser = win.gBrowser;
-
-		// Link may be loaded in current tab, so we should send notification
-		var tab;
-		if("getTabForBrowser" in gBrowser) // Firefox 35+
-			tab = gBrowser.getTabForBrowser(browser);
-		else if("_getTabForBrowser" in gBrowser)
-			tab = gBrowser._getTabForBrowser(browser);
-		else { // SeaMonkey
-			for(var i = 0, tabs = gBrowser.tabs, l = tabs.length; i < l; ++i) {
-				if(tabs[i].linkedBrowser == browser) {
-					tab = tabs[i];
-					break;
-				}
-			}
-		}
-		if(
-			tab
-			&& !tab.hasAttribute("privateTab-isPrivate")
-			&& "PrivateBrowsingUtils" in win
-			&& win.PrivateBrowsingUtils.isWindowPrivate(window)
-		) {
-			tab.dispatchEvent(new win.UIEvent("PrivateTab:PrivateChanged", {
-				bubbles: true,
-				cancelable: false,
-				detail: 1,
-				view: win
-			}));
-		}
+	var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+		.getService(Components.interfaces.inIDOMUtils);
+	var browser = dwu.getParentForNode(document, true);
+	if(
+		browser instanceof Components.interfaces.nsIDOMXULElement
+		&& browser.localName.toLowerCase() == "browser"
+	) {
+		var win = browser.ownerDocument.defaultView;
+		if("privateTab" in win)
+			win.privateTab._handleProtocolBrowser(browser, document.documentURIObject);
 	}
-	catch(e2) {
-		Components.utils.reportError(e2);
+	else {
+		Components.utils.reportError("Private Tab: can't get XUL browser");
 	}
 
 	if(!spec)
 		throw new Error("No URI");
 	if(!/^[^:]+:/.test(spec))
 		spec = "http://" + spec;
-	var uri = Services.io.newURI(spec, null, null); // We accept only valid URIs
-
-	//try { // See useDefaultIcon() in chrome://browser/content/tabbrowser.xml
-	//	setFavicon(uri.prePath + "/favicon.ico");
-	//}
-	//catch(e2) {
-	//}
-	if(tab && "privateTab" in win && location.protocol == "private:")
-		win.privateTab._updateBookmarkFavicon(document.documentURIObject, tab, browser);
+	var uri = Services.io.newURI(spec, null, null); // Validate URI
 	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
