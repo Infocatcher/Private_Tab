@@ -3474,6 +3474,10 @@ var privateTab = {
 	},
 	handleProtocolBrowser: function(browser, bookmarkURI) {
 		var tab = this.getTabForBrowser(browser);
+		if(!tab) {
+			_log("handleProtocolBrowser(): tab not found");
+			return;
+		}
 		_log("handleProtocolBrowser() -> setTabState()");
 		this.setTabState(tab); // Should be private, but let's ensure
 
