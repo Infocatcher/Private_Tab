@@ -3655,6 +3655,8 @@ var privateTab = {
 	},
 	getTabForBrowser: function(browser) {
 		var gBrowser = this.getTabBrowserFromChild(browser);
+		if(!gBrowser || !gBrowser.browsers)
+			return null;
 		if("getTabForBrowser" in gBrowser) // Firefox 35+
 			return gBrowser.getTabForBrowser(browser);
 		else if("_getTabForBrowser" in gBrowser)
