@@ -3592,13 +3592,15 @@ var privateTab = {
 			//~ todo: find way to use only one frame script
 			// Also there is no way to unload frame script: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
 			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
-			var data = this.trimMultilineString('\
-				var isPrivate = ' + isPrivate + ';\n\
-				var privacyContext = docShell.QueryInterface(Components.interfaces.nsILoadContext);\n\
-				if(isPrivate === undefined)\n\
-					isPrivate = !privacyContext.usePrivateBrowsing;\n\
-				privacyContext.usePrivateBrowsing = isPrivate;\n\
-				sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });');
+			var script = this.trimMultilineString('\
+				(function() {\n\
+					var isPrivate = ' + isPrivate + ';\n\
+					var privacyContext = docShell.QueryInterface(Components.interfaces.nsILoadContext);\n\
+					if(isPrivate === undefined)\n\
+						isPrivate = !privacyContext.usePrivateBrowsing;\n\
+					privacyContext.usePrivateBrowsing = isPrivate;\n\
+					sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });\n\
+				})();');
 			var feedback = function(msg) {
 				mm.removeMessageListener("PrivateTab:PrivateChanged", feedback);
 				var isPrivate = msg.data.isPrivate;
@@ -3611,7 +3613,7 @@ var privateTab = {
 			}.bind(this);
 			var mm = tab.linkedBrowser.messageManager;
 			mm.addMessageListener("PrivateTab:PrivateChanged", feedback);
-			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), true);
+			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(script), true);
 			return;
 		}
 		if(isPrivate === undefined)
@@ -4182,14 +4184,15 @@ var privateTab = {
 			mm.removeMessageListener("PrivateTab:PrivateState", receiveMessage);
 			feedback.call(context, msg.data.isPrivate);
 		};
-		var data = this.trimMultilineString('\
-			var isPrivate = docShell\n\
-				.QueryInterface(Components.interfaces.nsILoadContext)\n\
-				.usePrivateBrowsing;\n\
-			sendAsyncMessage("PrivateTab:PrivateState", { isPrivate: isPrivate });');
+		var script = this.trimMultilineString('\
+			sendAsyncMessage("PrivateTab:PrivateState", {\n\
+				isPrivate: docShell\n\
+					.QueryInterface(Components.interfaces.nsILoadContext)\n\
+					.usePrivateBrowsing\n\
+			});');
 		var mm = tab.linkedBrowser.messageManager;
 		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
-		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(data), true);
+		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(script), true);
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
