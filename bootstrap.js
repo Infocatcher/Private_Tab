@@ -143,7 +143,7 @@ var privateTab = {
 		}
 	},
 	receiveMessage: function(msg) {
-		if(msg.name == "PrivateTab:Protocol:Loaded")
+		if(msg.name == "PrivateTab:ProtocolURILoaded")
 			this.handleProtocolBrowser(msg.target, msg.data.URI);
 	},
 
@@ -246,7 +246,7 @@ var privateTab = {
 		this.privateProtocol.init(_log);
 		if("ppmm" in Services) {
 			Services.ppmm.loadProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID, true);
-			Services.mm.addMessageListener("PrivateTab:Protocol:Loaded", this);
+			Services.mm.addMessageListener("PrivateTab:ProtocolURILoaded", this);
 		}
 
 		if(prefs.get("showItemInTaskBarJumpList")) {
@@ -263,9 +263,9 @@ var privateTab = {
 		Components.utils.unload("chrome://privatetab/content/protocol.jsm");
 		delete this.privateProtocol;
 		if("ppmm" in Services) {
-			Services.ppmm.broadcastAsyncMessage("PrivateTab:Protocol:Destroy", {});
+			Services.ppmm.broadcastAsyncMessage("PrivateTab:ProtocolDestroy", {});
 			Services.ppmm.removeDelayedProcessScript("chrome://privatetab/content/protocol-process.js" + this.frameScriptUID);
-			Services.mm.removeMessageListener("PrivateTab:Protocol:Loaded", this);
+			Services.mm.removeMessageListener("PrivateTab:ProtocolURILoaded", this);
 		}
 
 		if(prefs.get("showItemInTaskBarJumpList")) {

@@ -67,7 +67,7 @@ function updateUI() {
 		.getInterface(Components.interfaces.nsIDocShell)
 		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 		.getInterface(Components.interfaces.nsIContentFrameMessageManager);
-	mm.sendAsyncMessage("PrivateTab:Protocol:Loaded", {
+	mm.sendAsyncMessage("PrivateTab:ProtocolURILoaded", {
 		URI: document.documentURI
 	});
 }
