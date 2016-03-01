@@ -3635,7 +3635,7 @@ var privateTab = {
 				action: "ToggleState",
 				isPrivate: isPrivate
 			});
-			return;
+			return isPrivateAttr;
 		}
 
 		var privacyContext = this.getTabPrivacyContext(tab);
