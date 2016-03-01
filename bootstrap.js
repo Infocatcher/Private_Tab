@@ -3600,10 +3600,8 @@ var privateTab = {
 		}));
 	},
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
-		var window = tab.ownerDocument.defaultView;
-		var privacyContext = this.getTabPrivacyContext(tab);
-		if(!privacyContext) { // Electrolysis
-			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
+		if(this.isRemoteTab(tab)) {
+			_log("toggleTabPrivate(): will use frame script");
 			var mm = tab.linkedBrowser.messageManager;
 			var receiveMessage = function(msg) {
 				mm.removeMessageListener("PrivateTab:PrivateChanged", receiveMessage);
@@ -3622,6 +3620,9 @@ var privateTab = {
 			});
 			return;
 		}
+
+		var window = tab.ownerDocument.defaultView;
+		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
 
@@ -4170,19 +4171,19 @@ var privateTab = {
 		return null;
 	},
 	isPrivateTab: function(tab) {
-		var privacyContext = this.getTabPrivacyContext(tab);
-		if(!privacyContext) {
+		if(this.isRemoteTab(tab)) {
 			_log(
-				"isPrivateTab() failed. Electrolysis? Fallback to check private attribute"
+				"isPrivateTab(): tab is remote, will check private attribute"
 				+ (_dbgv ? ". Call stack:\n" + new Error().stack : "")
 			);
 			return tab.getAttribute(this.privateAttr) == "true";
 		}
+		var privacyContext = this.getTabPrivacyContext(tab);
 		return privacyContext.usePrivateBrowsing;
 	},
 	isPrivateTabAsync: function(tab, feedback, context) {
-		var privacyContext = this.getTabPrivacyContext(tab, true);
-		if(privacyContext) {
+		if(!this.isRemoteTab(tab)) {
+			var privacyContext = this.getTabPrivacyContext(tab, true);
 			feedback.call(context, privacyContext.usePrivateBrowsing);
 			return;
 		}
@@ -4195,6 +4196,9 @@ var privateTab = {
 		mm.sendAsyncMessage("PrivateTab:Action", {
 			action: "GetSatet"
 		});
+	},
+	isRemoteTab: function(tab) {
+		return tab.linkedBrowser && !tab.linkedBrowser.docShell;
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
