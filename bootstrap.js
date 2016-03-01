@@ -3600,8 +3600,25 @@ var privateTab = {
 		}));
 	},
 	toggleTabPrivate: function(tab, isPrivate, _silent) {
+		var window = tab.ownerDocument.defaultView;
 		if(this.isRemoteTab(tab)) {
 			_log("toggleTabPrivate(): will use frame script");
+
+			var isPrivateAttr = isPrivate === undefined
+				? !tab.hasAttribute(this.privateAttr)
+				: isPrivate;
+			if(
+				!isPrivateAttr
+				&& tab.hasAttribute(this.privateAttr)
+			) {
+				this.checkNoPrivate(window);
+				if(this.isLastPrivate(tab)) {
+					_log("toggleTabPrivate() called for last private tab");
+					if(this.forbidCloseLastPrivate())
+						return undefined;
+				}
+			}
+
 			var mm = tab.linkedBrowser.messageManager;
 			var receiveMessage = function(msg) {
 				mm.removeMessageListener("PrivateTab:PrivateChanged", receiveMessage);
@@ -3621,7 +3638,6 @@ var privateTab = {
 			return;
 		}
 
-		var window = tab.ownerDocument.defaultView;
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
