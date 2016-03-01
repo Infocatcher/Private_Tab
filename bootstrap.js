@@ -410,6 +410,11 @@ var privateTab = {
 			return;
 		}
 
+		if(this.isMultiProcessWindow(window)) {
+			var mm = window.messageManager;
+			mm.loadFrameScript("chrome://privatetab/content/content.js" + this.frameScriptUID, true);
+		}
+
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		window.privateTab = new API(window);
@@ -512,6 +517,13 @@ var privateTab = {
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 		_log("destroyWindow()");
+
+		if(this.isMultiProcessWindow(window)) {
+			var mm = window.messageManager;
+			mm.broadcastAsyncMessage("PrivateTab:Action", { action: "Destroy" });
+			mm.removeDelayedFrameScript("chrome://privatetab/content/content.js" + this.frameScriptUID);
+		}
+
 		var document = window.document;
 		var gBrowser = window.gBrowser;
 		var force = reason != APP_SHUTDOWN && reason != WINDOW_CLOSED;
@@ -2211,9 +2223,11 @@ var privateTab = {
 		}
 		_log(e.type + ": force make tab " + (isPrivate ? "private" : "not private"));
 		var mm = tab.linkedBrowser.messageManager;
-		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(
-			"docShell.QueryInterface(Components.interfaces.nsILoadContext).usePrivateBrowsing = " + isPrivate + ";"
-		), true);
+		mm.sendAsyncMessage("PrivateTab:Action", {
+			action: "ToggleState",
+			isPrivate: isPrivate,
+			silent: true
+		});
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
@@ -3589,31 +3603,23 @@ var privateTab = {
 		var window = tab.ownerDocument.defaultView;
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(!privacyContext) { // Electrolysis
-			//~ todo: find way to use only one frame script
-			// Also there is no way to unload frame script: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
 			_log("toggleTabPrivate(): getTabPrivacyContext() failed, will use frame script");
-			var script = this.trimMultilineString('\
-				(function() {\n\
-					var isPrivate = ' + isPrivate + ';\n\
-					var privacyContext = docShell.QueryInterface(Components.interfaces.nsILoadContext);\n\
-					if(isPrivate === undefined)\n\
-						isPrivate = !privacyContext.usePrivateBrowsing;\n\
-					privacyContext.usePrivateBrowsing = isPrivate;\n\
-					sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });\n\
-				})();');
-			var feedback = function(msg) {
-				mm.removeMessageListener("PrivateTab:PrivateChanged", feedback);
+			var mm = tab.linkedBrowser.messageManager;
+			var receiveMessage = function(msg) {
+				mm.removeMessageListener("PrivateTab:PrivateChanged", receiveMessage);
 				var isPrivate = msg.data.isPrivate;
 				_log(
-					"Received message from frame script: usePrivateBrowsing = " + isPrivate
+					"Received message from frame script: isPrivate = " + isPrivate
 					+ "\nTab: " + _tab(tab)
 				);
 				if(!_silent)
 					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 			}.bind(this);
-			var mm = tab.linkedBrowser.messageManager;
-			mm.addMessageListener("PrivateTab:PrivateChanged", feedback);
-			mm.loadFrameScript("data:application/javascript," + encodeURIComponent(script), true);
+			mm.addMessageListener("PrivateTab:PrivateChanged", receiveMessage);
+			mm.sendAsyncMessage("PrivateTab:Action", {
+				action: "ToggleState",
+				isPrivate: isPrivate
+			});
 			return;
 		}
 		if(isPrivate === undefined)
@@ -4184,15 +4190,11 @@ var privateTab = {
 			mm.removeMessageListener("PrivateTab:PrivateState", receiveMessage);
 			feedback.call(context, msg.data.isPrivate);
 		};
-		var script = this.trimMultilineString('\
-			sendAsyncMessage("PrivateTab:PrivateState", {\n\
-				isPrivate: docShell\n\
-					.QueryInterface(Components.interfaces.nsILoadContext)\n\
-					.usePrivateBrowsing\n\
-			});');
 		var mm = tab.linkedBrowser.messageManager;
 		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
-		mm.loadFrameScript("data:application/javascript," + encodeURIComponent(script), true);
+		mm.sendAsyncMessage("PrivateTab:Action", {
+			action: "GetSatet"
+		});
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
