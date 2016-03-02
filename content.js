@@ -38,6 +38,19 @@ var remoteFrameHandler = {
 				if(!data.silent)
 					sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });
 			break;
+			case "WaitLoading":
+				var webProgress = docShell.QueryInterface(Components.interfaces.nsIWebProgress);
+				if(!webProgress.isLoadingDocument)
+					sendAsyncMessage("PrivateTab:ContentLoaded");
+				else {
+					addEventListener("load", function onLoad(e) {
+						if(e.target == content.document) {
+							removeEventListener("load", onLoad, true);
+							sendAsyncMessage("PrivateTab:ContentLoaded");
+						}
+					}, true);
+				}
+			break;
 			case "Destroy":
 				this.destroy();
 		}

@@ -3525,7 +3525,18 @@ var privateTab = {
 				);
 			}, 0);
 		}
-		if(browser.webProgress.isLoadingDocument)
+		if(this.isRemoteTab(tab)) {
+			var mm = browser.messageManager;
+			var receiveMessage = function(msg) {
+				mm.removeMessageListener("PrivateTab:ContentLoaded", receiveMessage);
+				onLoaded();
+			};
+			mm.addMessageListener("PrivateTab:ContentLoaded", receiveMessage);
+			mm.sendAsyncMessage("PrivateTab:Action", {
+				action: "WaitLoading"
+			});
+		}
+		else if(browser.webProgress.isLoadingDocument)
 			browser.addEventListener("load", onLoaded, true);
 		else
 			onLoaded();
