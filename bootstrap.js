@@ -4214,7 +4214,8 @@ var privateTab = {
 		});
 	},
 	isRemoteTab: function(tab) {
-		return tab.linkedBrowser && !tab.linkedBrowser.docShell;
+		var browser = tab.linkedBrowser;
+		return browser && browser.getAttribute("remote") == "true";
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
