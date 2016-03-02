@@ -3507,19 +3507,13 @@ var privateTab = {
 		function onLoaded(e) {
 			e && browser.removeEventListener(e.type, onLoaded, true);
 			_dbgv && _log("updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
-			var window = browser.ownerDocument.defaultView;
-			//~ todo: better way to wait for remote browser loading?
-			var stopTime = _this.isMultiProcessWindow(window) && (Date.now() + 15e3);
-			window.setTimeout(function update() { // Wait for possible changes
+			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
 				if(!tab.parentNode) // Tab was closed
 					return;
 				_dbgv && _log("updateBookmarkFavicon(): delay");
 				var icon = _this.getTabIcon(tab);
-				if(!icon) {
-					if(stopTime && Date.now() < stopTime)
-						window.setTimeout(update, 200);
+				if(!icon)
 					return;
-				}
 				_log("updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
 				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
 					.getService(Components.interfaces.mozIAsyncFavicons);
