@@ -3525,7 +3525,7 @@ var privateTab = {
 				);
 			}, 0);
 		}
-		if(browser.webNavigation.isLoadingDocument)
+		if(browser.webProgress.isLoadingDocument)
 			browser.addEventListener("load", onLoaded, true);
 		else
 			onLoaded();
