@@ -2374,16 +2374,14 @@ var privateTab = {
 		}
 
 		var referer = null;
-		if(sourceDocument) {
-			var sendReferer = prefs.get("sendRefererHeader");
-			if(
-				sendReferer > 0
-				&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
-			) {
-				referer = this.isMultiProcessWindow(window)
-					? Services.io.newURI(sourceDocument.documentURI, null, null)
-					: sourceDocument.documentURIObject;
-			}
+		var sendReferer = sourceDocument && prefs.get("sendRefererHeader");
+		if(
+			sendReferer > 0
+			&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
+		) {
+			referer = this.isMultiProcessWindow(window)
+				? Services.io.newURI(sourceDocument.documentURI, null, null)
+				: sourceDocument.documentURIObject;
 		}
 
 		this.readyToOpenTab(window, true);
