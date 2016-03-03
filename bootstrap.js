@@ -2249,27 +2249,24 @@ var privateTab = {
 		// Based on nsContextMenu.prototype.openLinkInTab()
 		var gContextMenu = window.gContextMenu;
 		var uri = gContextMenu.linkURL;
-		var doc = gContextMenu.target.ownerDocument;
-		var principal = doc.nodePrincipal;
-		if(
-			"gContextMenuContentData" in window
-			&& "gContextMenu" in window
-			&& window.gContextMenu
-			&& window.gContextMenu.isRemote // Electrolysis
-		) try {
-			principal = window.gContextMenuContentData.principal;
-		}
-		catch(e) {
-			Components.utils.reportError(e);
-		}
+		var ownerDoc = gContextMenu.ownerDoc
+			|| gContextMenu.target.ownerDocument;
+		var principal = gContextMenu.principal
+			|| ownerDoc.nodePrincipal;
 		try {
 			window.urlSecurityCheck(uri, principal);
 		}
 		catch(e) {
 			throw typeof e == "string" ? new Error(e) : e;
 		}
-		this.openURIInNewPrivateTab(window, uri, doc, {
+		var cmData = window.gContextMenuContentData || {};
+		this.openURIInNewPrivateTab(window, uri, ownerDoc, {
 			toggleInBackground: toggleInBackground,
+			referer: cmData.documentURIObject
+				|| ownerDoc.documentURIObject,
+			charset: cmData.charSet
+				|| ownerDoc.characterSet,
+			ownerTab: window.gBrowser.selectedTab,
 			openAsChild: true
 		});
 	},
@@ -2345,9 +2342,9 @@ var privateTab = {
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
+
 		var gBrowser = window.gBrowser;
 		var ownerTab;
-
 		if(openAsChild) {
 			// http://piro.sakura.ne.jp/xul/_treestyletab.html.en#api
 			if("TreeStyleTabService" in window)
@@ -2356,38 +2353,22 @@ var privateTab = {
 			// TabKit 2nd Edition https://addons.mozilla.org/firefox/addon/tabkit-2nd-edition/
 			if("tabkit" in window)
 				window.tabkit.addingTab("related");
-			if(sourceDocument && prefs.get("rememberOwnerTab")) {
-				var sourceWindow = sourceDocument.defaultView.top;
-				if("_getTabForContentWindow" in gBrowser)
-					ownerTab = gBrowser._getTabForContentWindow(sourceWindow);
-				else { // SeaMonkey
-					var browsers = gBrowser.browsers;
-					for(var i = 0, l = browsers.length; i < l; ++i) {
-						if(browsers[i].contentWindow == sourceWindow) {
-							ownerTab = gBrowser.tabs[i];
-							break;
-						}
-					}
-				}
-				_log("Owner tab: " + _tab(ownerTab));
-			}
+			if(sourceDocument && prefs.get("rememberOwnerTab"))
+				ownerTab = options.ownerTab || null;
 		}
 
 		var referer = null;
 		var sendReferer = sourceDocument && prefs.get("sendRefererHeader");
 		if(
 			sendReferer > 0
-			&& (sendReferer > 1 || this.isPrivateWindow(sourceDocument.defaultView))
-		) {
-			referer = this.isMultiProcessWindow(window)
-				? Services.io.newURI(sourceDocument.documentURI, null, null)
-				: sourceDocument.documentURIObject;
-		}
+			&& (sendReferer > 1 || options.ownerTab && this.isPrivateTab(options.ownerTab))
+		)
+			referer = options.referer || null;
 
 		this.readyToOpenTab(window, true);
 		var tab = gBrowser.addTab(uri, {
 			referrerURI: referer,
-			charset: sourceDocument ? sourceDocument.characterSet : null,
+			charset: options.charset || null,
 			ownerTab: ownerTab,
 			relatedToCurrent: openAsChild
 		});
