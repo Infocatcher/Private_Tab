@@ -4126,17 +4126,15 @@ var privateTab = {
 		return window && PrivateBrowsingUtils._privateTabOrigIsWindowPrivate(window);
 	},
 	isPrivateContent: function(window) {
-		try {
+		var tab = window.gBrowser.selectedTab;
+		if(!this.isRemoteTab(tab)) try {
 			return this.isPrivateWindow(this.getContentWindow(window));
 		}
 		catch(e) {
-			_log(
-				"isPrivateContent() failed. Electrolysis? Fallback to check private attribute"
-				+ (_dbgv ? ". Call stack:\n" + new Error().stack : "")
-			);
-			_dbgv && Components.utils.reportError(e);
+			_log("isPrivateContent() failed, call stack:\n" + new Error().stack);
+			Components.utils.reportError(e);
 		}
-		return window.gBrowser.selectedTab.hasAttribute(this.privateAttr);
+		return tab.hasAttribute(this.privateAttr);
 	},
 	getContentWindow: function(window) {
 		// Note: with enabled Electrolysis window.content may refers to
