@@ -1832,10 +1832,11 @@ var privateTab = {
 			!browser
 			|| !browser.webProgress
 			|| browser.webProgress.isLoadingDocument
-			// Something may went wrong with restored tabs,
+			// Something may went wrong with restored tabs (but works fine in multi-process mode),
 			// see https://github.com/Infocatcher/Private_Tab/issues/146#issuecomment-137159478
 			|| browser.currentURI.spec == "about:blank"
-				&& (browser.contentDocument || browser.contentDocumentAsCPOW || {}).readyState == "uninitialized"
+				&& browser.contentDocument
+				&& browser.contentDocument.readyState == "uninitialized"
 		) {
 			_log("Selected tab not yet loaded, wait");
 			window.setTimeout(function() {
