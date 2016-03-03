@@ -2269,7 +2269,8 @@ var privateTab = {
 			throw typeof e == "string" ? new Error(e) : e;
 		}
 		this.openURIInNewPrivateTab(window, uri, doc, {
-			toggleInBackground: toggleInBackground
+			toggleInBackground: toggleInBackground,
+			openAsChild: true
 		});
 	},
 	openPlaceInNewPrivateTab: function(window, toggleInBackground, e) {
@@ -2334,14 +2335,13 @@ var privateTab = {
 		view.controller.openSelectionInTabs(e);
 	},
 	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
-		var toggleInBackground = "toggleInBackground" in options && options.toggleInBackground;
+		var toggleInBackground = options.toggleInBackground || false;
 		var loadInBackgroundPref = options.loadInBackgroundPref || "browser.tabs.loadInBackground";
-		var openAsChild = "openAsChild" in options ? options.openAsChild : true;
+		var openAsChild = options.openAsChild || false;
 
-		var relatedToCurrent;
 		var w = this.getNotPopupWindow(window);
 		if(w && w != window) {
-			relatedToCurrent = openAsChild = false;
+			openAsChild = false;
 			w.setTimeout(w.focus, 0);
 			window = w;
 		}
@@ -2391,7 +2391,7 @@ var privateTab = {
 			referrerURI: referer,
 			charset: sourceDocument ? sourceDocument.characterSet : null,
 			ownerTab: ownerTab,
-			relatedToCurrent: relatedToCurrent
+			relatedToCurrent: openAsChild
 		});
 
 		var inBackground = prefs.get("loadInBackground");
