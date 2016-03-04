@@ -969,37 +969,34 @@ var privateTab = {
 					if(params && typeof params == "object") // Firefox 38+
 						aFlags = params.flags;
 					_dbgv && _log("loadURIWithFlags() flags: " + aFlags);
-					if(
-						aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL
-						&& _this.isPrivateWindow(this.contentWindow || this.contentWindowAsCPOW)
-					) {
-						// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
-						var stack = new Error().stack;
-						_dbgv && _log("loadURIWithFlags(), stack:\n" + stack);
-						if(
-							stack.indexOf("addTab@chrome:") != -1
-							|| stack.indexOf("loadOneTab@chrome:") != -1
-						) {
-							var tab = _this.getTabForBrowser(this);
-							if(tab) {
-								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => make tab not private");
-								_this.toggleTabPrivate(tab, false);
-							}
-							else {
-								_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag, tab not found!");
-							}
-							return false;
-						}
-						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
-						_this.readyToOpenTab(window, false);
-						var tab = gBrowser.loadOneTab(aURI || "about:blank", {
-							referrerURI: aReferrerURI,
-							fromExternal: true,
-							inBackground: prefs.getPref("browser.tabs.loadDivertedInBackground")
-						});
-						return !!tab;
+					if(!(aFlags & Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL))
+						return false;
+					var tab = _this.getTabForBrowser(this);
+					if(!tab) {
+						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag, tab not found!");
+						return false;
 					}
-					return false;
+					if(!_this.isPrivateTab(tab))
+						return false;
+					// See chrome://browser/content/browser.js, nsBrowserAccess.prototype.openURI()
+					var stack = new Error().stack;
+					_dbgv && _log("loadURIWithFlags(), stack:\n" + stack);
+					if(
+						stack.indexOf("addTab@chrome:") != -1
+						|| stack.indexOf("loadOneTab@chrome:") != -1
+					) {
+						_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => make tab not private");
+						_this.toggleTabPrivate(tab, false);
+						return false;
+					}
+					_log("loadURIWithFlags() with LOAD_FLAGS_FROM_EXTERNAL flag => open in new tab");
+					_this.readyToOpenTab(window, false);
+					gBrowser.loadOneTab(aURI || "about:blank", {
+						referrerURI: aReferrerURI,
+						fromExternal: true,
+						inBackground: prefs.getPref("browser.tabs.loadDivertedInBackground")
+					});
+					return true;
 				}
 			);
 		}
