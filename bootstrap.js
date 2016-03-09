@@ -1218,15 +1218,16 @@ var privateTab = {
 	},
 	setTabAttributeProxy: function(attr, val) {
 		var args = arguments;
+		var tab = this;
 		if(attr == "image" && val) {
 			val += ""; // Convert to string
 			if(
 				!val.startsWith("moz-anno:favicon:")
-				&& privateTabInternal.isPrivateTab(this)
+				&& privateTabInternal.isPrivateTab(tab)
 			) {
 				args = Array.slice(args);
 				try {
-					var browser = this.linkedBrowser;
+					var browser = tab.linkedBrowser;
 					var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
 					if(doc instanceof Components.interfaces.nsIImageDocument) {
 						// Will use base64 representation for icons of image documents
@@ -1256,7 +1257,8 @@ var privateTab = {
 				}
 			}
 		}
-		return Object.getPrototypeOf(Object.getPrototypeOf(this)).setAttribute.apply(this, args);
+		var window = tab.ownerDocument.defaultView;
+		return window.Element.prototype.setAttribute.apply(this, args);
 	},
 	patchBrowserThumbnails: function(window, applyPatch, forceDestroy) {
 		if(!("gBrowserThumbnails" in window)) // SeaMonkey?
