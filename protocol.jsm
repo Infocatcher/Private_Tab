@@ -87,26 +87,32 @@ var privateProtocol = {
 				loadInfo
 			)
 			: Services.io.newChannel(redirect, null, null);
-		var ensurePrivate = function() {
+		var ensurePrivate = function(reason) {
+			_log("[protocol] " + reason + " => ensurePrivate()");
 			this.makeChannelPrivate(channel);
 			ensurePrivate = function() {}; // Don't call again in case of success
 		}.bind(this);
 		var channelWrapper = {
 			__proto__: channel,
 			asyncOpen: function(aListener, aContext) {
-				_log("[protocol] nsIChannel.asyncOpen() => ensurePrivate()");
-				ensurePrivate();
+				ensurePrivate("nsIChannel.asyncOpen()");
 				return channel.asyncOpen.apply(this, arguments);
 			},
+			asyncOpen2: function(aListener) {
+				ensurePrivate("nsIChannel.asyncOpen2()");
+				return channel.asyncOpen2.apply(this, arguments);
+			},
 			open: function() {
-				_log("[protocol] nsIChannel.open() => ensurePrivate()");
-				ensurePrivate();
+				ensurePrivate("nsIChannel.open()");
 				return channel.open.apply(this, arguments);
+			},
+			open2: function() {
+				ensurePrivate("nsIChannel.open2()");
+				return channel.open2.apply(this, arguments);
 			}
 		};
 		Services.tm.mainThread.dispatch(function() {
-			_log("[protocol] fallback delay => ensurePrivate()");
-			ensurePrivate();
+			ensurePrivate("fallback delay");
 		}, Components.interfaces.nsIThread.DISPATCH_NORMAL);
 		return channelWrapper;
 	},
