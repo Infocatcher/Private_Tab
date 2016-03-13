@@ -81,12 +81,12 @@ var privateProtocol = {
 		// We can't use newChannel(newSpec, ...) here - strange things happens
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
 		var redirect = "chrome://privatetab/content/protocolRedirect.html#" + newSpec;
-		var channel = "newChannelFromURIWithLoadInfo" in Services.io
+		var channel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
 			? Services.io.newChannelFromURIWithLoadInfo(
 				Services.io.newURI(redirect, null, null),
 				loadInfo
 			)
-			: Services.io.newChannel(redirect, null, null);
+			: Services.io.newChannel(redirect, null, null); // Removed in Firefox 48+
 		var ensurePrivate = function(reason) {
 			_log("[protocol] " + reason + " => ensurePrivate()");
 			this.makeChannelPrivate(channel);
