@@ -66,6 +66,9 @@ var privateProtocol = {
 		return uri;
 	},
 	newChannel: function(uri) {
+		return this.newChannel2(uri, null);
+	},
+	newChannel2: function(uri, loadInfo) {
 		var spec = uri.spec;
 		_log("[protocol] newChannel(): spec = " + spec);
 		var newSpec = "";
@@ -78,7 +81,12 @@ var privateProtocol = {
 		// We can't use newChannel(newSpec, ...) here - strange things happens
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
 		var redirect = "chrome://privatetab/content/protocolRedirect.html#" + newSpec;
-		var channel = Services.io.newChannel(redirect, null, null);
+		var channel = "newChannelFromURIWithLoadInfo" in Services.io
+			? Services.io.newChannelFromURIWithLoadInfo(
+				Services.io.newURI(redirect, null, null),
+				loadInfo
+			)
+			: Services.io.newChannel(redirect, null, null);
 		var ensurePrivate = function() {
 			this.makeChannelPrivate(channel);
 			ensurePrivate = function() {}; // Don't call again in case of success
