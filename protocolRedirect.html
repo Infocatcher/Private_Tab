@@ -25,7 +25,11 @@ try {
 		throw new Error("No URI");
 	if(!/^[^:]+:/.test(spec))
 		spec = "http://" + spec;
-	var uri = Services.io.newURI(spec, null, null); // Validate URI
+	// Validate URI
+	var uri = Services.io.newURI(spec, null, null);
+	var testChannel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
+		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
+		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
 	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
@@ -38,7 +42,7 @@ catch(e) {
 		setFavicon("chrome://global/skin/icons/warning-16.png");
 		if(!spec)
 			out = "Missing URI";
-		else if(!uri)
+		else if(!testChannel)
 			out = "Malformed URI: " + spec;
 	}
 	out && document.getElementById("output").appendChild(document.createTextNode(out));
