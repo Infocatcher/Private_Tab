@@ -30,13 +30,17 @@ var remoteFrameHandler = {
 			break;
 			case "ToggleState":
 				var isPrivate = data.isPrivate;
+				var needChange = true;
 				if(isPrivate === undefined)
 					isPrivate = !this.isPrivate;
 				else if(isPrivate == this.isPrivate) // Nothing to do
-					break;
-				this.isPrivate = isPrivate;
-				if(!data.silent)
-					sendAsyncMessage("PrivateTab:PrivateChanged", { isPrivate: isPrivate });
+					needChange = false;
+				if(needChange)
+					this.isPrivate = isPrivate;
+				!data.silent && sendAsyncMessage("PrivateTab:PrivateChanged", {
+					isPrivate: isPrivate,
+					reallyChanged: needChange
+				});
 			break;
 			case "WaitLoading":
 				var webProgress = docShell.QueryInterface(Components.interfaces.nsIWebProgress);
