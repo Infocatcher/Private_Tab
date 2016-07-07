@@ -45,12 +45,12 @@ var remoteFrameHandler = {
 			case "WaitLoading":
 				var webProgress = docShell.QueryInterface(Components.interfaces.nsIWebProgress);
 				if(!webProgress.isLoadingDocument)
-					sendAsyncMessage("PrivateTab:ContentLoaded");
+					sendAsyncMessage("PrivateTab:ContentLoaded", { principal: content.document.nodePrincipal });
 				else {
 					addEventListener("load", function onLoad(e) {
 						if(e.target == content.document) {
 							removeEventListener("load", onLoad, true);
-							sendAsyncMessage("PrivateTab:ContentLoaded");
+							sendAsyncMessage("PrivateTab:ContentLoaded", { principal: content.document.nodePrincipal });
 						}
 					}, true);
 				}

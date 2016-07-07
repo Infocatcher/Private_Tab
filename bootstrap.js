@@ -3483,7 +3483,8 @@ var privateTab = {
 		_log("updateBookmarkFavicon()");
 		var browser = tab.linkedBrowser;
 		var _this = this;
-		function onLoaded(e) {
+		function onLoaded(e, principal) {
+			principal = principal || e && e.target.nodePrincipal;
 			e && browser.removeEventListener(e.type, onLoaded, true);
 			_dbgv && _log("updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
 			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
@@ -3502,7 +3503,7 @@ var privateTab = {
 					false /*aForceReload*/,
 					faviconService.FAVICON_LOAD_PRIVATE,
 					null /*nsIFaviconDataCallback aCallback*/,
-					null /*nsIPrincipal aLoadingPrincipal*/
+					principal /*nsIPrincipal aLoadingPrincipal*/
 				);
 			}, 0);
 		}
@@ -3510,7 +3511,7 @@ var privateTab = {
 			var mm = browser.messageManager;
 			var receiveMessage = function(msg) {
 				mm.removeMessageListener("PrivateTab:ContentLoaded", receiveMessage);
-				onLoaded();
+				onLoaded(null, msg.data.principal);
 			};
 			mm.addMessageListener("PrivateTab:ContentLoaded", receiveMessage);
 			mm.sendAsyncMessage("PrivateTab:Action", {
@@ -3520,7 +3521,7 @@ var privateTab = {
 		else if(browser.webProgress.isLoadingDocument)
 			browser.addEventListener("load", onLoaded, true);
 		else
-			onLoaded();
+			onLoaded(null, browser.contentPrincipal);
 	},
 	setTabState: function(tab, isPrivate) {
 		if(isPrivate === undefined) {
