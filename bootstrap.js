@@ -3500,7 +3500,9 @@ var privateTab = {
 					bookmarkURI,
 					Services.io.newURI(icon, null, null),
 					false /*aForceReload*/,
-					faviconService.FAVICON_LOAD_PRIVATE
+					faviconService.FAVICON_LOAD_PRIVATE,
+					null /*nsIFaviconDataCallback aCallback*/,
+					null /*nsIPrincipal aLoadingPrincipal*/
 				);
 			}, 0);
 		}
