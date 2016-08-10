@@ -6,6 +6,15 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Compatibility fixes for multi-process mode (Electrolysis aka e10s) around “unsafe CPOW usage” (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
+`*` Updated Portuguese (Portugal) locale (pt-PT), thanks to <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/210">#210</a>).<br>
+`x` Fixed private protocol in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/211">#211</a>).<br>
+`x` Some tweaks and fixes for multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>
+`*` Now used only one frame script for communications in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/213">#213</a>).<br>
+`x` Fixed possible recursion in wrapper for `tab.setAttribute("image", …)` (<a href="https://github.com/Infocatcher/Private_Tab/issues/214">#214</a>).<br>
+`x` Fixed compatibility with Firefox 51+ (SyntaxError: non-generator method definitions may not contain yield) (<a href="https://github.com/Infocatcher/Private_Tab/issues/228">#228</a>).<br>
+`*` Small internal enhancements and fixes.<br>
+
 ##### 0.1.9.1 (2016-02-01)
 `x` Fixed syntax error in Firefox 46.0a1+ around generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
 `x` Correctly handle view source tabs (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>

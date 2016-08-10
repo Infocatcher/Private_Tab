@@ -6,6 +6,15 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправления для мультипроцессного режима (Electrolysis aka e10s) в части «unsafe CPOW usage» (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
+`*` Обновлена португальская (Португалия) локаль (pt-PT), спасибо <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/210">#210</a>).<br>
+`x` Исправлен приватный протокол в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/211">#211</a>).<br>
+`x` Некоторые улучшения и исправления для мультипроцессного режима (<a href="https://github.com/Infocatcher/Private_Tab/issues/162">#162</a>).<br>
+`*` Теперь используется только один frame script для обмена сообщениями в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/213">#213</a>).<br>
+`x` Исправлена возможная рекурсия в обертке для `tab.setAttribute("image", …)` (<a href="https://github.com/Infocatcher/Private_Tab/issues/214">#214</a>).<br>
+`x` Исправлена совместимость с Firefox 51+ (SyntaxError: non-generator method definitions may not contain yield) (<a href="https://github.com/Infocatcher/Private_Tab/issues/228">#228</a>).<br>
+`*` Небольшие внутренние улучшения и исправления.<br>
+
 ##### 0.1.9.1 (2016-02-01)
 `x` Исправлена синтаксическая ошибка в Firefox 46.0a1+ при использовании generator comprehension (<a href="https://github.com/Infocatcher/Private_Tab/issues/203">#203</a>).<br>
 `x` Исправлена обработка вкладок для просмотра исходного кода страницы (<a href="https://github.com/Infocatcher/Private_Tab/issues/204">#204</a>).<br>
