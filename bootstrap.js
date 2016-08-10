@@ -46,7 +46,7 @@ var privateTab = {
 		this.patchPrivateBrowsingUtils(true);
 		this.appButtonDontChange = !prefs.get("fixAppButtonWidth");
 
-		for(var window in this.windows)
+		for(var window of this.windows)
 			this.initWindow(window, reason);
 		Services.ww.registerNotification(this);
 		if(this.oldSessionStore)
@@ -71,7 +71,7 @@ var privateTab = {
 		if(reason == ADDON_DISABLE || reason == ADDON_UNINSTALL)
 			this.askToClosePrivateTabs();
 
-		for(var window in this.windows)
+		for(var window of this.windows)
 			this.destroyWindow(window, reason);
 		Services.ww.unregisterNotification(this);
 
@@ -635,19 +635,21 @@ var privateTab = {
 		};
 	},
 	get windows() {
+		var windows = [];
 		var isSeaMonkey = this.isSeaMonkey;
 		var ws = Services.wm.getEnumerator(isSeaMonkey ? null : "navigator:browser");
 		while(ws.hasMoreElements()) {
 			var window = ws.getNext();
 			if(!isSeaMonkey || this.isTargetWindow(window))
-				yield window;
+				windows.push(window);
 		}
+		return windows;
 	},
 	getMostRecentBrowserWindow: function() {
 		var window = Services.wm.getMostRecentWindow("navigator:browser");
 		if(window)
 			return window;
-		if(this.isSeaMonkey) for(var window in this.windows)
+		if(this.isSeaMonkey) for(var window of this.windows)
 			return window;
 		return null;
 	},
@@ -786,7 +788,7 @@ var privateTab = {
 		else if(pName == "fixAppButtonWidth") {
 			this.appButtonDontChange = !pVal;
 			this.restoreAppButtonWidth();
-			for(var window in this.windows) {
+			for(var window of this.windows) {
 				var document = window.document;
 				this.appButtonNA = false;
 				if(pVal && !this.appButtonCssURI)
@@ -800,12 +802,12 @@ var privateTab = {
 		)
 			this.reloadStyles();
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
-			for(var window in this.windows)
+			for(var window of this.windows)
 				this.patchTabBrowserDND(window, window.gBrowser, pVal, true);
 		}
 		else if(pName == "makeNewEmptyTabsPrivate") {
 			var hide = pVal == 1;
-			for(var window in this.windows) {
+			for(var window of this.windows) {
 				var document = window.document;
 				var menuItem = document.getElementById(this.newTabMenuId);
 				if(menuItem)
@@ -816,11 +818,11 @@ var privateTab = {
 			}
 		}
 		else if(pName == "patchDownloads") {
-			if(!pVal) for(var window in this.windows)
+			if(!pVal) for(var window of this.windows)
 				this.updateDownloadPanel(window, this.isPrivateWindow(window));
 		}
 		else if(pName == "allowOpenExternalLinksInPrivateTabs") {
-			for(var window in this.windows)
+			for(var window of this.windows)
 				this.patchBrowserLoadURI(window, !pVal);
 		}
 		else if(pName == "enablePrivateProtocol") {
@@ -845,7 +847,7 @@ var privateTab = {
 				this.forgetAllClosedTabs();
 		}
 		else if(pName == "usePrivateWindowStyle") {
-			for(var window in this.windows)
+			for(var window of this.windows)
 				this.updateWindowTitle(window.gBrowser, undefined, true);
 		}
 		else if(pName == "stylesHighPriority" || pName == "stylesHighPriority.tree")
@@ -1550,7 +1552,7 @@ var privateTab = {
 	},
 	askToClosePrivateTabs: function() {
 		var privateTabs = 0;
-		for(var window in this.windows) {
+		for(var window of this.windows) {
 			if(this.isPrivateWindow(window))
 				continue;
 			Array.forEach(window.gBrowser.tabs, function(tab) {
@@ -1577,7 +1579,7 @@ var privateTab = {
 			"",
 			null, {}
 		) != 1;
-		if(closeTabs) for(var window in this.windows)
+		if(closeTabs) for(var window of this.windows)
 			if(!this.isPrivateWindow(window) && this.closePrivateTabs(window))
 				window.setTimeout(window.close, 0);
 	},
@@ -1620,12 +1622,12 @@ var privateTab = {
 		_log("Forget about " + closedTabs.length + " closed tabs");
 	},
 	forgetAllClosedTabs: function() {
-		for(var window in this.windows)
+		for(var window of this.windows)
 			this.forgetClosedTabs(window);
 	},
 	clearSearchBars: function() {
 		_log("clearSearchBars()");
-		for(var window in this.windows)
+		for(var window of this.windows)
 			this.clearSearchBar(window);
 	},
 	clearSearchBar: function(window) {
@@ -3394,7 +3396,7 @@ var privateTab = {
 		var hasHotkeys = !!this.hotkeys;
 		var keyEvent = this.keyEvent;
 		var keyHighPriority = this.keyHighPriority;
-		for(var window in this.windows) {
+		for(var window of this.windows) {
 			window.removeEventListener("keydown", this, true);
 			window.removeEventListener("keydown", this, false);
 			window.removeEventListener("keypress", this, true);
@@ -4214,7 +4216,7 @@ var privateTab = {
 			else if(tabOrWindow.ownerDocument)
 				ourTab = tabOrWindow;
 		}
-		for(var window in this.windows) {
+		for(var window of this.windows) {
 			if(
 				window != ourWindow && (
 					this.isPrivateWindow(window)
