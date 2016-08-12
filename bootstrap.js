@@ -1361,6 +1361,14 @@ var privateTab = {
 			this.setTabState(tab); // Private tab may be restored using our API
 			return;
 		}
+		if(
+			this.isRemoteTab(tab)
+			&& tab.linkedBrowser
+			&& tab.linkedBrowser.currentURI.spec == "about:blank"
+		) { // Yay, yay, let's take yet another strange trick
+			_log(e.type + ": about:blank remote tab, looks like this is buggy event (was loaded some URL into non-remote tab?)");
+			return;
+		}
 		var window = tab.ownerDocument.defaultView;
 		if(
 			this.isMultiProcessWindow(window) // Just always set...
