@@ -1274,7 +1274,7 @@ var privateTab = {
 				gBrowserThumbnails, meth, key,
 				function before(browser) {
 					if(_this.isPrivateContent(window)) {
-						_log(key + ": forbid capturing from " + browser.currentURI.spec.substr(0, 255));
+						_log(key + ": forbid capturing from " + _str(browser.currentURI.spec));
 						return { value: false };
 					}
 					return false;
@@ -3504,7 +3504,7 @@ var privateTab = {
 				var icon = _this.getTabIcon(tab);
 				if(!icon)
 					return;
-				_log("updateBookmarkFavicon(): tab icon: " + icon.substr(0, 255));
+				_log("updateBookmarkFavicon(): tab icon: " + _str(icon));
 				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
 					.getService(Components.interfaces.mozIAsyncFavicons);
 				faviconService.setAndFetchFaviconForPage(
@@ -4736,5 +4736,8 @@ function _log(s) {
 	dump(msg + "\n");
 }
 function _tab(tab) {
-	return tab && (tab.label || "").substr(0, 255);
+	return tab && _str(tab.label);
+}
+function _str(s) {
+	return s && s.substr(0, 255);
 }
