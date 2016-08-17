@@ -1354,18 +1354,16 @@ var privateTab = {
 	tabRestoringHandler: function(e) {
 		var tab = e.originalTarget || e.target;
 		var isPrivate = tab.hasAttribute(this.privateAttr);
-		_log("Tab restored, private attribute: " + isPrivate + ", label: " + _tab(tab));
+		var uri = tab.linkedBrowser && tab.linkedBrowser.currentURI.spec;
+		_log("Tab restored, private attribute: " + isPrivate + "\nlabel: " + _tab(tab) + "\nURI: " + _str(uri));
 		if("_privateTabIgnore" in tab) {
 			delete tab._privateTabIgnore;
 			_log("Leave restored tab as is");
 			this.setTabState(tab); // Private tab may be restored using our API
 			return;
 		}
-		if(
-			this.isRemoteTab(tab)
-			&& tab.linkedBrowser
-			&& tab.linkedBrowser.currentURI.spec == "about:blank"
-		) { // Yay, yay, let's take yet another strange trick
+		if(this.isRemoteTab(tab) && uri == "about:blank") {
+			// Yay, yay, let's take yet another strange trick
 			_log(e.type + ": about:blank remote tab, looks like this is buggy event (was loaded some URL into non-remote tab?)");
 			return;
 		}
