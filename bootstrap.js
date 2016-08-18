@@ -1318,7 +1318,7 @@ var privateTab = {
 			isPrivate = true;
 		}
 		_log(
-			"Tab opened: " + _tab(tab) + (isEmpty ? " (empty)" : "(not empty)")
+			"Tab opened: " + _tab(tab) + (isEmpty ? " (empty)" : " (not empty)")
 			+ "\nInherit private state: " + isPrivate
 		);
 		if(isPrivate != undefined)
@@ -1332,6 +1332,7 @@ var privateTab = {
 					_log("Restored not private tab in private window");
 					isPrivate = false;
 				}
+				_log("Mark tab as " + (isPrivate ? "private" : "not private"));
 				this.setTabState(tab, isPrivate);
 			}.bind(this), 0);
 		}
