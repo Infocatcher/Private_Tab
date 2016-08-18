@@ -3437,6 +3437,13 @@ var privateTab = {
 		}
 		if(/^\w+:\S*$/.test(tabLabel))
 			return false;
+		// Trick for duplicated tabs
+		var stack = new Error().stack;
+		_dbgv && _log("isEmptyTab() stack: " + stack);
+		if(stack.indexOf("\nssi_duplicateTab@resource:///modules/sessionstore/SessionStore.jsm:") != -1) {
+			_log("isEmptyTab(): found duplicateTab() in stack => not empty");
+			return false;
+		}
 		// We should check tab label for SeaMonkey and old Firefox
 		var emptyTabLabel = this.getTabBrowserString("tabs.emptyTabTitle", gBrowser)
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
