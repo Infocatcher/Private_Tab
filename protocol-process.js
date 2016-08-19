@@ -3,7 +3,7 @@
 	if(Services.appinfo.processType != Services.appinfo.PROCESS_TYPE_CONTENT)
 		return;
 	var {privateProtocol} = Components.utils.import("chrome://privatetab/content/protocol.jsm", {});
-	privateProtocol.init(function() {});
+	privateProtocol.init();
 	addMessageListener("PrivateTab:ProtocolDestroy", function destroy(msg) {
 		removeMessageListener("PrivateTab:ProtocolDestroy", destroy);
 		privateProtocol.destroy();

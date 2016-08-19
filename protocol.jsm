@@ -6,23 +6,27 @@ const P_CID = Components.ID("{e974cf10-11cb-4293-af88-e61c7dfe717c}"),
       P_SCHEME = "private",
       P_NAME = "Private Tab protocol handler";
 
+function _gLog() {}
+function _log(s) {
+	_gLog("[protocol] " + s);
+}
 Components.utils.import("resource://gre/modules/Services.jsm");
-var global = this;
 
 var privateProtocol = {
 	get compReg() {
 		return Components.manager
 			.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 	},
-	init: function(_log) {
-		global._log = _log;
+	init: function(logger) {
+		if(logger)
+			_gLog = logger;
 		this.compReg.registerFactory(P_CID, P_NAME, P_CONTRACTID, this);
-		_log("[protocol] Initialized");
+		_log("Initialized");
 	},
 	destroy: function() {
 		this.compReg.unregisterFactory(P_CID, this);
-		_log("[protocol] Destroyed");
-		delete global._log;
+		_log("Destroyed");
+		_gLog = function() {};
 	},
 
 	// nsIFactory
@@ -70,13 +74,13 @@ var privateProtocol = {
 	},
 	newChannel2: function(uri, loadInfo) {
 		var spec = uri.spec;
-		_log("[protocol] newChannel(): spec = " + spec);
+		_log("newChannel(): spec = " + spec);
 		var newSpec = "";
 		var schemePrefix = P_SCHEME + ":";
 		// Example: private:///#http://example.com/ (legacy) or private:http://example.com/
 		if(spec && spec.startsWith(schemePrefix))
 			newSpec = spec.substr(schemePrefix.length).replace(/^\/*#?/, "");
-		_log("[protocol] newChannel(): newSpec = " + newSpec);
+		_log("newChannel(): newSpec = " + newSpec);
 
 		// We can't use newChannel(newSpec, ...) here - strange things happens
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
@@ -88,7 +92,7 @@ var privateProtocol = {
 			)
 			: Services.io.newChannel(redirect, null, null); // Removed in Firefox 48+
 		var ensurePrivate = function(reason) {
-			_log("[protocol] " + reason + " => ensurePrivate()");
+			_log(reason + " => ensurePrivate()");
 			this.makeChannelPrivate(channel);
 			ensurePrivate = function() {}; // Don't call again in case of success
 		}.bind(this);
