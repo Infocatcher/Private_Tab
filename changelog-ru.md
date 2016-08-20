@@ -13,6 +13,7 @@
 `*` Теперь используется только один frame script для обмена сообщениями в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/213">#213</a>).<br>
 `x` Исправлена возможная рекурсия в обертке для `tab.setAttribute("image", …)` (<a href="https://github.com/Infocatcher/Private_Tab/issues/214">#214</a>).<br>
 `x` Исправлена совместимость с Firefox 51+ (SyntaxError: non-generator method definitions may not contain yield) (<a href="https://github.com/Infocatcher/Private_Tab/issues/228">#228</a>).<br>
+`x` Исправлено определение клонированных вкладок как не пустых (<a href="https://github.com/Infocatcher/Private_Tab/issues/230">#230</a>).<br>
 `*` Небольшие внутренние улучшения и исправления.<br>
 
 ##### 0.1.9.1 (2016-02-01)
