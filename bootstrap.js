@@ -1382,19 +1382,20 @@ var privateTab = {
 		}
 	},
 	tabCloseHandler: function(e) {
+		var isCapturing = e.eventPhase == e.CAPTURING_PHASE;
 		if(
 			typeof e.detail == "object" // Firefox 47+
 				? e.detail && e.detail.adoptedBy
 				: e.detail
 		) {
-			if(e.eventPhase == e.CAPTURING_PHASE)
+			if(isCapturing)
 				_log(e.type + ": tab moved to another window, ignore");
 			return;
 		}
 		// We can't open new private tab in bubbling phase:
 		// Error: TypeError: preview is undefined
 		// Source file: resource:///modules/WindowsPreviewPerTab.jsm
-		if(e.eventPhase == e.CAPTURING_PHASE)
+		if(isCapturing)
 			this.checkForLastPrivateTab(e);
 		else
 			this.cleanupClosedTab(e);
