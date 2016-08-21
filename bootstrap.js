@@ -1382,7 +1382,11 @@ var privateTab = {
 		}
 	},
 	tabCloseHandler: function(e) {
-		if(e.detail) {
+		if(
+			typeof e.detail == "object" // Firefox 47+
+				? e.detail && e.detail.adoptedBy
+				: e.detail
+		) {
 			if(e.eventPhase == e.CAPTURING_PHASE)
 				_log(e.type + ": tab moved to another window, ignore");
 			return;
