@@ -15,6 +15,7 @@
 `x` Исправлена совместимость с Firefox 51+ (SyntaxError: non-generator method definitions may not contain yield) (<a href="https://github.com/Infocatcher/Private_Tab/issues/228">#228</a>).<br>
 `x` Исправлено определение клонированных вкладок как не пустых (<a href="https://github.com/Infocatcher/Private_Tab/issues/230">#230</a>).<br>
 `x` Исправлено определение закрытия вкладок в Firefox 47+ (из-за изменений в свойстве `detail` события `TabClose`).<br>
+`x` Исправлено отсутствие иконок вкладок в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/224">#224</a>).<br>
 `*` Небольшие внутренние улучшения и исправления.<br>
 
 ##### 0.1.9.1 (2016-02-01)

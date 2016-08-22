@@ -15,6 +15,7 @@
 `x` Fixed compatibility with Firefox 51+ (SyntaxError: non-generator method definitions may not contain yield) (<a href="https://github.com/Infocatcher/Private_Tab/issues/228">#228</a>).<br>
 `x` Fixed detection of duplicated tabs as non-empty (<a href="https://github.com/Infocatcher/Private_Tab/issues/230">#230</a>).<br>
 `x` Correctly detect tab closing in Firefox 47+ (due to changes in `detail` property of `TabClose` event).<br>
+`x` Fixed missing tab favicons in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/224">#224</a>).<br>
 `*` Small internal enhancements and fixes.<br>
 
 ##### 0.1.9.1 (2016-02-01)
