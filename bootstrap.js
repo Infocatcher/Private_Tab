@@ -1228,50 +1228,54 @@ var privateTab = {
 	setTabAttributeProxy: function(attr, val) {
 		var args = arguments;
 		var tab = this;
-		if(attr == "image" && val) {
-			val += ""; // Convert to string
-			if(
-				!val.startsWith("moz-anno:favicon:")
-				&& privateTabInternal.isPrivateTab(tab)
-			) {
-				args = Array.slice(args);
-				try {
-					var browser = tab.linkedBrowser;
-					var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
-					if(doc instanceof Components.interfaces.nsIImageDocument) {
-						// Will use base64 representation for icons of image documents
-						var req = doc.imageRequest;
-						var image = req && req.image;
-						var maxSize = prefs.getPref("browser.chrome.image_icons.max_size", 1024);
-						if(image && image.width <= maxSize && image.height <= maxSize) {
-							var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
-							var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-							canvas.width = image.width;
-							canvas.height = image.height;
-							var ctx = canvas.getContext("2d");
-							ctx.drawImage(img, 0, 0);
-							args[1] = canvas.toDataURL();
-							_log("setTabAttributeProxy() => data:");
-						}
-						else {
-							_log("setTabAttributeProxy(): image missing or too large");
-						}
-					}
+		var window = tab.ownerDocument.defaultView;
+		function done() {
+			return window.Element.prototype.setAttribute.apply(tab, args);
+		}
+		if(attr != "image" || !val)
+			return done();
+		val += ""; // Convert to string
+		if(
+			val.startsWith("moz-anno:favicon:")
+			|| !privateTabInternal.isPrivateTab(tab)
+		)
+			return done();
+
+		args = Array.slice(args);
+		try {
+			var browser = tab.linkedBrowser;
+			var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
+			if(doc instanceof Components.interfaces.nsIImageDocument) {
+				// Will use base64 representation for icons of image documents
+				var req = doc.imageRequest;
+				var image = req && req.image;
+				var maxSize = prefs.getPref("browser.chrome.image_icons.max_size", 1024);
+				if(image && image.width <= maxSize && image.height <= maxSize) {
+					var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
+					var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+					canvas.width = image.width;
+					canvas.height = image.height;
+					var ctx = canvas.getContext("2d");
+					ctx.drawImage(img, 0, 0);
+					args[1] = canvas.toDataURL();
+					_log("setTabAttributeProxy() => data:");
 				}
-				catch(e) {
-					if(!doc && ("" + e).indexOf("unsafe CPOW usage") != -1)
-						_log("setTabAttributeProxy(): can't get content document, unsafe CPOW usage");
-					else {
-						Components.utils.reportError(e);
-						// Something went wrong, will use cached icon
-						args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
-						_log("setTabAttributeProxy() => moz-anno:favicon:");
-					}
+				else {
+					_log("setTabAttributeProxy(): image missing or too large");
 				}
 			}
 		}
-		var window = tab.ownerDocument.defaultView;
-		return window.Element.prototype.setAttribute.apply(this, args);
+		catch(e) {
+			if(!doc && ("" + e).indexOf("unsafe CPOW usage") != -1)
+				_log("setTabAttributeProxy(): can't get content document, unsafe CPOW usage");
+			else {
+				Components.utils.reportError(e);
+				// Something went wrong, will use cached icon
+				args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+				_log("setTabAttributeProxy() => moz-anno:favicon:");
+			}
+		}
+		return done();
 	},
 	patchBrowserThumbnails: function(window, applyPatch, forceDestroy) {
 		if(!("gBrowserThumbnails" in window)) // SeaMonkey?
