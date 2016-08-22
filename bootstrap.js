@@ -1076,9 +1076,8 @@ var privateTab = {
 						return;
 					}
 					try {
-						before.isPrivate = otherBrowser.webNavigation
-							.QueryInterface(Components.interfaces.nsILoadContext)
-							.usePrivateBrowsing;
+						var tab = _this.getTabForBrowser(otherBrowser);
+						before.isPrivate = _this.isPrivateTab(tab);
 						_log("swapDocShells(): usePrivateBrowsing: " + before.isPrivate);
 					}
 					catch(e) {
@@ -1088,12 +1087,9 @@ var privateTab = {
 				function after(ret, otherBrowser) {
 					var isPrivate = after.before.isPrivate;
 					if(isPrivate !== undefined) try {
-						this.webNavigation
-							.QueryInterface(Components.interfaces.nsILoadContext)
-							.usePrivateBrowsing = isPrivate;
 						_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
 						var tab = _this.getTabForBrowser(this);
-						tab && _this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+						_this.toggleTabPrivate(tab, isPrivate);
 					}
 					catch(e) {
 						Components.utils.reportError(e);
