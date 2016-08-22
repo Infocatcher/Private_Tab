@@ -1264,8 +1264,8 @@ var privateTab = {
 
 		args = Array.slice(args);
 		try {
-			var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
-			if(doc instanceof Components.interfaces.nsIImageDocument) {
+			var doc = browser.contentDocument;
+			if(doc && doc instanceof Components.interfaces.nsIImageDocument) {
 				// Will use base64 representation for icons of image documents
 				var req = doc.imageRequest;
 				var image = req && req.image;
@@ -1286,14 +1286,10 @@ var privateTab = {
 			}
 		}
 		catch(e) {
-			if(!doc && ("" + e).indexOf("unsafe CPOW usage") != -1)
-				_log("setTabAttributeProxy(): can't get content document, unsafe CPOW usage");
-			else {
-				Components.utils.reportError(e);
-				// Something went wrong, will use cached icon
-				args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
-				_log("setTabAttributeProxy() => moz-anno:favicon:");
-			}
+			Components.utils.reportError(e);
+			// Something went wrong, will use cached icon
+			args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+			_log("setTabAttributeProxy() => moz-anno:favicon:");
 		}
 		return done();
 	},
