@@ -1066,6 +1066,9 @@ var privateTab = {
 			// Note: we can't use "SwapDocShells" event: we should do our corrections after swapDocShells() call,
 			// see https://github.com/Infocatcher/Private_Tab/issues/115
 			var _this = this;
+			var _spec = function(br) {
+				return br.currentURI && br.currentURI.spec;
+			};
 			patcher.wrapFunction(
 				browserProto, "swapDocShells", "browser.swapDocShells",
 				function before(otherBrowser) {
@@ -1077,6 +1080,10 @@ var privateTab = {
 					}
 					try {
 						var tab = _this.getTabForBrowser(otherBrowser);
+						if(!tab) {
+							_log("swapDocShells(): can't get, tab not found for " + _str(_spec(otherBrowser)));
+							return;
+						}
 						before.isPrivate = _this.isPrivateTab(tab);
 						_log("swapDocShells(): usePrivateBrowsing: " + before.isPrivate);
 					}
@@ -1087,8 +1094,12 @@ var privateTab = {
 				function after(ret, otherBrowser) {
 					var isPrivate = after.before.isPrivate;
 					if(isPrivate !== undefined) try {
-						_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
 						var tab = _this.getTabForBrowser(this);
+						if(!tab) {
+							_log("swapDocShells(): can't set, tab not found for " + _str(_spec(this)));
+							return;
+						}
+						_log("swapDocShells(): set usePrivateBrowsing to " + isPrivate);
 						_this.toggleTabPrivate(tab, isPrivate);
 					}
 					catch(e) {
