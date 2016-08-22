@@ -55,6 +55,37 @@ var remoteFrameHandler = {
 					}, true);
 				}
 			break;
+			case "GetImageDocumentDataURL":
+				var data = "";
+				var isImageDoc = false;
+				var doc = content.document;
+				if(doc instanceof Components.interfaces.nsIImageDocument) {
+					isImageDoc = true;
+					var req = doc.imageRequest;
+					var image = req && req.image;
+					try {
+						var {Services} = Components.utils.import("resource://gre/modules/Services.jsm", {});
+						var maxSize = Services.prefs.getIntPref("browser.chrome.image_icons.max_size");
+					}
+					catch(e) {
+						Components.utils.reportError(e);
+						maxSize = 1024;
+					}
+					if(image && image.width <= maxSize && image.height <= maxSize) {
+						var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
+						var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+						canvas.width = image.width;
+						canvas.height = image.height;
+						var ctx = canvas.getContext("2d");
+						ctx.drawImage(img, 0, 0);
+						data = canvas.toDataURL();
+					}
+				}
+				sendAsyncMessage("PrivateTab:ImageDocumentDataURL", {
+					isImageDocument: isImageDoc,
+					dataURL: data
+				});
+			break;
 			case "Destroy":
 				this.destroy();
 		}

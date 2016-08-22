@@ -1241,9 +1241,29 @@ var privateTab = {
 		)
 			return done();
 
+		var browser = tab.linkedBrowser;
+		if(privateTabInternal.isRemoteTab(tab)) {
+			var mm = browser.messageManager;
+			var receiveMessage = function(msg) {
+				mm.removeMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
+				args[1] = msg.data.isImageDocument
+					? msg.data.dataURL
+					: val.replace(/^moz-anno:favicon:/, "");
+				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + args[1]);
+				done();
+			};
+			mm.addMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
+			mm.sendAsyncMessage("PrivateTab:Action", {
+				action: "GetImageDocumentDataURL"
+			});
+
+			// Actually this doesn't work (if icon isn't cached yet), but we should return something in sync mode
+			args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+			return done();
+		}
+
 		args = Array.slice(args);
 		try {
-			var browser = tab.linkedBrowser;
 			var doc = browser.contentDocument || browser.contentDocumentAsCPOW;
 			if(doc instanceof Components.interfaces.nsIImageDocument) {
 				// Will use base64 representation for icons of image documents
