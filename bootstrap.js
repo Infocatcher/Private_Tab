@@ -1158,7 +1158,7 @@ var privateTab = {
 			var restoreTimer = 0;
 			patcher.wrapFunction(
 				gBrowser, meth, key,
-				function before(tab, uri) {
+				function before(tab, uri, loadingPrincipal) {
 					if(!uri || _this.isPrivateWindow(window))
 						return;
 					var isPrivate = _this.isPrivateTab(tab); //~ todo: may work wrong with Electrolysis
@@ -1259,10 +1259,14 @@ var privateTab = {
 					}
 				}
 				catch(e) {
-					Components.utils.reportError(e);
-					// Something went wrong, will use cached icon
-					args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
-					_log("setTabAttributeProxy() => moz-anno:favicon:");
+					if(!doc && ("" + e).indexOf("unsafe CPOW usage") != -1)
+						_log("setTabAttributeProxy(): can't get content document, unsafe CPOW usage");
+					else {
+						Components.utils.reportError(e);
+						// Something went wrong, will use cached icon
+						args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+						_log("setTabAttributeProxy() => moz-anno:favicon:");
+					}
 				}
 			}
 		}
