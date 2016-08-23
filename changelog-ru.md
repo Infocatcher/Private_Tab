@@ -16,6 +16,7 @@
 `x` Исправлено определение клонированных вкладок как не пустых (<a href="https://github.com/Infocatcher/Private_Tab/issues/230">#230</a>).<br>
 `x` Исправлено определение закрытия вкладок в Firefox 47+ (из-за изменений в свойстве `detail` события `TabClose`).<br>
 `x` Исправлено отсутствие иконок вкладок в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/224">#224</a>).<br>
+`+` Добавлена финская локаль (fi), спасибо <a href="https://github.com/hellojole">hellojole</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/226">#226</a>).<br>
 `*` Небольшие внутренние улучшения и исправления.<br>
 
 ##### 0.1.9.1 (2016-02-01)

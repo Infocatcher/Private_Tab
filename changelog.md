@@ -16,6 +16,7 @@
 `x` Fixed detection of duplicated tabs as non-empty (<a href="https://github.com/Infocatcher/Private_Tab/issues/230">#230</a>).<br>
 `x` Correctly detect tab closing in Firefox 47+ (due to changes in `detail` property of `TabClose` event).<br>
 `x` Fixed missing tab favicons in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/224">#224</a>).<br>
+`+` Added Finnish locale (fi), thanks to <a href="https://github.com/hellojole">hellojole</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/226">#226</a>).<br>
 `*` Small internal enhancements and fixes.<br>
 
 ##### 0.1.9.1 (2016-02-01)
