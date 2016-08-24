@@ -1249,7 +1249,7 @@ var privateTab = {
 				args[1] = msg.data.isImageDocument
 					? msg.data.dataURL
 					: val.replace(/^moz-anno:favicon:/, "");
-				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + args[1]);
+				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + _str(args[1]));
 				done();
 			};
 			mm.addMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
