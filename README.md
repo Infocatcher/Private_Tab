@@ -15,7 +15,19 @@ You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_menu_icons">add icons to menu items</a>
 * <a href="https://github.com/Infocatcher/UserStyles/blob/master/Private_Tab_hide_items">hide some menu items</a>
 
-#### Keyboard shortcuts:
+#### Options
+See <em>extensions.privateTab.</em>\* preferences in <a href="http://kb.mozillazine.org/About:config">about:config</a> page, some descriptions can be found in <a href="https://github.com/Infocatcher/Private_Tab/blob/master/defaults/preferences/prefs.js">defaults/preferences/prefs.js</a>.
+
+* <em>extensions.privateTab.sendRefererHeader</em>
+<br>`0` – don't send <a href="https://en.wikipedia.org/wiki/HTTP_referer">HTTP referer</a> when URI is opened in new private tab
+<br>`1` – send only if private tab opened from another private tab
+<br>`2` – always send (as Firefox itself do for “Open Link in New Private Window”)
+
+* <em>extensions.privateTab.usePrivateWindowStyle</em>
+<br>`true` – use style of private window, if current tab is private
+<br>`false` – only show private state of window (regardless of current tab private state)
+
+##### Keyboard shortcuts:
 You can modify keyboard shortcuts through <a href="http://kb.mozillazine.org/About:config">about:config</a> page, see notes about <em>extensions.privateTab.key.</em>\* preferences in <a href="https://github.com/Infocatcher/Private_Tab/blob/master/defaults/preferences/prefs.js">defaults/preferences/prefs.js</a>.
 
 #### Troubleshooting:
