@@ -57,10 +57,9 @@ var remoteFrameHandler = {
 			break;
 			case "GetImageDocumentDataURL":
 				var data = "";
-				var isImageDoc = false;
 				var doc = content.document;
-				if(doc instanceof Components.interfaces.nsIImageDocument) {
-					isImageDoc = true;
+				var isImageDoc = doc instanceof Components.interfaces.nsIImageDocument;
+				if(isImageDoc) {
 					var req = doc.imageRequest;
 					var image = req && req.image;
 					try {
