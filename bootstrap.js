@@ -1225,18 +1225,19 @@ var privateTab = {
 		}
 		_log((applyPatch ? "Override" : "Restore") + " tab.setAttribute()");
 	},
-	setTabAttributeProxy: function(attr, val) {
+	setTabAttributeProxy: function(attr, src) {
 		var args = arguments;
 		var tab = this;
-		var window = tab.ownerDocument.defaultView;
 		function done() {
+			args[1] = src;
+			var window = tab.ownerDocument.defaultView;
 			return window.Element.prototype.setAttribute.apply(tab, args);
 		}
-		if(attr != "image" || !val)
+		if(attr != "image" || !src)
 			return done();
-		val += ""; // Convert to string
+		src += ""; // Convert to string
 		if(
-			val.startsWith("moz-anno:favicon:")
+			src.startsWith("moz-anno:favicon:")
 			|| !privateTabInternal.isPrivateTab(tab)
 		)
 			return done();
@@ -1246,10 +1247,10 @@ var privateTab = {
 			var mm = browser.messageManager;
 			var receiveMessage = function(msg) {
 				mm.removeMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
-				args[1] = msg.data.isImageDocument
+				src = msg.data.isImageDocument
 					? msg.data.dataURL
-					: val.replace(/^moz-anno:favicon:/, "");
-				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + _str(args[1]));
+					: origSrc || src;
+				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + _str(src));
 				done();
 			};
 			mm.addMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
@@ -1258,7 +1259,8 @@ var privateTab = {
 			});
 
 			// Actually this doesn't work (if icon isn't cached yet), but we should return something in sync mode
-			args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+			var origSrc = src;
+			src = "moz-anno:favicon:" + src.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
 			return done();
 		}
 
@@ -1277,7 +1279,7 @@ var privateTab = {
 					canvas.height = image.height;
 					var ctx = canvas.getContext("2d");
 					ctx.drawImage(img, 0, 0);
-					args[1] = canvas.toDataURL();
+					src = canvas.toDataURL();
 					_log("setTabAttributeProxy() => data:");
 				}
 				else {
@@ -1288,7 +1290,7 @@ var privateTab = {
 		catch(e) {
 			Components.utils.reportError(e);
 			// Something went wrong, will use cached icon
-			args[1] = "moz-anno:favicon:" + val.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
+			src = "moz-anno:favicon:" + src.replace(/[&#]-moz-resolution=\d+,\d+$/, "");
 			_log("setTabAttributeProxy() => moz-anno:favicon:");
 		}
 		return done();
