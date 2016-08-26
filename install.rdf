@@ -105,9 +105,9 @@
 			<Description>
 				<em:locale>fi</em:locale>
 				<em:name>Private Tab</em:name>
-				<em:description>Adds private tabs</em:description>
+				<em:description>Lisää yksityiset välilehdet</em:description>
 				<em:creator>Infocatcher</em:creator>
-				<em:translator>hellojole</em:translator>
+				<em:translator>Joel Hietala</em:translator>
 			</Description>
 		</em:localized>
 
