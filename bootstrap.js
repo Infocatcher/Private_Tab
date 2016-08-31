@@ -4249,7 +4249,7 @@ var privateTab = {
 		var mm = tab.linkedBrowser.messageManager;
 		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
 		mm.sendAsyncMessage("PrivateTab:Action", {
-			action: "GetSatet"
+			action: "GetState"
 		});
 	},
 	isRemoteTab: function(tab) {

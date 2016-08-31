@@ -25,7 +25,7 @@ var remoteFrameHandler = {
 	receiveMessage: function(msg) {
 		var data = msg.data;
 		switch(data.action) {
-			case "GetSatet":
+			case "GetState":
 				sendAsyncMessage("PrivateTab:PrivateState", { isPrivate: this.isPrivate });
 			break;
 			case "ToggleState":
