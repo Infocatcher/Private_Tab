@@ -410,6 +410,7 @@ var privateTab = {
 			return;
 		}
 
+		_dbgv && _log("initWindow()");
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		window.privateTab = new API(window);
@@ -4260,9 +4261,11 @@ var privateTab = {
 
 	sendAsyncMessage: function(window, mm, data) {
 		if(!window.privateTab._frameScriptLoaded) {
+			_dbgv && _log("sendAsyncMessage() -> loadFrameScript()");
 			window.privateTab._frameScriptLoaded = true;
 			window.messageManager.loadFrameScript("chrome://privatetab/content/content.js" + this.frameScriptUID, true);
 		}
+		_dbgv && _log("sendAsyncMessage():\n" + JSON.stringify(data, null, "\t"));
 		mm.sendAsyncMessage("PrivateTab:Action", data);
 	},
 
