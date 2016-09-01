@@ -451,11 +451,19 @@ var privateTab = {
 
 		if(reason == WINDOW_LOADED)
 			this.inheritWindowState(window);
-		Array.forEach(gBrowser.tabs, function(tab) {
-			this.setTabState(tab);
-		}, this);
+		// Show real tab state, but after small delay for better startup performance
+		window.setTimeout(function() {
+			Array.forEach(gBrowser.tabs, function(tab) {
+				this.setTabState(tab);
+			}, this);
+		}.bind(this), 0);
 
 		if(this.isPrivateWindow(window)) {
+			// All tabs should be private... so, update state before real check
+			Array.forEach(gBrowser.tabs, function(tab) {
+				tab.setAttribute(this.privateAttr, "true");
+			}, this);
+
 			var root = document.documentElement;
 			// We handle window before gBrowserInit.onLoad(), so set "privatebrowsingmode"
 			// for fixAppButtonWidth() manually
