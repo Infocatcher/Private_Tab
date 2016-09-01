@@ -410,11 +410,6 @@ var privateTab = {
 			return;
 		}
 
-		if(this.isMultiProcessWindow(window)) {
-			var mm = window.messageManager;
-			mm.loadFrameScript("chrome://privatetab/content/content.js" + this.frameScriptUID, true);
-		}
-
 		var gBrowser = window.gBrowser
 			|| window.getBrowser(); // For SeaMonkey
 		window.privateTab = new API(window);
@@ -1228,22 +1223,23 @@ var privateTab = {
 	setTabAttributeProxy: function(attr, src) {
 		var args = arguments;
 		var tab = this;
+		var window = tab.ownerDocument.defaultView;
 		function done() {
 			args[1] = src;
-			var window = tab.ownerDocument.defaultView;
 			return window.Element.prototype.setAttribute.apply(tab, args);
 		}
 		if(attr != "image" || !src)
 			return done();
+		var pti = privateTabInternal;
 		src += ""; // Convert to string
 		if(
 			src.startsWith("moz-anno:favicon:")
-			|| !privateTabInternal.isPrivateTab(tab)
+			|| !pti.isPrivateTab(tab)
 		)
 			return done();
 
 		var browser = tab.linkedBrowser;
-		if(privateTabInternal.isRemoteTab(tab)) {
+		if(pti.isRemoteTab(tab)) {
 			var mm = browser.messageManager;
 			var receiveMessage = function(msg) {
 				mm.removeMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
@@ -1254,7 +1250,7 @@ var privateTab = {
 				done();
 			};
 			mm.addMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
-			mm.sendAsyncMessage("PrivateTab:Action", {
+			pti.sendAsyncMessage(window, mm, {
 				action: "GetImageDocumentDataURL"
 			});
 
@@ -2270,7 +2266,7 @@ var privateTab = {
 		}
 		_log(e.type + ": force make tab " + (isPrivate ? "private" : "not private"));
 		var mm = tab.linkedBrowser.messageManager;
-		mm.sendAsyncMessage("PrivateTab:Action", {
+		this.sendAsyncMessage(window, mm, {
 			action: "ToggleState",
 			isPrivate: isPrivate,
 			silent: true
@@ -3536,12 +3532,13 @@ var privateTab = {
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
 		_log("updateBookmarkFavicon()");
 		var browser = tab.linkedBrowser;
+		var window = browser.ownerDocument.defaultView;
 		var _this = this;
 		function onLoaded(e, principal) {
 			principal = principal || e && e.target.nodePrincipal;
 			e && browser.removeEventListener(e.type, onLoaded, true);
 			_dbgv && _log("updateBookmarkFavicon(): " + (e ? e.type : "already loaded"));
-			browser.ownerDocument.defaultView.setTimeout(function() { // Wait for possible changes
+			window.setTimeout(function() { // Wait for possible changes
 				if(!tab.parentNode) // Tab was closed
 					return;
 				_dbgv && _log("updateBookmarkFavicon(): delay");
@@ -3568,7 +3565,7 @@ var privateTab = {
 				onLoaded(null, msg.data.principal);
 			};
 			mm.addMessageListener("PrivateTab:ContentLoaded", receiveMessage);
-			mm.sendAsyncMessage("PrivateTab:Action", {
+			this.sendAsyncMessage(window, mm, {
 				action: "WaitLoading"
 			});
 		}
@@ -3672,7 +3669,7 @@ var privateTab = {
 					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 			}.bind(this);
 			mm.addMessageListener("PrivateTab:PrivateChanged", receiveMessage);
-			mm.sendAsyncMessage("PrivateTab:Action", {
+			this.sendAsyncMessage(window, mm, {
 				action: "ToggleState",
 				isPrivate: isPrivate
 			});
@@ -4247,8 +4244,9 @@ var privateTab = {
 			feedback.call(context, msg.data.isPrivate);
 		};
 		var mm = tab.linkedBrowser.messageManager;
+		var window = tab.ownerDocument.defaultView;
 		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
-		mm.sendAsyncMessage("PrivateTab:Action", {
+		this.sendAsyncMessage(window, mm, {
 			action: "GetState"
 		});
 	},
@@ -4258,6 +4256,14 @@ var privateTab = {
 	},
 	isPendingTab: function(tab) {
 		return tab.hasAttribute("pending");
+	},
+
+	sendAsyncMessage: function(window, mm, data) {
+		if(!window.privateTab._frameScriptLoaded) {
+			window.privateTab._frameScriptLoaded = true;
+			window.messageManager.loadFrameScript("chrome://privatetab/content/content.js" + this.frameScriptUID, true);
+		}
+		mm.sendAsyncMessage("PrivateTab:Action", data);
 	},
 
 	isLastPrivate: function(tabOrWindow) {
@@ -4572,6 +4578,7 @@ API.prototype = {
 	_checkLastPrivate: true,
 	_clearSearchBarUndo: false,
 	_clearSearchBarValue: false,
+	_frameScriptLoaded: false,
 	_destroy: function() {
 		if(this._openNewTabsPrivate !== undefined)
 			this.stopToOpenTabs();
