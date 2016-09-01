@@ -4269,8 +4269,10 @@ var privateTab = {
 		mm.sendAsyncMessage("PrivateTab:Action", data);
 	},
 	waitForMessage: function(mm, name, callback, context) {
+		_dbgv && _log('waitForMessage("' + name + '")');
 		mm.addMessageListener(name, function receiveMessage(msg) {
 			mm.removeMessageListener(name, receiveMessage);
+			_dbgv && _log('waitForMessage("' + name + '") -> callback()');
 			callback.call(context, msg);
 		});
 	},
