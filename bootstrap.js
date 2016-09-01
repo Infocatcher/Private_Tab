@@ -1250,15 +1250,13 @@ var privateTab = {
 		var browser = tab.linkedBrowser;
 		if(pti.isRemoteTab(tab)) {
 			var mm = browser.messageManager;
-			var receiveMessage = function(msg) {
-				mm.removeMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
+			pti.waitForMessage(mm, "PrivateTab:ImageDocumentDataURL", function(msg) {
 				src = msg.data.isImageDocument
 					? msg.data.dataURL
 					: origSrc || src;
 				_log("setTabAttributeProxy(): received response from remote tab, set image to\n" + _str(src));
 				done();
-			};
-			mm.addMessageListener("PrivateTab:ImageDocumentDataURL", receiveMessage);
+			});
 			pti.sendAsyncMessage(window, mm, {
 				action: "GetImageDocumentDataURL"
 			});
@@ -3569,11 +3567,9 @@ var privateTab = {
 		}
 		if(this.isRemoteTab(tab)) {
 			var mm = browser.messageManager;
-			var receiveMessage = function(msg) {
-				mm.removeMessageListener("PrivateTab:ContentLoaded", receiveMessage);
+			this.waitForMessage(mm, "PrivateTab:ContentLoaded", function(msg) {
 				onLoaded(null, msg.data.principal);
-			};
-			mm.addMessageListener("PrivateTab:ContentLoaded", receiveMessage);
+			});
 			this.sendAsyncMessage(window, mm, {
 				action: "WaitLoading"
 			});
@@ -3667,8 +3663,7 @@ var privateTab = {
 			}
 
 			var mm = tab.linkedBrowser.messageManager;
-			var receiveMessage = function(msg) {
-				mm.removeMessageListener("PrivateTab:PrivateChanged", receiveMessage);
+			this.waitForMessage(mm, "PrivateTab:PrivateChanged", function(msg) {
 				var isPrivate = msg.data.isPrivate;
 				_log(
 					"Received message from frame script: isPrivate = " + isPrivate
@@ -3676,8 +3671,7 @@ var privateTab = {
 				);
 				if(!_silent)
 					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
-			}.bind(this);
-			mm.addMessageListener("PrivateTab:PrivateChanged", receiveMessage);
+			}, this);
 			this.sendAsyncMessage(window, mm, {
 				action: "ToggleState",
 				isPrivate: isPrivate
@@ -4248,13 +4242,11 @@ var privateTab = {
 			feedback.call(context, privacyContext.usePrivateBrowsing);
 			return;
 		}
-		var receiveMessage = function(msg) {
-			mm.removeMessageListener("PrivateTab:PrivateState", receiveMessage);
-			feedback.call(context, msg.data.isPrivate);
-		};
-		var mm = tab.linkedBrowser.messageManager;
 		var window = tab.ownerDocument.defaultView;
-		mm.addMessageListener("PrivateTab:PrivateState", receiveMessage);
+		var mm = tab.linkedBrowser.messageManager;
+		this.waitForMessage(mm, "PrivateTab:PrivateState", function(msg) {
+			feedback.call(context, msg.data.isPrivate);
+		});
 		this.sendAsyncMessage(window, mm, {
 			action: "GetState"
 		});
@@ -4275,6 +4267,12 @@ var privateTab = {
 		}
 		_dbgv && _log("sendAsyncMessage():\n" + JSON.stringify(data, null, "\t"));
 		mm.sendAsyncMessage("PrivateTab:Action", data);
+	},
+	waitForMessage: function(mm, name, callback, context) {
+		mm.addMessageListener(name, function receiveMessage(msg) {
+			mm.removeMessageListener(name, receiveMessage);
+			callback.call(context, msg);
+		});
 	},
 
 	isLastPrivate: function(tabOrWindow) {
