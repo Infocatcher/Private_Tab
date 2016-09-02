@@ -1065,6 +1065,13 @@ var privateTab = {
 			_log("Can't patch browser: no swapDocShells() method");
 			return;
 		}
+		// Get the same prototype for remote and non-remote tabs
+		for(var p = browserProto; p; p = Object.getPrototypeOf(p)) {
+			if(p.hasOwnProperty("swapDocShells")) {
+				browserProto = p;
+				break;
+			}
+		}
 		if(applyPatch) {
 			_log("Patch browser.__proto__.swapDocShells() method");
 			// Note: we can't use "SwapDocShells" event: we should do our corrections after swapDocShells() call,
