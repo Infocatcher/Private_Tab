@@ -4203,8 +4203,7 @@ var privateTab = {
 	getContentWindow: function(window) {
 		// Note: with enabled Electrolysis window.content may refers to
 		// previously selected content window right after "TabSelect"
-		return window.gBrowser.contentWindow
-			|| window.gBrowser.contentWindowAsCPOW;
+		return window.gBrowser.contentWindow;
 	},
 	isMultiProcessWindow: function(window) {
 		return "gMultiProcessBrowser" in window && window.gMultiProcessBrowser;
@@ -4217,7 +4216,7 @@ var privateTab = {
 				+ new Error().stack
 			);
 		}
-		var window = browser.contentWindow || browser.contentWindowAsCPOW;
+		var window = browser.contentWindow;
 		try {
 			return this.getPrivacyContext(window);
 		}
