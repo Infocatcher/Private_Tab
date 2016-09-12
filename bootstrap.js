@@ -941,12 +941,35 @@ var privateTab = {
 			patcher.wrapFunction(
 				window, fnViewSource, fnViewSource,
 				function before(argsOrDoc) {
-					if(!prefs.getPref("view_source.tab"))
-						return;
-					var w = this.getNotPopupWindow(window, true) || window;
-					var isPrivate = this.isPrivateContent(w);
-					_log(fnViewSource + "(): wait for tab to make " + (isPrivate ? "private" : "not private"));
-					this.readyToOpenTab(w, isPrivate);
+					if(prefs.getPref("view_source.tab")) {
+						var w = this.getNotPopupWindow(window, true) || window;
+						var isPrivate = this.isPrivateContent(w);
+						_log(fnViewSource + "(): wait for tab to make " + (isPrivate ? "private" : "not private"));
+						this.readyToOpenTab(w, isPrivate);
+					}
+					else if(!prefs.getPref("view_source.editor.external")) {
+						var isPrivate = this.isPrivateContent(window);
+						var _p = isPrivate ? "private" : "not private";
+						_log(fnViewSource + "(): wait for window to make " + _p);
+						var observer, onLoad;
+						Services.obs.addObserver(observer = function(window, topic, data) {
+							Services.obs.removeObserver(observer, topic);
+							window.addEventListener("load", onLoad = function(e) {
+								window.removeEventListener("load", onLoad, false);
+								if(window.location.href != "chrome://global/content/viewSource.xul") {
+									_log(fnViewSource + "(): can't get view source window");
+									return;
+								}
+								var privacyContext = this.getPrivacyContext(window);
+								if(privacyContext.usePrivateBrowsing == isPrivate)
+									_log(fnViewSource + "(): window already " + _p);
+								else {
+									_log(fnViewSource + "(): make window " + _p);
+									privacyContext.usePrivateBrowsing = isPrivate;
+								}
+							}.bind(this), false);
+						}.bind(this), "domwindowopened", false);
+					}
 				}.bind(this)
 			);
 		}
