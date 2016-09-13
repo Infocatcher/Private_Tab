@@ -404,8 +404,6 @@ var privateTab = {
 
 	initWindow: function(window, reason) {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window)) {
-			if(this.isViewSourceWindow(window))
-				this.setViewSourcePrivacy(window);
 			delete window.__privateTabOpener;
 			return;
 		}
@@ -665,76 +663,6 @@ var privateTab = {
 		var loc = window.location.href;
 		return loc == "chrome://browser/content/browser.xul"
 			|| loc == "chrome://navigator/content/navigator.xul";
-	},
-	isViewSourceWindow: function(window) {
-		return window.location.href == "chrome://global/content/viewSource.xul";
-	},
-	setViewSourcePrivacy: function(window) {
-		var args = window.arguments;
-		var vsURI      = args && args[0];
-		var vsPageDesc = args && args[2];
-		if(!vsURI || !vsPageDesc) {
-			_log(
-				"setViewSourcePrivacy(): view source window was opened with unusable arguments:\n"
-				 + (args && Array.map(args, String).join("\n"))
-			);
-			return;
-		}
-		var opener = window.opener || window.__privateTabOpener;
-		if(
-			!opener
-			|| opener.closed
-			|| !opener.gBrowser
-			|| !opener.gBrowser.browsers
-		) {
-			_log("setViewSourcePrivacy(): can't get (or wrong) opener window");
-			return;
-		}
-		vsPageDesc instanceof Components.interfaces.nsISHEntry;
-		opener.gBrowser.browsers.some(function(browser, i) {
-			var contentWindow = browser.contentWindow || browser.contentWindowAsCPOW;
-			var content = getSourceWindow(contentWindow);
-			if(!content)
-				return false;
-			_log(
-				"setViewSourcePrivacy(): found source tab #" + i + ":\n" + browser.currentURI.spec
-				+ (content == contentWindow ? "" : "\n=> " + content.location.href)
-			);
-			var isPrivate = this.isPrivateWindow(content);
-			var privacyContext = this.getPrivacyContext(window);
-			if(privacyContext.usePrivateBrowsing != isPrivate) {
-				_log("setViewSourcePrivacy(): make window " + (isPrivate ? "private" : "not private"));
-				privacyContext.usePrivateBrowsing = isPrivate;
-			}
-			return true;
-		}, this);
-		function getSourceWindow(win) {
-			if(isSourceWindow(win))
-				return win;
-			var frames = win.frames;
-			if(frames) for(var i = 0, l = frames.length; i < l; ++i) {
-				var sourceWin = getSourceWindow(frames[i]);
-				if(sourceWin)
-					return sourceWin;
-			}
-			return null;
-		}
-		function isSourceWindow(win) {
-			try {
-				var pageDesc = win
-					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-					.getInterface(Components.interfaces.nsIWebNavigation)
-					.QueryInterface(Components.interfaces.nsIWebPageDescriptor)
-					.currentDescriptor;
-			}
-			catch(e) { // Throws for not yet loaded (pending) tabs
-			}
-			return pageDesc
-				&& pageDesc instanceof Components.interfaces.nsISHEntry
-				&& pageDesc.ID && pageDesc.ID == vsPageDesc.ID
-				&& pageDesc.docshellID && pageDesc.docshellID == vsPageDesc.docshellID
-				&& win.location.href == vsURI;
-		}
 	},
 	inheritWindowState: function(window) {
 		var args = window.arguments || undefined;
