@@ -427,7 +427,7 @@ var privateTab = {
 				this.patchWarnAboutClosingWindow(window, true);
 				// Wait to not break BROWSER_NEW_TAB_URL in detached window
 				this.patchTabBrowserDND(window, gBrowser, true);
-				this.patchViewSourceTab(window, true);
+				this.patchViewSource(window, true);
 			}.bind(this), 50);
 			// Import data from privateTab.tabLabelIsEmpty() API
 			if(!this.emptyTabLabelsImported) {
@@ -549,7 +549,7 @@ var privateTab = {
 		}
 		this.patchBrowsers(gBrowser, false, !force);
 		this.patchTabBrowserDND(window, gBrowser, false, false, !force);
-		this.patchViewSourceTab(window, false, !force);
+		this.patchViewSource(window, false, !force);
 		this.patchWarnAboutClosingWindow(window, false, !force);
 		if(!prefs.get("allowOpenExternalLinksInPrivateTabs"))
 			this.patchBrowserLoadURI(window, false, !force);
@@ -931,7 +931,7 @@ var privateTab = {
 			forceDestroy
 		);
 	},
-	patchViewSourceTab: function(window, applyPatch, forceDestroy) {
+	patchViewSource: function(window, applyPatch, forceDestroy) {
 		var fnViewSource = "BrowserViewSourceOfDocument";
 		if(!(fnViewSource in window)) {
 			_log("Can't patch " + fnViewSource + "(): function not found");
