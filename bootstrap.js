@@ -2185,10 +2185,11 @@ var privateTab = {
 						&& fe.localName == "browser"
 						&& fe.getAttribute("remote") == "true"
 					) {
-						var doc = fe.contentDocument || fe.contentDocumentAsCPOW;
-						fe = doc.activeElement;
-						while(fe instanceof window.HTMLFrameElement)
-							fe = fe.contentDocument.activeElement;
+						//var doc = fe.contentDocument;
+						//fe = doc.activeElement;
+						//while(fe instanceof window.HTMLFrameElement)
+						//	fe = fe.contentDocument.activeElement;
+						fe = null;
 					}
 					if(fe && this.isEditableNode(fe)) {
 						_log("Don't use single char hotkey in editable node");
