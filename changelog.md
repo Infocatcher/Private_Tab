@@ -6,6 +6,10 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
+`x` Correctly restore wrapper for `browser.swapDocShells()` to handle detached tabs in multi-process mode.<br>
+`*` Improved performance in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
+
 ##### 0.2.0 (2016-08-25)
 `x` Compatibility fixes for multi-process mode (Electrolysis aka e10s) around “unsafe CPOW usage” (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
 `*` Updated Portuguese (Portugal) locale (pt-PT), thanks to <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/210">#210</a>).<br>

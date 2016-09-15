@@ -6,6 +6,10 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`*` Немного улучшена производительность при запуске в мультипроцессном режиме: frame script теперь загружается после небольшой задержки.<br>
+`x` Исправлено восстановление обертки вокруг `browser.swapDocShells()` для обработки «оторванных» вкладок в мультипроцессном режиме.<br>
+`*` Улучшена производительность в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
+
 ##### 0.2.0 (2016-08-25)
 `x` Исправления для мультипроцессного режима (Electrolysis aka e10s) в части «unsafe CPOW usage» (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
 `*` Обновлена португальская (Португалия) локаль (pt-PT), спасибо <a href="https://github.com/SW1FT">SW1FT</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/210">#210</a>).<br>
