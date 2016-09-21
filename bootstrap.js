@@ -877,26 +877,26 @@ var privateTab = {
 					}
 					else if(!prefs.getPref("view_source.editor.external")) {
 						var isPrivate = this.isPrivateContent(window);
+						var _this = this;
 						var _p = isPrivate ? "private" : "not private";
 						_log(fnViewSource + "(): wait for window to make " + _p);
-						var observer, onLoad;
-						Services.obs.addObserver(observer = function(window, topic, data) {
+						Services.obs.addObserver(function observer(window, topic, data) {
 							Services.obs.removeObserver(observer, topic);
-							window.addEventListener("load", onLoad = function(e) {
+							window.addEventListener("load", function onLoad(e) {
 								window.removeEventListener("load", onLoad, false);
 								if(window.location.href != "chrome://global/content/viewSource.xul") {
 									_log(fnViewSource + "(): can't get view source window");
 									return;
 								}
-								var privacyContext = this.getPrivacyContext(window);
+								var privacyContext = _this.getPrivacyContext(window);
 								if(privacyContext.usePrivateBrowsing == isPrivate)
 									_log(fnViewSource + "(): window already " + _p);
 								else {
 									_log(fnViewSource + "(): make window " + _p);
 									privacyContext.usePrivateBrowsing = isPrivate;
 								}
-							}.bind(this), false);
-						}.bind(this), "domwindowopened", false);
+							}, false);
+						}, "domwindowopened", false);
 					}
 				}.bind(this)
 			);
