@@ -872,14 +872,13 @@ var privateTab = {
 					if(prefs.getPref("view_source.tab")) {
 						var w = this.getNotPopupWindow(window, true) || window;
 						var isPrivate = this.isPrivateContent(w);
-						_log(fnViewSource + "(): wait for tab to make " + (isPrivate ? "private" : "not private"));
+						_log(fnViewSource + "(): wait for tab to make " + _p(isPrivate));
 						this.readyToOpenTab(w, isPrivate);
 					}
 					else if(!prefs.getPref("view_source.editor.external")) {
 						var isPrivate = this.isPrivateContent(window);
 						var _this = this;
-						var _p = isPrivate ? "private" : "not private";
-						_log(fnViewSource + "(): wait for window to make " + _p);
+						_log(fnViewSource + "(): wait for window to make " + _p(isPrivate));
 						Services.obs.addObserver(function observer(window, topic, data) {
 							Services.obs.removeObserver(observer, topic);
 							window.addEventListener("load", function onLoad(e) {
@@ -890,9 +889,9 @@ var privateTab = {
 								}
 								var privacyContext = _this.getPrivacyContext(window);
 								if(privacyContext.usePrivateBrowsing == isPrivate)
-									_log(fnViewSource + "(): window already " + _p);
+									_log(fnViewSource + "(): window already " + _p(isPrivate));
 								else {
-									_log(fnViewSource + "(): make window " + _p);
+									_log(fnViewSource + "(): make window " + _p(isPrivate));
 									privacyContext.usePrivateBrowsing = isPrivate;
 								}
 							}, false);
@@ -1326,7 +1325,7 @@ var privateTab = {
 					_log("Restored not private tab in private window");
 					isPrivate = false;
 				}
-				_log("Mark tab as " + (isPrivate ? "private" : "not private"));
+				_log("Mark tab as " + _p(isPrivate));
 				this.setTabState(tab, isPrivate);
 			}.bind(this), 0);
 		}
@@ -1367,7 +1366,7 @@ var privateTab = {
 			this.isMultiProcessWindow(window) // Just always set...
 			|| this.isPrivateTab(tab) != isPrivate
 		) {
-			_log("Make restored tab " + (isPrivate ? "private" : "not private"));
+			_log("Make restored tab " + _p(isPrivate));
 			this.toggleTabPrivate(tab, isPrivate);
 			if(isPrivate) {
 				this.onFirstPrivateTab(window, tab);
@@ -1903,7 +1902,7 @@ var privateTab = {
 		}
 		var isPrivateSource = sourceNode == this.dndPrivateNode;
 		this._dndPrivateNode = null;
-		_log(e.type + ": from " + (isPrivateSource ? "private" : "not private") + " tab");
+		_log(e.type + ": from " + _p(isPrivateSource) + " tab");
 
 		var targetTab;
 		var trg = e.originalTarget || e.target;
@@ -1957,7 +1956,7 @@ var privateTab = {
 			origIsPrivate = !isPrivate;
 			_log(
 				"Dropped link may be opened in already existing tab, so make it "
-				+ (isPrivate ? "private" : "not private")
+				+ _p(isPrivate)
 			);
 			this.toggleTabPrivate(targetTab, isPrivate, true);
 		}
@@ -1970,7 +1969,7 @@ var privateTab = {
 			}
 			if(origIsPrivate != undefined) {
 				if(tab == targetTab) {
-					_log("Highlight target tab as " + (isPrivate ? "private" : "not private"));
+					_log("Highlight target tab as " + _p(isPrivate));
 					this.dispatchAPIEvent(targetTab, "PrivateTab:PrivateChanged", isPrivate);
 				}
 				else {
@@ -1981,7 +1980,7 @@ var privateTab = {
 			tab._privateTabIgnore = true; // We should always set this flag!
 			_log(
 				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
-				+ (isPrivate ? "private" : "not private")
+				+ _p(isPrivate)
 			);
 			// Strange things happens in private windows, so we force set private flag
 			if(this.isPrivateTab(tab) != isPrivate || isPrivate)
@@ -2230,7 +2229,7 @@ var privateTab = {
 			_log(e.type + ": tab should have correct private state");
 			return;
 		}
-		_log(e.type + ": force make tab " + (isPrivate ? "private" : "not private"));
+		_log(e.type + ": force make tab " + _p(isPrivate));
 		var mm = tab.linkedBrowser.messageManager;
 		this.sendAsyncMessage(window, mm, {
 			action: "ToggleState",
@@ -2434,7 +2433,7 @@ var privateTab = {
 	readyToOpenTab: function(window, isPrivate, callback) {
 		this.waitForTab(window, function(tab) {
 			if(tab) {
-				_log("readyToOpenTab(): make tab " + (isPrivate ? "private" : "not private"));
+				_log("readyToOpenTab(): make tab " + _p(isPrivate));
 				tab._privateTabIgnore = true;
 				this.toggleTabPrivate(tab, isPrivate);
 			}
@@ -3674,7 +3673,7 @@ var privateTab = {
 			isPrivate = !this.isPrivateContent(window);
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
-		_log("Make all tabs in window " + (isPrivate ? "private" : "not private"));
+		_log("Make all tabs in window " + _p(isPrivate));
 		Array.forEach(gBrowser.tabs, function(tab) {
 			this.toggleTabPrivate(tab, isPrivate);
 		}, this);
@@ -4760,4 +4759,7 @@ function _tab(tab) {
 }
 function _str(s) {
 	return s && s.substr(0, 255);
+}
+function _p(isPrivate) {
+	return isPrivate ? "private" : "not private";
 }
