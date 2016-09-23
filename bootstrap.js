@@ -1122,7 +1122,7 @@ var privateTab = {
 				function before(tab, uri, loadingPrincipal) {
 					if(!uri || _this.isPrivateWindow(window))
 						return;
-					var isPrivate = _this.isPrivateTab(tab); //~ todo: may work wrong with Electrolysis
+					var isPrivate = _this.isPrivateTab(tab);
 					if(!isPrivate)
 						return;
 					_log("[patcher] " + key + "(): isPrivate = " + isPrivate);
@@ -2189,6 +2189,7 @@ var privateTab = {
 						//while(fe instanceof window.HTMLFrameElement)
 						//	fe = fe.contentDocument.activeElement;
 						fe = null;
+						_log("Single char hotkeys aren't supported in e10s mode");
 					}
 					if(fe && this.isEditableNode(fe)) {
 						_log("Don't use single char hotkey in editable node");
@@ -4167,15 +4168,14 @@ var privateTab = {
 				+ new Error().stack
 			);
 		}
-		var window = browser.contentWindow;
 		try {
-			return this.getPrivacyContext(window);
+			return this.getPrivacyContext(browser.contentWindow);
 		}
 		catch(e) {
 			if(!_silent) {
 				_log(
-					"getTabPrivacyContext() failed. Electrolysis?"
-					+ (_dbgv ? " Call stack:\n" + new Error().stack : "")
+					"getTabPrivacyContext() failed"
+					+ (_dbgv ? "\nCall stack:\n" + new Error().stack : "")
 				);
 				_dbgv && Components.utils.reportError(e);
 			}
