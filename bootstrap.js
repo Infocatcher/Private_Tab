@@ -3641,6 +3641,8 @@ var privateTab = {
 		var privacyContext = this.getTabPrivacyContext(tab);
 		if(isPrivate === undefined)
 			isPrivate = !privacyContext.usePrivateBrowsing;
+		else if(isPrivate == privacyContext.usePrivateBrowsing)
+			return isPrivate; // Nothing to do
 
 		if(
 			!isPrivate
