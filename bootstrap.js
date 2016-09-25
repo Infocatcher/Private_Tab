@@ -2241,14 +2241,14 @@ var privateTab = {
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
 		var window = e.currentTarget;
-		var privateTab = window.privateTab;
-		privateTab._ssWindowBusy = busy;
+		var pt = window.privateTab;
+		pt._ssWindowBusy = busy;
 		if(this.isSeaMonkey) {
-			window.clearTimeout(privateTab._ssWindowBusyRestoreTimer);
+			window.clearTimeout(pt._ssWindowBusyRestoreTimer);
 			if(busy) {
-				privateTab._ssWindowBusyRestoreTimer = window.setTimeout(function() {
+				pt._ssWindowBusyRestoreTimer = window.setTimeout(function() {
 					_log("setWindowBusy(): false (workaround for SeaMonkey)");
-					privateTab._ssWindowBusy = false;
+					pt._ssWindowBusy = false;
 				}, 0);
 			}
 		}
