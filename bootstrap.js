@@ -2299,7 +2299,7 @@ var privateTab = {
 		this.openURIInNewPrivateTab(top, node.uri, null, {
 			toggleInBackground: toggleInBackground,
 			loadInBackgroundPref: prefs.getPref(loadInBackgroundPref) != undefined && loadInBackgroundPref,
-			openAsChild: window.top == top.content
+			openAsChild: window.top == top.content // Note: chrome:// tab should be not remote
 		});
 	},
 	openPlacesInPrivateTabs: function(window, e, isContainer) {
