@@ -2307,7 +2307,6 @@ var privateTab = {
 		var document = window.document;
 		// See view-source:chrome://browser/content/places/placesOverlay.xul
 		// <menuitem id="placesContext_openContainer:tabs">, <menuitem id="placesContext_openLinks:tabs">
-		var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
 		var pt = top.privateTab;
 		// Current tab may be reused
 		//~ todo: try use progress listener
@@ -2338,7 +2337,22 @@ var privateTab = {
 			destroyLoadURIWrapper();
 			pt.stopToOpenTabs();
 		}, 0);
-		view.controller.openSelectionInTabs(e);
+
+		function mi(id) {
+			var mi = e.target.parentNode.getElementsByAttribute("id", id)[0] || null;
+			return mi && !mi.disabled && mi;
+		}
+		var openInTabs = mi("placesContext_openContainer:tabs")
+			|| mi("placesContext_openLinks:tabs");
+		if(openInTabs) {
+			_log("openPlacesInPrivateTabs(): will use #" + openInTabs.id);
+			openInTabs.doCommand();
+		}
+		else {
+			_log("openPlacesInPrivateTabs(): can't find built-in menu item, will use openSelectionInTabs()");
+			var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
+			view.controller.openSelectionInTabs(e);
+		}
 	},
 	openURIInNewPrivateTab: function(window, uri, sourceDocument, options) {
 		var toggleInBackground = options.toggleInBackground || false;
