@@ -48,6 +48,7 @@ pref("extensions.privateTab.toggleTabPrivateAutoReload.stopLoading", true);
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);
+pref("extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems", true);
 pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.fixAfterTabsButtonsAccessibility", true);
 // Fix width of clickable area for "New Tab" and "New Private Tab" buttons after last tab

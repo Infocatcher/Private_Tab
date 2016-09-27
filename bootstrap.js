@@ -2344,12 +2344,16 @@ var privateTab = {
 		}
 		var openInTabs = mi("placesContext_openContainer:tabs")
 			|| mi("placesContext_openLinks:tabs");
-		if(openInTabs) {
+		if(openInTabs && prefs.get("openPlacesInPrivateTabs.callNativeMenuItems")) {
 			_log("openPlacesInPrivateTabs(): will use #" + openInTabs.id);
 			openInTabs.doCommand();
 		}
 		else {
-			_log("openPlacesInPrivateTabs(): can't find built-in menu item, will use openSelectionInTabs()");
+			_log(
+				"openPlacesInPrivateTabs(): "
+				+ (openInTabs ? "" : "can't find built-in menu item, ")
+				+ "will use openSelectionInTabs()"
+			);
 			var view = window.PlacesUIUtils.getViewForNode(document.popupNode);
 			view.controller.openSelectionInTabs(e);
 		}
