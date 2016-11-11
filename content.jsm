@@ -5,6 +5,9 @@ function PrivateTabContent(frameGlobal) {
 	this.init();
 }
 PrivateTabContent.prototype = {
+	instances: { // For global counter
+		count: 0
+	},
 	get privacyContext() {
 		return this.fg.docShell
 			.QueryInterface(Components.interfaces.nsILoadContext);
@@ -19,13 +22,16 @@ PrivateTabContent.prototype = {
 		this.privacyContext.usePrivateBrowsing = isPrivate;
 	},
 	init: function() {
+		++this.instances.count;
 		this.fg.addEventListener("unload", this, false);
 		this.fg.addMessageListener("PrivateTab:Action", this);
 	},
-	destroy: function() {
+	destroy: function(force) {
 		this.fg.removeEventListener("unload", this, false);
 		this.fg.removeMessageListener("PrivateTab:Action", this);
 		this.fg = null;
+		if(--this.instances.count == 0 && force)
+			Components.utils.unload("chrome://privatetab/content/content.jsm");
 	},
 	handleEvent: function(e) {
 		if(e.type == "unload" && e.target == this.fg)
@@ -97,7 +103,7 @@ PrivateTabContent.prototype = {
 				});
 			break;
 			case "Destroy":
-				this.destroy();
+				this.destroy(true);
 		}
 	}
 };

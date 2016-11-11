@@ -101,13 +101,6 @@ var privateTab = {
 					this.storage.set("emptyTabLabels", emptyLabels);
 				}
 			}
-
-			try {
-				Components.utils.unload("chrome://privatetab/content/content.jsm");
-			}
-			catch(e) {
-				Components.utils.reportError(e);
-			}
 		}
 
 		prefs.destroy();
