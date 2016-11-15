@@ -59,7 +59,6 @@ PrivateTabContent.prototype = {
 			break;
 			case "WaitLoading":
 				var webProgress = this.fg.docShell.QueryInterface(Components.interfaces.nsIWebProgress);
-				var ptc = this;
 				if(!webProgress.isLoadingDocument)
 					this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
 				else {
