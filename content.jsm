@@ -71,18 +71,23 @@ PrivateTabContent.prototype = {
 		});
 	},
 	waitLoading: function() {
-		var webProgress = this.fg.docShell.QueryInterface(Components.interfaces.nsIWebProgress);
-		if(!webProgress.isLoadingDocument)
-			this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
-		else {
-			var onLoad;
-			this.fg.addEventListener("load", onLoad = function(e) {
-				if(e.target == this.document) {
-					this.fg.removeEventListener("load", onLoad, true);
-					this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
-				}
-			}.bind(this), true);
+		var fg = this.fg;
+		function feedback() {
+			fg.sendAsyncMessage("PrivateTab:ContentLoaded", {
+				principal: fg.content.document.nodePrincipal
+			});
 		}
+		var webProgress = fg.docShell.QueryInterface(Components.interfaces.nsIWebProgress);
+		if(!webProgress.isLoadingDocument) {
+			feedback();
+			return;
+		}
+		fg.addEventListener("load", function onLoad(e) {
+			if(e.target == fg.content.document) {
+				fg.removeEventListener("load", onLoad, true);
+				feedback();
+			}
+		}, true);
 	},
 	getImageDocumentDataURL: function() {
 		var data = "";
