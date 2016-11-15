@@ -44,65 +44,74 @@ PrivateTabContent.prototype = {
 				this.fg.sendAsyncMessage("PrivateTab:PrivateState", { isPrivate: this.isPrivate });
 			break;
 			case "ToggleState":
-				var isPrivate = data.isPrivate;
-				var needChange = true;
-				if(isPrivate === undefined)
-					isPrivate = !this.isPrivate;
-				else if(isPrivate == this.isPrivate) // Nothing to do
-					needChange = false;
-				if(needChange)
-					this.isPrivate = isPrivate;
-				!data.silent && this.fg.sendAsyncMessage("PrivateTab:PrivateChanged", {
-					isPrivate: isPrivate,
-					reallyChanged: needChange
-				});
+				this.togglePrivate(data.isPrivate, data.silent || false);
 			break;
 			case "WaitLoading":
-				var webProgress = this.fg.docShell.QueryInterface(Components.interfaces.nsIWebProgress);
-				if(!webProgress.isLoadingDocument)
-					this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
-				else {
-					var onLoad;
-					this.fg.addEventListener("load", onLoad = function(e) {
-						if(e.target == this.document) {
-							this.fg.removeEventListener("load", onLoad, true);
-							this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
-						}
-					}.bind(this), true);
-				}
+				this.waitLoading();
 			break;
 			case "GetImageDocumentDataURL":
-				var data = "";
-				var doc = this.document;
-				var isImageDoc = doc instanceof Components.interfaces.nsIImageDocument;
-				if(isImageDoc) {
-					var req = doc.imageRequest;
-					var image = req && req.image;
-					try {
-						var {Services} = Components.utils.import("resource://gre/modules/Services.jsm", {});
-						var maxSize = Services.prefs.getIntPref("browser.chrome.image_icons.max_size");
-					}
-					catch(e) {
-						Components.utils.reportError(e);
-						maxSize = 1024;
-					}
-					if(image && image.width <= maxSize && image.height <= maxSize) {
-						var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
-						var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-						canvas.width = image.width;
-						canvas.height = image.height;
-						var ctx = canvas.getContext("2d");
-						ctx.drawImage(img, 0, 0);
-						data = canvas.toDataURL();
-					}
-				}
-				this.fg.sendAsyncMessage("PrivateTab:ImageDocumentDataURL", {
-					isImageDocument: isImageDoc,
-					dataURL: data
-				});
+				this.getImageDocumentDataURL();
 			break;
 			case "Destroy":
 				this.destroy(true);
 		}
+	},
+
+	togglePrivate: function(isPrivate, silent) {
+		var needChange = true;
+		if(isPrivate === undefined)
+			isPrivate = !this.isPrivate;
+		else if(isPrivate == this.isPrivate) // Nothing to do
+			needChange = false;
+		if(needChange)
+			this.isPrivate = isPrivate;
+		!silent && this.fg.sendAsyncMessage("PrivateTab:PrivateChanged", {
+			isPrivate: isPrivate,
+			reallyChanged: needChange
+		});
+	},
+	waitLoading: function() {
+		var webProgress = this.fg.docShell.QueryInterface(Components.interfaces.nsIWebProgress);
+		if(!webProgress.isLoadingDocument)
+			this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
+		else {
+			var onLoad;
+			this.fg.addEventListener("load", onLoad = function(e) {
+				if(e.target == this.document) {
+					this.fg.removeEventListener("load", onLoad, true);
+					this.fg.sendAsyncMessage("PrivateTab:ContentLoaded", { principal: this.document.nodePrincipal });
+				}
+			}.bind(this), true);
+		}
+	},
+	getImageDocumentDataURL: function() {
+		var data = "";
+		var doc = this.document;
+		var isImageDoc = doc instanceof Components.interfaces.nsIImageDocument;
+		if(isImageDoc) {
+			var req = doc.imageRequest;
+			var image = req && req.image;
+			try {
+				var {Services} = Components.utils.import("resource://gre/modules/Services.jsm", {});
+				var maxSize = Services.prefs.getIntPref("browser.chrome.image_icons.max_size");
+			}
+			catch(e) {
+				Components.utils.reportError(e);
+				maxSize = 1024;
+			}
+			if(image && image.width <= maxSize && image.height <= maxSize) {
+				var img = doc.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "img")[0];
+				var canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+				canvas.width = image.width;
+				canvas.height = image.height;
+				var ctx = canvas.getContext("2d");
+				ctx.drawImage(img, 0, 0);
+				data = canvas.toDataURL();
+			}
+		}
+		this.fg.sendAsyncMessage("PrivateTab:ImageDocumentDataURL", {
+			isImageDocument: isImageDoc,
+			dataURL: data
+		});
 	}
 };
