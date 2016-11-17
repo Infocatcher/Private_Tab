@@ -12,9 +12,6 @@ PrivateTabContent.prototype = {
 		return this.fg.docShell
 			.QueryInterface(Components.interfaces.nsILoadContext);
 	},
-	get document() {
-		return this.fg.content.document;
-	},
 	get isPrivate() {
 		return this.privacyContext.usePrivateBrowsing;
 	},
@@ -91,7 +88,7 @@ PrivateTabContent.prototype = {
 	},
 	getImageDocumentDataURL: function() {
 		var data = "";
-		var doc = this.document;
+		var doc = this.fg.content.document;
 		var isImageDoc = doc instanceof Components.interfaces.nsIImageDocument;
 		if(isImageDoc) {
 			var req = doc.imageRequest;
