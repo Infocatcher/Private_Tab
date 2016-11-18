@@ -4598,6 +4598,10 @@ API.prototype = {
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
 		return privateTabInternal.isPrivateTab(tab);
 	},
+	isTabPrivateAsync: function privateTab_isTabPrivateAsync(tab, feedback, context) {
+		// Get real state in e10s mode
+		privateTabInternal.isPrivateTabAsync(tab, feedback, context);
+	},
 	toggleTabPrivate: function privateTab_toggleTabPrivate(tab, isPrivate) {
 		isPrivate = privateTabInternal.toggleTabPrivate(tab, isPrivate);
 		privateTabInternal.fixTabState(tab, isPrivate);
