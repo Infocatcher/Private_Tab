@@ -75,6 +75,7 @@ You can listen for following events:
 
 ##### API functions:
 boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
+<br>void [privateTab.isTabPrivateAsync](#privatetabistabprivateasync)(in DOMNode tab, in function callback[, in object context])
 <br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
 <br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
@@ -89,6 +90,16 @@ Investigates that the tab are private (`true`) or not (`false`), example:
 Array.slice(gBrowser.visibleTabs || gBrowser.tabs).forEach(function(tab) {
 	if(privateTab.isTabPrivate(tab))
 		gBrowser.removeTab(tab);
+});
+```
+###### privateTab.isTabPrivateAsync()
+The same as [privateTab.isTabPrivate](#privatetabistabprivate), but get real state of `nsILoadContext.usePrivateBrowsing` in multi-process mode (Electrolysis aka e10s), Private Tab 0.2.1+.
+<br>Not needed in most cases!
+```js
+// Asynchronously get privacy state of given tab.
+// In most cases should be replaced with synchronous privateTab.isTabPrivate()
+privateTab.isTabPrivateAsync(gBrowser.selectedTab, function(isPrivate) {
+	alert("Selected tab is " + (isPrivate ? "private" : "not private"));
 });
 ```
 ###### privateTab.toggleTabPrivate()
