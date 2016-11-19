@@ -9,6 +9,9 @@
 `*` Немного улучшена производительность при запуске в мультипроцессном режиме: frame script теперь загружается после небольшой задержки.<br>
 `x` Исправлено восстановление обертки вокруг `browser.swapDocShells()` для обработки «оторванных» вкладок в мультипроцессном режиме.<br>
 `*` Улучшена производительность в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
+`*` Открытие всех закладок: улучшена совместимость с другими расширениями, например, с <a href="https://addons.mozilla.org/firefox/addon/tree-style-tab/">Tree Style Tab</a> (настройка <em>extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems</em>).<br>
+`*` Улучшено потребление памяти в мультипроцессном режиме: теперь используется общий модуль content.jsm для frame scripts (<a href="https://github.com/Infocatcher/Private_Tab/issues/235">#235</a>).<br>
+`+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a>.
 
 ##### 0.2.0 (2016-08-25)
 `x` Исправления для мультипроцессного режима (Electrolysis aka e10s) в части «unsafe CPOW usage» (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>

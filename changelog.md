@@ -9,6 +9,9 @@
 `*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
 `x` Correctly restore wrapper for `browser.swapDocShells()` to handle detached tabs in multi-process mode.<br>
 `*` Improved performance in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
+`*` Open all bookmarks: improved compatibility with other extensions like <a href="https://addons.mozilla.org/firefox/addon/tree-style-tab/">Tree Style Tab</a> (<em>extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems</em> preference).<br>
+`*` Improved memory usage in multi-process mode: now used shared content.jsm module for frame scripts (<a href="https://github.com/Infocatcher/Private_Tab/issues/235">#235</a>).<br>
+`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a> API.
 
 ##### 0.2.0 (2016-08-25)
 `x` Compatibility fixes for multi-process mode (Electrolysis aka e10s) around “unsafe CPOW usage” (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
