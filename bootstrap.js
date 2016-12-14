@@ -451,14 +451,14 @@ var privateTab = {
 			this.inheritWindowState(window);
 		// Show real tab state, but after small delay for better startup performance
 		window.setTimeout(function() {
-			Array.forEach(gBrowser.tabs, function(tab) {
+			forEach(gBrowser.tabs, function(tab) {
 				this.setTabState(tab);
 			}, this);
 		}.bind(this), 0);
 
 		if(this.isPrivateWindow(window)) {
 			// All tabs should be private... so, update state before real check
-			Array.forEach(gBrowser.tabs, function(tab) {
+			forEach(gBrowser.tabs, function(tab) {
 				tab.setAttribute(this.privateAttr, "true");
 			}, this);
 
@@ -532,7 +532,7 @@ var privateTab = {
 		var disable = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		if(force) {
 			var isPrivateWindow = this.isPrivateWindow(window);
-			Array.forEach(gBrowser.tabs, function(tab) {
+			forEach(gBrowser.tabs, function(tab) {
 				tab.removeAttribute(this.privateAttr);
 				if(disable && isPrivateWindow ^ this.isPrivateTab(tab)) {
 					this.toggleTabPrivate(tab, isPrivateWindow);
@@ -669,7 +669,7 @@ var privateTab = {
 		_log(
 			"inheritWindowState():\nwindow.opener: " + window.opener
 			+ "\nwindow.__privateTabOpener: " + (window.__privateTabOpener || undefined)
-			+ "\nwindow.arguments:\n" + (args && Array.map(args, String).join("\n"))
+			+ "\nwindow.arguments:\n" + (args && Array.prototype.map.call(args, String).join("\n"))
 		);
 		var opener = window.opener || window.__privateTabOpener || null;
 		delete window.__privateTabOpener;
@@ -1224,7 +1224,7 @@ var privateTab = {
 			return done();
 		}
 
-		args = Array.slice(args);
+		args = Array.prototype.slice.call(args);
 		try {
 			var doc = browser.contentDocument;
 			if(doc && doc instanceof Components.interfaces.nsIImageDocument) {
@@ -1484,7 +1484,7 @@ var privateTab = {
 				if(this.forbidCloseLastPrivate()) {
 					var pos = "_tPos" in tab
 						? tab._tPos
-						: Array.indexOf(window.gBrowser.tabs, tab); // SeaMonkey
+						: Array.prototype.indexOf.call(window.gBrowser.tabs, tab); // SeaMonkey
 					this.openNewPrivateTab(window, false, function(newTab) {
 						newTab && window.gBrowser.moveTabTo(newTab, pos);
 					});
@@ -1560,7 +1560,7 @@ var privateTab = {
 		for(var window of this.windows) {
 			if(this.isPrivateWindow(window))
 				continue;
-			Array.forEach(window.gBrowser.tabs, function(tab) {
+			forEach(window.gBrowser.tabs, function(tab) {
 				if(tab.hasAttribute(this.privateAttr))
 					++privateTabs;
 			}, this);
@@ -3089,7 +3089,7 @@ var privateTab = {
 			_log("updateListAllTabs(): " + (e ? e.type + " event on parent node" : "fallback delay"));
 			window.clearTimeout(fallbackTimer);
 			parent.removeEventListener("popupshowing", update, false);
-			Array.forEach(
+			forEach(
 				popup.getElementsByTagName("menuitem"),
 				function(mi) {
 					if(mi.classList.contains("alltabs-item") && "tab" in mi)
@@ -3137,7 +3137,7 @@ var privateTab = {
 				: "toolbarbutton" // History list in Australis menu
 		);
 		var undoTabItems = JSON.parse(this.ss.getClosedTabData(window));
-		Array.forEach(items, function(item) {
+		forEach(items, function(item) {
 			var indx = item.getAttribute("value");
 			if(!/^\d+$/.test(indx))
 				return;
@@ -3695,7 +3695,7 @@ var privateTab = {
 		//~ todo: add pref for this?
 		//this.getPrivacyContext(window).usePrivateBrowsing = true;
 		_log("Make all tabs in window " + _p(isPrivate));
-		Array.forEach(gBrowser.tabs, function(tab) {
+		forEach(gBrowser.tabs, function(tab) {
 			this.toggleTabPrivate(tab, isPrivate);
 		}, this);
 	},
@@ -4274,7 +4274,7 @@ var privateTab = {
 		return true;
 	},
 	hasPrivateTab: function(window, ignoreTab) {
-		return Array.some(
+		return Array.prototype.some.call(
 			window.gBrowser.tabs,
 			function(tab) {
 				return tab != ignoreTab
@@ -4762,6 +4762,11 @@ var prefs = {
 		return Services.prefs.PREF_STRING;
 	}
 };
+
+function forEach() {
+	var each = Array.prototype.forEach;
+	each.call.apply(each, arguments);
+}
 
 // Be careful, loggers always works until prefs aren't initialized
 // (and if "debug" preference has default value)
