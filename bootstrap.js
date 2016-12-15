@@ -4763,10 +4763,7 @@ var prefs = {
 	}
 };
 
-function forEach() {
-	var each = Array.prototype.forEach;
-	each.call.apply(each, arguments);
-}
+var forEach = Array.prototype.forEach.call.bind(Array.prototype.forEach);
 
 // Be careful, loggers always works until prefs aren't initialized
 // (and if "debug" preference has default value)
