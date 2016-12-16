@@ -29,7 +29,7 @@ var patcher = {
 					catch(e) {
 						Components.utils.reportError(e);
 					}
-					win[key].after.apply(this, [ret].concat(Array.slice(arguments)));
+					win[key].after.apply(this, [ret].concat(Array.prototype.slice.call(arguments)));
 					return ret;
 				}
 				: function wrapper() {
@@ -66,7 +66,7 @@ var patcher = {
 							/\}$/,
 							"\t}).apply(this, arguments);\n"
 							+ "\t" + global + '["' + key + '"].after'
-							+ '.apply(this, [' + ret + "].concat(Array.slice(arguments)));\n"
+							+ '.apply(this, [' + ret + "].concat(Array.prototype.slice.call(arguments)));\n"
 							+ "\treturn " + ret + ";\n"
 							+ "}"
 						);
