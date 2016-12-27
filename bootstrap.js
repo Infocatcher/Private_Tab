@@ -2502,10 +2502,15 @@ var privateTab = {
 		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
 	toggleContextTabPrivate: function(window, toggleReload) {
+		var gBrowser = window.gBrowser;
 		var tab = this.getContextTab(window, true)
-			|| window.gBrowser.selectedTab; // For hotkey
-		var isPrivate = this.toggleTabPrivate(tab);
-		if(this.isPendingTab(tab)) {
+			|| gBrowser.selectedTab; // For hotkey
+		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
+		var useDupTab = this.platformVersion >= 51;
+		var isPrivate = useDupTab
+			? !this.isPrivateTab(tab) // Just get state
+			: this.toggleTabPrivate(tab);
+		if(!useDupTab && this.isPendingTab(tab)) {
 			_log("toggleContextTabPrivate() -> isPendingTab -> fixTabState()");
 			this.fixTabState(tab, isPrivate);
 		}
@@ -2514,6 +2519,35 @@ var privateTab = {
 			var stopLoading = prefs.get("toggleTabPrivateAutoReload.stopLoading");
 			if(toggleReload)
 				autoReload = !autoReload;
+
+			if(useDupTab) {
+				_log("toggleContextTabPrivate() -> will use gBrowser.duplicateTab()");
+				var pos = "_tPos" in tab
+					? tab._tPos
+					: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+				// Set private attribute before our global "SSTabRestoring" listener
+				var onRestore;
+				window.addEventListener("SSTabRestoring", onRestore = function(e) {
+					window.removeEventListener(e.type, onRestore, true);
+					_log("toggleContextTabPrivate() => " + e.type + " => update private attribute");
+					var tab = e.originalTarget || e.target;
+					if(isPrivate)
+						tab.setAttribute(this.privateAttr, "true");
+					else
+						tab.removeAttribute(this.privateAttr);
+				}.bind(this), true);
+				var dupTab = gBrowser.duplicateTab(tab);
+				gBrowser.moveTabTo(dupTab, pos);
+				if(tab.selected)
+					gBrowser.selectedTab = dupTab;
+				window.setTimeout(function(tab) {
+					gBrowser.removeTab(tab);
+				}, 0, tab);
+				tab = dupTab;
+				// Duplicated tab will be reloaded anyway
+				autoReload = stopLoading = false;
+			}
+
 			var browser = tab.linkedBrowser;
 			if(autoReload) {
 				var typed = browser.userTypedValue;
