@@ -4069,6 +4069,19 @@ var privateTab = {
 						return { value: isPrivate };
 					}
 					var stack = new Error().stack;
+					_dbgv && _log(key + "():\n" + stack);
+
+					if(
+						(
+							stack.indexOf("\nprivateTab.openNewPrivateTab@") != -1 // Firefox 52
+							|| stack.indexOf("\nopenNewPrivateTab@") != -1 // Firefox 53
+						)
+						&& stack.indexOf("\n_linkBrowserToTab@chrome://browser/content/tabbrowser.xml:") != -1
+					) {
+						_log(key + "(): looks like privateTab.openNewPrivateTab() + preloaded about:newtab, override to true");
+						return { value: true };
+					}
+
 					var fromSearchBar = stack.indexOf("@chrome://browser/content/search/search.xml:") != -1
 						|| stack.indexOf("\ndoSearch@chrome://tabmixplus/content/changecode.js:") != -1;
 					var fromDownloads = !fromSearchBar && prefs.get("patchDownloads")
@@ -4078,7 +4091,6 @@ var privateTab = {
 							stack.indexOf("\nTrackingProtection.enabled@chrome://browser/content/browser.js:") != -1
 							|| stack.indexOf("@chrome://browser/content/browser-trackingprotection.js:") != -1 // Firefox 45+
 						);
-					_dbgv && _log(key + "():\n" + stack);
 					if(fromSearchBar || fromDownloads || fromTrackingProtection) try {
 						var isPrivate = _this.isPrivateContent(window);
 						_dbgv && _log(key + "(): return state of selected tab: " + isPrivate);
