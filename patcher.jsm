@@ -29,7 +29,8 @@ var patcher = {
 					catch(e) {
 						Components.utils.reportError(e);
 					}
-					win[key].after.apply(this, [ret].concat(Array.prototype.slice.call(arguments)));
+					// Note: used "win.Array" to work after unloading of our .jsm
+					win[key].after.apply(this, [ret].concat(win.Array.prototype.slice.call(arguments)));
 					return ret;
 				}
 				: function wrapper() {
