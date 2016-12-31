@@ -2536,6 +2536,7 @@ var privateTab = {
 					else
 						tab.removeAttribute(this.privateAttr);
 				}.bind(this), true);
+				tab.collapsed = true;
 				var dupTab = gBrowser.duplicateTab(tab);
 				gBrowser.moveTabTo(dupTab, pos);
 				if(tab.selected)
