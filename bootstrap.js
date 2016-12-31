@@ -2540,9 +2540,7 @@ var privateTab = {
 				gBrowser.moveTabTo(dupTab, pos);
 				if(tab.selected)
 					gBrowser.selectedTab = dupTab;
-				window.setTimeout(function(tab) {
-					gBrowser.removeTab(tab);
-				}, 0, tab);
+				gBrowser.removeTab(tab);
 				tab = dupTab;
 				// Duplicated tab will be reloaded anyway
 				autoReload = stopLoading = false;
@@ -2578,12 +2576,14 @@ var privateTab = {
 				browser.stop();
 			}
 		}
-		if(tab.selected) { // Only for hotkey
+		window.setTimeout(function() {
+			if(!tab.selected) // Only for hotkey
+				return;
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
 			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
 				window.TabScope._updateTitle();
-		}
+		}.bind(this), 0);
 	},
 
 	cmdAttr: "privateTab-command",
