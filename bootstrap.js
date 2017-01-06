@@ -2527,6 +2527,7 @@ var privateTab = {
 					: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
 				tab.collapsed = true;
 				var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
+				dupTab.collapsed = false; // Not really needed, just to ensure
 				gBrowser.moveTabTo(dupTab, pos);
 				if(tab.selected)
 					gBrowser.selectedTab = dupTab;
