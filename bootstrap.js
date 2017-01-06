@@ -4662,6 +4662,9 @@ API.prototype = {
 		privateTabInternal.fixTabState(tab, isPrivate);
 		return isPrivate;
 	},
+	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
+		return privateTabInternal.duplicateTabAndTogglePrivate(tab, isPrivate);
+	},
 	readyToOpenTab: function privateTab_readyToOpenTab(isPrivate) {
 		privateTabInternal.readyToOpenTab(this.window, isPrivate);
 	},

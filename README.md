@@ -77,6 +77,7 @@ You can listen for following events:
 boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
 <br>void [privateTab.isTabPrivateAsync](#privatetabistabprivateasync)(in DOMNode tab, in function callback[, in object context])
 <br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
+<br>DOMNode [privateTab.duplicateTabAndTogglePrivate](#privatetabduplicatetabandtoggleprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
 <br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
 <br>boolean [privateTab.hasClosedTabs](#privatetabhasclosedtabs)
@@ -116,6 +117,17 @@ Array.forEach(
 			privateTab.toggleTabPrivate(tab, true);
 	}
 );
+```
+###### privateTab.duplicateTabAndTogglePrivate()
+Duplicate already opened tab in private or non-private tab.
+```js
+// Duplicate selected tab and toggle private state of duplicated tab
+var tab = gBrowser.selectedTab;
+var pos = "_tPos" in tab
+	? tab._tPos
+	: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+var dupTab = gBrowser.selectedTab = privateTab.duplicateTabAndTogglePrivate(tab);
+gBrowser.moveTabTo(dupTab, pos + 1); // Place right after initial tab
 ```
 ###### privateTab.readyToOpenTab()
 Allows to open private or not private tab (independent of any inheritance mechanism), example:
