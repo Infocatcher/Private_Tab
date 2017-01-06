@@ -2525,19 +2525,8 @@ var privateTab = {
 				var pos = "_tPos" in tab
 					? tab._tPos
 					: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
-				// Set private attribute before our global "SSTabRestoring" listener
-				var onRestore;
-				window.addEventListener("SSTabRestoring", onRestore = function(e) {
-					window.removeEventListener(e.type, onRestore, true);
-					_log("toggleContextTabPrivate() => " + e.type + " => update private attribute");
-					var tab = e.originalTarget || e.target;
-					if(isPrivate)
-						tab.setAttribute(this.privateAttr, "true");
-					else
-						tab.removeAttribute(this.privateAttr);
-				}.bind(this), true);
 				tab.collapsed = true;
-				var dupTab = gBrowser.duplicateTab(tab);
+				var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 				gBrowser.moveTabTo(dupTab, pos);
 				if(tab.selected)
 					gBrowser.selectedTab = dupTab;
@@ -3722,6 +3711,24 @@ var privateTab = {
 		if(!_silent)
 			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
 		return isPrivate;
+	},
+	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
+		var window = tab.ownerDocument.defaultView;
+		var gBrowser = this.getTabBrowser(tab);
+		if(isPrivate === undefined)
+			isPrivate = !this.isPrivateTab(tab); // Toggle
+		// Set private attribute before our global "SSTabRestoring" listener
+		var onRestore;
+		window.addEventListener("SSTabRestoring", onRestore = function(e) {
+			window.removeEventListener(e.type, onRestore, true);
+			_log("duplicateTabAndTogglePrivate() => " + e.type + " => update private attribute");
+			var tab = e.originalTarget || e.target;
+			if(isPrivate)
+				tab.setAttribute(this.privateAttr, "true");
+			else
+				tab.removeAttribute(this.privateAttr);
+		}.bind(this), true);
+		return gBrowser.duplicateTab(tab);
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
