@@ -11,7 +11,13 @@
 `*` Improved performance in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
 `*` Open all bookmarks: improved compatibility with other extensions like <a href="https://addons.mozilla.org/firefox/addon/tree-style-tab/">Tree Style Tab</a> (<em>extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems</em> preference).<br>
 `*` Improved memory usage in multi-process mode: now used shared content.jsm module for frame scripts (<a href="https://github.com/Infocatcher/Private_Tab/issues/235">#235</a>).<br>
-`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a> API.
+`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a> API.<br>
+`x` Fixed compatibility with future Firefox versions: don't use Array generics like `Array.forEach()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1222547">bug 1222547</a>).<br>
+`x` Correctly open new private tab with preloaded about:newtab in Firefox 52+ (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728403#p728403">thanks to Dumby</a>).<br>
+`x` Fixed ability to toggle tab private state in Firefox 51+, now will be used duplicated tab (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
+`x` Fixed patcher around third-party wrappers (TypeError: Array is undefined) (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728469#p728469">thanks to Dumby</a>).<br>
+`x` Fixed compatibility with future Firefox versions: don't use deprecated `Date.prototype.toLocaleFormat()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818634">bug 818634</a>).<br>
+`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabduplicatetabandtoggleprivate">privateTab.duplicateTabAndTogglePrivate()</a> API.<br>
 
 ##### 0.2.0 (2016-08-25)
 `x` Compatibility fixes for multi-process mode (Electrolysis aka e10s) around “unsafe CPOW usage” (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>

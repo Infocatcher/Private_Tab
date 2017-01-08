@@ -11,7 +11,13 @@
 `*` Улучшена производительность в мультипроцессном режиме (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
 `*` Открытие всех закладок: улучшена совместимость с другими расширениями, например, с <a href="https://addons.mozilla.org/firefox/addon/tree-style-tab/">Tree Style Tab</a> (настройка <em>extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems</em>).<br>
 `*` Улучшено потребление памяти в мультипроцессном режиме: теперь используется общий модуль content.jsm для frame scripts (<a href="https://github.com/Infocatcher/Private_Tab/issues/235">#235</a>).<br>
-`+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a>.
+`+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabistabprivateasync">privateTab.isTabPrivateAsync()</a>.<br>
+`x` Исправлена совместимость с будущими версиями Firefox: прекращено использование Array generics вида `Array.forEach()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1222547">bug 1222547</a>).<br>
+`x` Исправлено открытие новой приватной вкладки с предзагруженным about:newtab в Firefox 52+ (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728403#p728403">спасибо Dumby</a>).<br>
+`x` Исправлена возможность переключения приватности вкладок в Firefox 51+, теперь будет использоваться клонированная вкладка (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
+`x` Исправлен патчер при наличии оберток от других расширений (TypeError: Array is undefined) (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728469#p728469">спасибо Dumby</a>).<br>
+`x` Исправлена совместимость с будущими версиями Firefox: прекращено использование `Date.prototype.toLocaleFormat()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818634">bug 818634</a>).<br>
+`+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabduplicatetabandtoggleprivate">privateTab.duplicateTabAndTogglePrivate()</a>.<br>
 
 ##### 0.2.0 (2016-08-25)
 `x` Исправления для мультипроцессного режима (Electrolysis aka e10s) в части «unsafe CPOW usage» (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
