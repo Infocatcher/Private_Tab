@@ -3714,21 +3714,21 @@ var privateTab = {
 		return isPrivate;
 	},
 	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
-		var window = tab.ownerDocument.defaultView;
+		var document = tab.ownerDocument;
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
 			isPrivate = !this.isPrivateTab(tab); // Toggle
 		// Set private attribute before our global "SSTabRestoring" listener
 		var onRestore;
-		window.addEventListener("SSTabRestoring", onRestore = function(e) {
-			window.removeEventListener(e.type, onRestore, true);
+		document.addEventListener("SSTabRestoring", onRestore = function(e) {
+			document.removeEventListener(e.type, onRestore, false);
 			_log("duplicateTabAndTogglePrivate() => " + e.type + " => update private attribute");
 			var tab = e.originalTarget || e.target;
 			if(isPrivate)
 				tab.setAttribute(this.privateAttr, "true");
 			else
 				tab.removeAttribute(this.privateAttr);
-		}.bind(this), true);
+		}.bind(this), false);
 		return gBrowser.duplicateTab(tab);
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
