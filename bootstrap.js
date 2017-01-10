@@ -3719,6 +3719,7 @@ var privateTab = {
 	},
 	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
 		var document = tab.ownerDocument;
+		var window = document.defaultView;
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
 			isPrivate = !this.isPrivateTab(tab); // Toggle
@@ -3733,6 +3734,8 @@ var privateTab = {
 			else
 				tab.removeAttribute(this.privateAttr);
 		}.bind(this), false);
+		if(this.isRemoteTab(tab)) // D'oh, let's try
+			this.readyToOpenTab(window, isPrivate);
 		return gBrowser.duplicateTab(tab);
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
