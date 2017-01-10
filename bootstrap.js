@@ -134,6 +134,10 @@ var privateTab = {
 			var timer = Components.classes["@mozilla.org/timer;1"]
 				.createInstance(Components.interfaces.nsITimer);
 			timer.init(function() {
+				if(this.hasPrivate) {
+					_log("Looks like wrong " + topic + " (found opened private tab/window), ignore");
+					return;
+				}
 				if(this.cleanupClosedPrivateTabs) {
 					_log(topic + " => forgetAllClosedTabs()");
 					this.forgetAllClosedTabs();
@@ -4338,6 +4342,12 @@ var privateTab = {
 			},
 			this
 		);
+	},
+	get hasPrivate() {
+		for(var window of this.windows)
+			if(this.isPrivateWindow(window) || this.hasPrivateTab(window))
+				return true;
+		return false;
 	},
 	forbidCloseLastPrivate: function() {
 		var exitingCanceled = Components.classes["@mozilla.org/supports-PRBool;1"]
