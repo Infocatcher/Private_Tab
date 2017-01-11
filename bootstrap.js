@@ -3723,20 +3723,21 @@ var privateTab = {
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
 			isPrivate = !this.isPrivateTab(tab); // Toggle
-		// Set private attribute before our global "SSTabRestoring" listener
-		var onRestore;
-		document.addEventListener("SSTabRestoring", onRestore = function(e) {
-			document.removeEventListener(e.type, onRestore, false);
-			_log("duplicateTabAndTogglePrivate() => " + e.type + " => update private attribute");
-			var tab = e.originalTarget || e.target;
-			if(isPrivate)
-				tab.setAttribute(this.privateAttr, "true");
-			else
-				tab.removeAttribute(this.privateAttr);
-		}.bind(this), false);
+		// Simplest way to get correct session state for duplicated tab
+		var origIsPrivate = tab.hasAttribute(this.privateAttr);
+		if(isPrivate)
+			tab.setAttribute(this.privateAttr, "true");
+		else
+			tab.removeAttribute(this.privateAttr);
 		if(this.isRemoteTab(tab)) // D'oh, let's try
 			this.readyToOpenTab(window, isPrivate);
-		return gBrowser.duplicateTab(tab);
+		var dupTab = gBrowser.duplicateTab(tab);
+		// And then restore original state
+		if(origIsPrivate)
+			tab.setAttribute(this.privateAttr, "true");
+		else
+			tab.removeAttribute(this.privateAttr);
+		return dupTab;
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
