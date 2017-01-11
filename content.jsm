@@ -22,10 +22,12 @@ PrivateTabContent.prototype = {
 		++this.instances.count;
 		this.fg.addEventListener("unload", this, false);
 		this.fg.addMessageListener("PrivateTab:Action", this);
+		this.fg.addMessageListener("SessionStore:restoreHistory", this);
 	},
 	destroy: function(force) {
 		this.fg.removeEventListener("unload", this, false);
 		this.fg.removeMessageListener("PrivateTab:Action", this);
+		this.fg.removeMessageListener("SessionStore:restoreHistory", this);
 		this.fg = null;
 		if(--this.instances.count == 0 && force)
 			Components.utils.unload("chrome://privatetab/content/content.jsm");
@@ -35,7 +37,13 @@ PrivateTabContent.prototype = {
 			this.destroy();
 	},
 	receiveMessage: function(msg) {
-		var data = msg.data;
+		switch(msg.name) {
+			case "PrivateTab:Action":           this.handleActionMessage(msg.data);    break;
+			case "SessionStore:restoreHistory": this.handleSessionRestoring(msg.data);
+		}
+	},
+
+	handleActionMessage: function(data) {
 		switch(data.action) {
 			case "GetState":
 				this.fg.sendAsyncMessage("PrivateTab:PrivateState", { isPrivate: this.isPrivate });
@@ -52,6 +60,12 @@ PrivateTabContent.prototype = {
 			case "Destroy":
 				this.destroy(true);
 		}
+	},
+	handleSessionRestoring: function(data) {
+		var tabData = data.tabData;
+		var isPrivate = tabData && tabData.attributes && "privateTab-isPrivate" in tabData.attributes;
+		if(isPrivate != this.isPrivate)
+			this.isPrivate = isPrivate;
 	},
 
 	togglePrivate: function(isPrivate, silent) {
