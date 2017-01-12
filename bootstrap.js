@@ -2235,12 +2235,18 @@ var privateTab = {
 			return;
 		}
 		_log(e.type + ": force make tab " + _p(isPrivate));
-		var mm = tab.linkedBrowser.messageManager;
-		this.sendAsyncMessage(window, mm, {
-			action: "ToggleState",
-			isPrivate: isPrivate,
-			silent: true
-		});
+		if(this.isRemoteTab(tab)) {
+			var mm = tab.linkedBrowser.messageManager;
+			this.sendAsyncMessage(window, mm, {
+				action: "ToggleState",
+				isPrivate: isPrivate,
+				silent: true
+			});
+		}
+		else {
+			var privacyContext = this.getTabPrivacyContext(tab);
+			privacyContext.usePrivateBrowsing = isPrivate;
+		}
 	},
 	setWindowBusy: function(e, busy) {
 		_log("setWindowBusy(): " + busy);
