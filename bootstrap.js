@@ -2535,7 +2535,11 @@ var privateTab = {
 				gBrowser.moveTabTo(dupTab, pos);
 				if(tab.selected)
 					gBrowser.selectedTab = dupTab;
-				gBrowser.removeTab(tab);
+				window.setTimeout(function(tab) { // Wait for async duplication...
+					// Make tab empty to not save in undo close history
+					this.ss.setTabState(tab, '{"entries":[]}');
+					gBrowser.removeTab(tab);
+				}.bind(this), 300, tab);
 				tab = dupTab;
 				// Duplicated tab will be reloaded anyway
 				autoReload = stopLoading = false;
