@@ -1486,12 +1486,13 @@ var privateTab = {
 			if(this.isLastPrivate(tab)) {
 				_log("Closed last private tab");
 				if(this.forbidCloseLastPrivate()) {
+					_log("checkForLastPrivateTab(): duplicate closing private tab to stay in private mode");
+					var gBrowser = window.gBrowser;
 					var pos = "_tPos" in tab
 						? tab._tPos
-						: Array.prototype.indexOf.call(window.gBrowser.tabs, tab); // SeaMonkey
-					this.openNewPrivateTab(window, false, function(newTab) {
-						newTab && window.gBrowser.moveTabTo(newTab, pos);
-					});
+						: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+					var newTab = gBrowser.duplicateTab(tab);
+					gBrowser.moveTabTo(newTab, pos);
 				}
 				else if(
 					this.isSeaMonkey
