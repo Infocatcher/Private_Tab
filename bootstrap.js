@@ -4368,6 +4368,7 @@ var privateTab = {
 			.createInstance(Components.interfaces.nsISupportsPRBool);
 		exitingCanceled.data = false;
 		Services.obs.notifyObservers(exitingCanceled, "last-pb-context-exiting", null);
+		_log("forbidCloseLastPrivate(): exiting canceled: " + exitingCanceled.data);
 		return exitingCanceled.data;
 	},
 
