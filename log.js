@@ -1,0 +1,40 @@
+const LOG_PREFIX = "[Private Tab] ";
+
+if(!("Services" in this))
+	Components.utils.import("resource://gre/modules/Services.jsm");
+this.__defineGetter__("_dbg", function() {
+	return Services.prefs.getBoolPref("extensions.privateTab.debug");
+});
+this.__defineSetter__("_dbg", function(v) {
+	delete this._dbg;
+	return this._dbg = v;
+});
+this.__defineGetter__("_dbgv", function() {
+	return Services.prefs.getBoolPref("extensions.privateTab.debug.verbose");
+});
+this.__defineSetter__("_dbgv", function(v) {
+	delete this._dbgv;
+	return this._dbgv = v;
+});
+
+function ts() {
+	var d = new Date();
+	var ms = d.getMilliseconds();
+	return d.toTimeString().replace(/^.*\d+:(\d+:\d+).*$/, "$1") + ":" + "000".substr(("" + ms).length) + ms + " ";
+}
+function _log(s) {
+	if(!_dbg)
+		return;
+	var msg = LOG_PREFIX + ts() + s;
+	Services.console.logStringMessage(msg);
+	dump(msg + "\n");
+}
+function _tab(tab) {
+	return tab && _str(tab.label);
+}
+function _str(s) {
+	return s && s.substr(0, 255);
+}
+function _p(isPrivate) {
+	return isPrivate ? "private" : "not private";
+}

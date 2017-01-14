@@ -1,8 +1,6 @@
 const WINDOW_LOADED = -1;
 const WINDOW_CLOSED = -2;
 
-const LOG_PREFIX = "[Private Tab] ";
-
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 this.__defineGetter__("patcher", function() {
@@ -37,6 +35,8 @@ var privateTab = {
 		this.initialized = true;
 
 		prefs.init();
+
+		Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
 		_dbg = prefs.get("debug", false);
 		_dbgv = prefs.get("debug.verbose", false);
 
@@ -4846,28 +4846,3 @@ var prefs = {
 };
 
 var forEach = Array.prototype.forEach.call.bind(Array.prototype.forEach);
-
-// Be careful, loggers always works until prefs aren't initialized
-// (and if "debug" preference has default value)
-var _dbg = true, _dbgv = true;
-function ts() {
-	var d = new Date();
-	var ms = d.getMilliseconds();
-	return d.toTimeString().replace(/^.*\d+:(\d+:\d+).*$/, "$1") + ":" + "000".substr(("" + ms).length) + ms + " ";
-}
-function _log(s) {
-	if(!_dbg)
-		return;
-	var msg = LOG_PREFIX + ts() + s;
-	Services.console.logStringMessage(msg);
-	dump(msg + "\n");
-}
-function _tab(tab) {
-	return tab && _str(tab.label);
-}
-function _str(s) {
-	return s && s.substr(0, 255);
-}
-function _p(isPrivate) {
-	return isPrivate ? "private" : "not private";
-}
