@@ -18,6 +18,8 @@
 `x` Fixed patcher around third-party wrappers (TypeError: Array is undefined) (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728469#p728469">thanks to Dumby</a>).<br>
 `x` Fixed compatibility with future Firefox versions: don't use deprecated `Date.prototype.toLocaleFormat()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818634">bug 818634</a>).<br>
 `+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabduplicatetabandtoggleprivate">privateTab.duplicateTabAndTogglePrivate()</a> API.<br>
+`x` Workaround to ignore wrong `last-pb-context-exited` notification in multi-process mode (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1329912">bug 1329912</a>).<br>
+`x` Fixed ability to restore closed private tabs in multi-process mode (<em>extensions.privateTab.rememberClosedPrivateTabs</em> preference) (<a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
 
 ##### 0.2.0 (2016-08-25)
 `x` Compatibility fixes for multi-process mode (Electrolysis aka e10s) around “unsafe CPOW usage” (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>

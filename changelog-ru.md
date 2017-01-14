@@ -18,6 +18,8 @@
 `x` Исправлен патчер при наличии оберток от других расширений (TypeError: Array is undefined) (<a href="https://forum.mozilla-russia.org/viewtopic.php?pid=728469#p728469">спасибо Dumby</a>).<br>
 `x` Исправлена совместимость с будущими версиями Firefox: прекращено использование `Date.prototype.toLocaleFormat()` (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818634">bug 818634</a>).<br>
 `+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabduplicatetabandtoggleprivate">privateTab.duplicateTabAndTogglePrivate()</a>.<br>
+`x` Добавлено игнорирование некорректного оповещения "last-pb-context-exited" в мультипроцессном режиме (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1329912">bug 1329912</a>).<br>
+`x` Исправлена возможность восстановления закрытых приватных вкладок в мультипроцессном режиме (настройка <em>extensions.privateTab.rememberClosedPrivateTabs</em>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
 
 ##### 0.2.0 (2016-08-25)
 `x` Исправления для мультипроцессного режима (Electrolysis aka e10s) в части «unsafe CPOW usage» (<a href="https://github.com/Infocatcher/Private_Tab/issues/208">#208</a>).<br>
