@@ -77,8 +77,12 @@ PrivateTabContent.prototype = {
 	handleSessionRestoring: function(data) {
 		var tabData = data.tabData;
 		var isPrivate = tabData && tabData.attributes && "privateTab-isPrivate" in tabData.attributes;
-		if(isPrivate != this.isPrivate)
+		if(isPrivate == this.isPrivate)
+			_log("[frame script] handleSessionRestoring(): private state is already " + isPrivate);
+		else {
+			_log("[frame script] handleSessionRestoring(): private state -> " + isPrivate);
 			this.isPrivate = isPrivate;
+		}
 	},
 
 	togglePrivate: function(isPrivate, silent) {
