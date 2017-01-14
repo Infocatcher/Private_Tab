@@ -1,5 +1,12 @@
 var EXPORTED_SYMBOLS = ["PrivateTabContent"];
 
+this.__defineGetter__("_log", function() {
+	delete this._log;
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
+	return _log;
+});
+
 function PrivateTabContent(frameGlobal) {
 	this.fg = frameGlobal;
 	this.init();
@@ -25,12 +32,18 @@ PrivateTabContent.prototype = {
 		this.fg.addMessageListener("SessionStore:restoreHistory", this);
 	},
 	destroy: function(force) {
+		_log && _dbgv && _log(
+			"[frame script] destroy(" + (force || "") + "), instances: " + this.instances.count
+			+ ", current: " + this.fg.content.location.href.substr(0, 255)
+		);
 		this.fg.removeEventListener("unload", this, false);
 		this.fg.removeMessageListener("PrivateTab:Action", this);
 		this.fg.removeMessageListener("SessionStore:restoreHistory", this);
 		this.fg = null;
-		if(--this.instances.count == 0 && force)
+		if(--this.instances.count == 0 && force) {
+			_log("[frame script] unload content.jsm");
 			Components.utils.unload("chrome://privatetab/content/content.jsm");
+		}
 	},
 	handleEvent: function(e) {
 		if(e.type == "unload" && e.target == this.fg)
