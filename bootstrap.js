@@ -1491,7 +1491,9 @@ var privateTab = {
 					var pos = "_tPos" in tab
 						? tab._tPos
 						: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
-					var newTab = gBrowser.duplicateTab(tab);
+					var newTab = "duplicateTab" in gBrowser
+						? gBrowser.duplicateTab(tab)
+						: this.ss.duplicateTab(window, tab); // SeaMonkey
 					gBrowser.moveTabTo(newTab, pos);
 				}
 				else if(
@@ -3742,7 +3744,9 @@ var privateTab = {
 			tab.removeAttribute(this.privateAttr);
 		if(this.isRemoteTab(tab)) // D'oh, let's try
 			this.readyToOpenTab(window, isPrivate);
-		var dupTab = gBrowser.duplicateTab(tab);
+		var dupTab = "duplicateTab" in gBrowser
+			? gBrowser.duplicateTab(tab)
+			: this.ss.duplicateTab(window, tab); // SeaMonkey
 		// And then restore original state
 		if(origIsPrivate)
 			tab.setAttribute(this.privateAttr, "true");
