@@ -140,6 +140,10 @@ PrivateTabContent.prototype = {
 				var ctx = canvas.getContext("2d");
 				ctx.drawImage(img, 0, 0);
 				data = canvas.toDataURL();
+				_log("[frame script] getImageDocumentDataURL() => data:");
+			}
+			else {
+				_log("[frame script] getImageDocumentDataURL(): image missing or too large");
 			}
 		}
 		this.fg.sendAsyncMessage("PrivateTab:ImageDocumentDataURL", {
