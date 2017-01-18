@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.2.1 (2017-01-18)
 `*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
 `x` Correctly restore wrapper for `browser.swapDocShells()` to handle detached tabs in multi-process mode.<br>
 `*` Improved performance in multi-process mode (<a href="https://github.com/Infocatcher/Private_Tab/issues/234">#234</a>).<br>
