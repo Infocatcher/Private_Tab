@@ -3620,9 +3620,11 @@ var privateTab = {
 	onFirstPrivateTab: function(window, tab) {
 		this.onFirstPrivateTab = function() {};
 		_log("First private tab");
-		window.setTimeout(function() {
-			this.ss.persistTabAttribute(this.privateAttr);
-		}.bind(this), 0);
+		window.setTimeout(this.persistPrivateAttribute.bind(this), 0);
+	},
+	persistPrivateAttribute: function() {
+		this.persistPrivateAttribute = function() {};
+		this.ss.persistTabAttribute(this.privateAttr);
 	},
 	fixTabState: function(tab, isPrivate) {
 		if(!this.isPendingTab(tab) || !prefs.get("workaroundForPendingTabs"))
@@ -3736,6 +3738,7 @@ var privateTab = {
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
 			isPrivate = !this.isPrivateTab(tab); // Toggle
+		isPrivate && this.persistPrivateAttribute();
 		// Simplest way to get correct session state for duplicated tab
 		var origIsPrivate = tab.hasAttribute(this.privateAttr);
 		if(isPrivate)
