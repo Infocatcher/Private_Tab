@@ -1376,6 +1376,8 @@ var privateTab = {
 				this.onFirstPrivateTab(window, tab);
 				window.privateTab._onFirstPrivateTab(window, tab);
 			}
+			// For restored non-remote tabs (and for changes using tab duplication in Firefox 51+)
+			tab.selected && this.updateWindowTitle(window.gBrowser);
 		}
 	},
 	tabCloseHandler: function(e) {
