@@ -6,6 +6,8 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Correctly update window title and style, if toggled private state of selected non-remote tab (restored non-remote private tab) in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
+
 ##### 0.2.1 (2017-01-18)
 `*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
 `x` Correctly restore wrapper for `browser.swapDocShells()` to handle detached tabs in multi-process mode.<br>
