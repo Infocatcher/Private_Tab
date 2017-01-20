@@ -1404,7 +1404,7 @@ var privateTab = {
 			return;
 		//~ hack: manually add closed private tab to undo close history
 		var tab = e.originalTarget || e.target;
-		if(!tab.hasAttribute(this.privateAttr))
+		if(!tab.hasAttribute(this.privateAttr) || "_privateTabIgnore" in tab)
 			return;
 		var window = tab.ownerDocument.defaultView;
 		if(this.isPrivateWindow(window))
@@ -1558,6 +1558,7 @@ var privateTab = {
 			else {
 				if(i == 0 && !hasNotPrivate)
 					gBrowser.selectedTab = gBrowser.addTab("about:blank", { skipAnimation: true });
+				tab._privateTabIgnore = true; // To not save in undo close history
 				gBrowser.removeTab(tab, { animate: false });
 				_log("closePrivateTabs(): remove tab: " + _tab(tab));
 			}
