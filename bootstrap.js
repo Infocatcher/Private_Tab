@@ -3735,8 +3735,7 @@ var privateTab = {
 		return isPrivate;
 	},
 	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
-		var document = tab.ownerDocument;
-		var window = document.defaultView;
+		var window = tab.ownerDocument.defaultView;
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
 			isPrivate = !this.isPrivateTab(tab); // Toggle
