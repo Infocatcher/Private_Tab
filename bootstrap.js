@@ -2537,21 +2537,7 @@ var privateTab = {
 
 			if(useDupTab) {
 				_log("toggleContextTabPrivate() -> will use gBrowser.duplicateTab()");
-				var pos = "_tPos" in tab
-					? tab._tPos
-					: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
-				tab.collapsed = true;
-				var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
-				dupTab.collapsed = false; // Not really needed, just to ensure
-				gBrowser.moveTabTo(dupTab, pos);
-				if(tab.selected)
-					gBrowser.selectedTab = dupTab;
-				window.setTimeout(function(tab) { // Wait for async duplication...
-					// Make tab empty to not save in undo close history
-					this.ss.setTabState(tab, '{"entries":[]}');
-					gBrowser.removeTab(tab);
-				}.bind(this), 300, tab);
-				tab = dupTab;
+				tab = this.replaceTabAndTogglePrivate(tab, isPrivate);
 				// Duplicated tab will be reloaded anyway
 				autoReload = stopLoading = false;
 			}
@@ -3756,6 +3742,25 @@ var privateTab = {
 			tab.setAttribute(this.privateAttr, "true");
 		else
 			tab.removeAttribute(this.privateAttr);
+		return dupTab;
+	},
+	replaceTabAndTogglePrivate: function(tab, isPrivate) {
+		var window = tab.ownerDocument.defaultView;
+		var gBrowser = this.getTabBrowser(tab);
+		var pos = "_tPos" in tab
+			? tab._tPos
+			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+		tab.collapsed = true;
+		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
+		dupTab.collapsed = false; // Not really needed, just to ensure
+		gBrowser.moveTabTo(dupTab, pos);
+		if(tab.selected)
+			gBrowser.selectedTab = dupTab;
+		window.setTimeout(function(tab) { // Wait for async duplication...
+			// Make tab empty to not save in undo close history
+			this.ss.setTabState(tab, '{"entries":[]}');
+			gBrowser.removeTab(tab);
+		}.bind(this), 300, tab);
 		return dupTab;
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
