@@ -3757,11 +3757,21 @@ var privateTab = {
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
-		window.setTimeout(function(tab) { // Wait for async duplication...
+		var removeTab, startTime = Date.now();
+		window.setTimeout(removeTab = function() { // Wait for async duplication
+			if(
+				dupTab.parentNode // Only if not closed
+				&& dupTab.hasAttribute("busy")
+				&& dupTab.linkedBrowser.currentURI.spec == "about:blank"
+				&& Date.now() - startTime < 10e3
+			) {
+				window.setTimeout(removeTab, 70);
+				return;
+			}
 			// Make tab empty to not save in undo close history
 			this.ss.setTabState(tab, '{"entries":[]}');
 			gBrowser.removeTab(tab);
-		}.bind(this), 300, tab);
+		}.bind(this), 300);
 		return dupTab;
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
