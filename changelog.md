@@ -10,6 +10,7 @@
 `x` Don't save closed private tabs in undo close history after extension disabling (<em>extensions.privateTab.rememberOwnerTab</em> = true).<br>
 `x` Correctly toggle private state of already opened tabs in Firefox 51+: now used more robust way to wait for asynchronous tab duplication (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Correctly make tabs non-private after extension disabling in Firefox 51+.<br>
+`x` Fixed: fail to startup on new profile (ReferenceError: _log is not defined) (<a href="https://github.com/Infocatcher/Private_Tab/issues/240">#240</a>).<br>
 
 ##### 0.2.1 (2017-01-18)
 `*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
