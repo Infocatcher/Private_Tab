@@ -537,11 +537,19 @@ var privateTab = {
 		if(force) {
 			var isPrivateWindow = this.isPrivateWindow(window);
 			forEach(gBrowser.tabs, function(tab) {
-				tab.removeAttribute(this.privateAttr);
 				if(disable && isPrivateWindow ^ this.isPrivateTab(tab)) {
-					this.toggleTabPrivate(tab, isPrivateWindow);
-					this.fixTabState(tab, false); // Always remove this.privateAttr
+					if(this.toggleUsingDupTab) {
+						window.setTimeout(function(tab) { // Pseudo async and to not break tabs loop
+							this.replaceTabAndTogglePrivate(tab, isPrivateWindow);
+						}.bind(this), 0, tab);
+					}
+					else {
+						this.toggleTabPrivate(tab, isPrivateWindow);
+						this.fixTabState(tab, false); // Always remove private attribute
+					}
 				}
+				// Note: isPrivateTab() will check for private attributes in e10s mode
+				tab.removeAttribute(this.privateAttr);
 			}, this);
 			document.documentElement.removeAttribute(this.privateAttr);
 			_log("Restore title...");
@@ -2517,12 +2525,16 @@ var privateTab = {
 		}
 		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
+	get toggleUsingDupTab() {
+		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
+		delete this.toggleUsingDupTab;
+		return this.toggleUsingDupTab = this.platformVersion >= 51;
+	},
 	toggleContextTabPrivate: function(window, toggleReload) {
 		var gBrowser = window.gBrowser;
 		var tab = this.getContextTab(window, true)
 			|| gBrowser.selectedTab; // For hotkey
-		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
-		var useDupTab = this.platformVersion >= 51;
+		var useDupTab = this.toggleUsingDupTab;
 		var isPrivate = useDupTab
 			? !this.isPrivateTab(tab) // Just get state
 			: this.toggleTabPrivate(tab);
