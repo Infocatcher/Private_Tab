@@ -3744,7 +3744,7 @@ var privateTab = {
 			tab.setAttribute(this.privateAttr, "true");
 		else
 			tab.removeAttribute(this.privateAttr);
-		if(this.isRemoteTab(tab)) // D'oh, let's try
+		if(this.isRemoteTab(tab) && "privateTab" in window) // Ensure private, but not on disabling/uninstalling
 			this.readyToOpenTab(window, isPrivate);
 		var dupTab = "duplicateTab" in gBrowser
 			? gBrowser.duplicateTab(tab)
