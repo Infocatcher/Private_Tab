@@ -2537,9 +2537,10 @@ var privateTab = {
 		var isPrivate = useDupTab
 			? !this.isPrivateTab(tab) // Just get state
 			: this.toggleTabPrivate(tab);
-		if(!useDupTab && this.isPendingTab(tab)) {
+		if(this.isPendingTab(tab)) {
 			_log("toggleContextTabPrivate() -> isPendingTab -> fixTabState()");
 			this.fixTabState(tab, isPrivate);
+			delete tab._privateTabIgnore;
 		}
 		else {
 			var autoReload = prefs.get("toggleTabPrivateAutoReload");
