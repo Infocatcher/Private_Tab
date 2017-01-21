@@ -34,9 +34,8 @@ var privateTab = {
 			return;
 		this.initialized = true;
 
-		prefs.init();
-
 		Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
+		prefs.init();
 		_dbg = prefs.get("debug", false);
 		_dbgv = prefs.get("debug.verbose", false);
 

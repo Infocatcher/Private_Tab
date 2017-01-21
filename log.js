@@ -3,19 +3,25 @@ const LOG_PREFIX = "[Private Tab] ";
 if(!("Services" in this))
 	Components.utils.import("resource://gre/modules/Services.jsm");
 this.__defineGetter__("_dbg", function() {
-	return Services.prefs.getBoolPref("extensions.privateTab.debug");
+	return _boolPref("debug");
 });
 this.__defineSetter__("_dbg", function(v) {
 	delete this._dbg;
 	return this._dbg = v;
 });
 this.__defineGetter__("_dbgv", function() {
-	return Services.prefs.getBoolPref("extensions.privateTab.debug.verbose");
+	return _boolPref("debug.verbose");
 });
 this.__defineSetter__("_dbgv", function(v) {
 	delete this._dbgv;
 	return this._dbgv = v;
 });
+function _boolPref(pref) {
+	pref = "extensions.privateTab." + pref;
+	if(Services.prefs.getPrefType(pref) == Services.prefs.PREF_BOOL)
+		return Services.prefs.getBoolPref(pref);
+	return true; // Not yet initialized
+}
 
 function ts() {
 	var d = new Date();
