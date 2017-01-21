@@ -3771,6 +3771,7 @@ var privateTab = {
 			// Make tab empty to not save in undo close history
 			this.ss.setTabState(tab, '{"entries":[]}');
 			gBrowser.removeTab(tab);
+			_dbgv && _log("replaceTabAndTogglePrivate() -> removeTab() after " + (Date.now() - startTime) + " ms");
 		}.bind(this), 300);
 		return dupTab;
 	},
