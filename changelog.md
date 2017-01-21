@@ -8,6 +8,8 @@
 ##### master/HEAD
 `x` Correctly update window title and style, if toggled private state of selected non-remote tab (restored non-remote private tab) in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
 `x` Don't save closed private tabs in undo close history after extension disabling (<em>extensions.privateTab.rememberOwnerTab</em> = true).<br>
+`x` Correctly toggle private state of already opened tabs in Firefox 51+: now used more robust way to wait for asynchronous tab duplication (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
+`x` Correctly make tabs non-private after extension disabling in Firefox 51+.<br>
 
 ##### 0.2.1 (2017-01-18)
 `*` Slightly improved startup performance in multi-process mode: frame script will be loaded after small delay.<br>
