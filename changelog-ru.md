@@ -6,6 +6,8 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправлено переключение приватности выгруженных вкладок в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
+
 ##### 0.2.1.1 (2017-01-21)
 `x` Исправлено обновление заголовка и внешнего вида окна при переключении приватности активной не мультипроцессной вкладки (восстановлении не мультипроцессной приватной вкладки) в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
 `x` При отключении расширения закрытые приватные вкладки теперь не сохраняются в списке для восстановления (<em>extensions.privateTab.rememberOwnerTab</em> = true).<br>
