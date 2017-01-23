@@ -2537,6 +2537,16 @@ var privateTab = {
 		var isPrivate = useDupTab
 			? !this.isPrivateTab(tab) // Just get state
 			: this.toggleTabPrivate(tab);
+
+		var updateState = function() {
+			if(!tab.selected) // Only for hotkey
+				return;
+			this.updateTabContext(window);
+			this.updateTabTooltip(window);
+			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
+				window.TabScope._updateTitle();
+		}.bind(this);
+
 		if(this.isPendingTab(tab)) {
 			_log("toggleContextTabPrivate() -> isPendingTab -> fixTabState()");
 			this.fixTabState(tab, isPrivate);
@@ -2551,6 +2561,23 @@ var privateTab = {
 			if(useDupTab) {
 				if("_privateTabWaitInitialize" in tab) {
 					_log("toggleContextTabPrivate(): found wait flag, do nothing");
+					return;
+				}
+				if(this.isTabNotInitialized(tab)) {
+					// It's not safe to duplicate tab right now
+					_log("toggleContextTabPrivate(): tab isn't initialized, will wait");
+					tab._privateTabWaitInitialize = true;
+					var waitTab, startTime = Date.now();
+					window.setTimeout(waitTab = function() {
+						if(this.isTabNotInitialized(tab) && Date.now() - startTime < 300) {
+							window.setTimeout(waitTab, 20);
+							return;
+						}
+						delete tab._privateTabWaitInitialize;
+						_log("toggleContextTabPrivate(): wait done in " + (Date.now() - startTime) + " ms");
+						tab = this.replaceTabAndTogglePrivate(tab, isPrivate);
+						window.setTimeout(updateState, 0);
+					}.bind(this), 20);
 					return;
 				}
 				_log("toggleContextTabPrivate() -> will use gBrowser.duplicateTab()");
@@ -2589,14 +2616,7 @@ var privateTab = {
 				browser.stop();
 			}
 		}
-		window.setTimeout(function() {
-			if(!tab.selected) // Only for hotkey
-				return;
-			this.updateTabContext(window);
-			this.updateTabTooltip(window);
-			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
-				window.TabScope._updateTitle();
-		}.bind(this), 0);
+		window.setTimeout(updateState, 0);
 	},
 
 	cmdAttr: "privateTab-command",
