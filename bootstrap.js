@@ -3776,12 +3776,7 @@ var privateTab = {
 		dupTab._privateTabWaitInitialize = true;
 		var removeTab, startTime = Date.now();
 		window.setTimeout(removeTab = function() { // Wait for async duplication
-			if(
-				dupTab.parentNode // Only if not closed
-				&& dupTab.hasAttribute("busy")
-				&& dupTab.linkedBrowser.currentURI.spec == "about:blank"
-				&& Date.now() - startTime < 10e3
-			) {
+			if(this.isTabNotInitialized(dupTab) && Date.now() - startTime < 10e3) {
 				window.setTimeout(removeTab, 70);
 				return;
 			}
@@ -3792,6 +3787,12 @@ var privateTab = {
 			_dbgv && _log("replaceTabAndTogglePrivate() -> removeTab() after " + (Date.now() - startTime) + " ms");
 		}.bind(this), 300);
 		return dupTab;
+	},
+	isTabNotInitialized: function(tab) {
+		return tab.parentNode // Only if not closed
+			&& tab.hasAttribute("busy")
+			&& tab.linkedBrowser
+			&& tab.linkedBrowser.currentURI.spec == "about:blank";
 	},
 	toggleWindowPrivate: function(window, isPrivate) {
 		var gBrowser = window.gBrowser;
