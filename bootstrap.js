@@ -2549,6 +2549,10 @@ var privateTab = {
 				autoReload = !autoReload;
 
 			if(useDupTab) {
+				if("_privateTabWaitInitialize" in tab) {
+					_log("toggleContextTabPrivate(): found wait flag, do nothing");
+					return;
+				}
 				_log("toggleContextTabPrivate() -> will use gBrowser.duplicateTab()");
 				tab = this.replaceTabAndTogglePrivate(tab, isPrivate);
 				// Duplicated tab will be reloaded anyway
@@ -3769,6 +3773,7 @@ var privateTab = {
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
+		dupTab._privateTabWaitInitialize = true;
 		var removeTab, startTime = Date.now();
 		window.setTimeout(removeTab = function() { // Wait for async duplication
 			if(
@@ -3780,6 +3785,7 @@ var privateTab = {
 				window.setTimeout(removeTab, 70);
 				return;
 			}
+			delete dupTab._privateTabWaitInitialize;
 			// Make tab empty to not save in undo close history
 			this.ss.setTabState(tab, '{"entries":[]}');
 			gBrowser.removeTab(tab);
