@@ -3173,10 +3173,7 @@ var privateTab = {
 	updateTabMenuItem: function(mi, tab, isPrivate) {
 		if(isPrivate === undefined)
 			isPrivate = this.isPrivateTab(tab);
-		if(isPrivate)
-			mi.setAttribute(this.privateAttr, "true");
-		else
-			mi.removeAttribute(this.privateAttr);
+		this.setPrivate(mi, isPrivate);
 	},
 	setupUndoCloseTabs: function(window, init) {
 		var document = window.document;
@@ -3217,14 +3214,10 @@ var privateTab = {
 				return;
 			var undoItem = undoTabItems[indx];
 			var state = undoItem && undoItem.state;
-			if(
-				state
+			var isPrivate = state
 				&& "attributes" in state
-				&& this.privateAttr in state.attributes
-			)
-				item.setAttribute(this.privateAttr, "true");
-			else
-				item.removeAttribute(this.privateAttr);
+				&& this.privateAttr in state.attributes;
+			this.setPrivate(tab, isPrivate);
 		}, this);
 	},
 	destroyControls: function(window, force) {
@@ -3632,15 +3625,18 @@ var privateTab = {
 		}
 		if(isPrivate == tab.hasAttribute(this.privateAttr))
 			return;
+		this.setPrivate(tab, isPrivate);
 		if(isPrivate) {
-			tab.setAttribute(this.privateAttr, "true");
 			var window = tab.ownerDocument.defaultView;
 			this.onFirstPrivateTab(window, tab);
 			window.privateTab._onFirstPrivateTab(window, tab);
 		}
-		else {
+	},
+	setPrivate: function(tab, isPrivate) {
+		if(isPrivate)
+			tab.setAttribute(this.privateAttr, "true");
+		else
 			tab.removeAttribute(this.privateAttr);
-		}
 	},
 	onFirstPrivateTab: function(window, tab) {
 		this.onFirstPrivateTab = function() {};
@@ -3765,20 +3761,14 @@ var privateTab = {
 		isPrivate && this.persistPrivateAttribute();
 		// Simplest way to get correct session state for duplicated tab
 		var origIsPrivate = tab.hasAttribute(this.privateAttr);
-		if(isPrivate)
-			tab.setAttribute(this.privateAttr, "true");
-		else
-			tab.removeAttribute(this.privateAttr);
+		this.setPrivate(tab, isPrivate);
 		if(this.isRemoteTab(tab) && "privateTab" in window) // Ensure private, but not on disabling/uninstalling
 			this.readyToOpenTab(window, isPrivate);
 		var dupTab = "duplicateTab" in gBrowser
 			? gBrowser.duplicateTab(tab)
 			: this.ss.duplicateTab(window, tab); // SeaMonkey
 		// And then restore original state
-		if(origIsPrivate)
-			tab.setAttribute(this.privateAttr, "true");
-		else
-			tab.removeAttribute(this.privateAttr);
+		this.setPrivate(tab, origIsPrivate);
 		return dupTab;
 	},
 	replaceTabAndTogglePrivate: function(tab, isPrivate) {
