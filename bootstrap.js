@@ -2524,6 +2524,10 @@ var privateTab = {
 		}
 		return contextTab || cm && cm.triggerNode && window.gBrowser.mContextTab;
 	},
+	updateContextTab: function(window, tab) {
+		if("TabContextMenu" in window)
+			window.TabContextMenu.contextTab = tab;
+	},
 	get toggleUsingDupTab() {
 		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
 		delete this.toggleUsingDupTab;
@@ -2541,10 +2545,16 @@ var privateTab = {
 		var updateState = function() {
 			if(!tab.selected) // Only for hotkey
 				return;
+			if(useDupTab) { // Trick to set correct state right now (duplication is still in progress)
+				var origIsPrivate = tab.hasAttribute(this.privateAttr);
+				this.setPrivate(tab, isPrivate);
+			}
 			this.updateTabContext(window);
 			this.updateTabTooltip(window);
 			if("TabScope" in window && "_updateTitle" in window.TabScope && window.TabScope._tab)
 				window.TabScope._updateTitle();
+			if(useDupTab) // Restore initial state
+				this.setPrivate(tab, origIsPrivate);
 		}.bind(this);
 
 		if(this.isPendingTab(tab)) {
@@ -2576,12 +2586,14 @@ var privateTab = {
 						delete tab._privateTabWaitInitialize;
 						_log("toggleContextTabPrivate(): wait done in " + (Date.now() - startTime) + " ms");
 						tab = this.replaceTabAndTogglePrivate(tab, isPrivate);
+						this.updateContextTab(window, tab);
 						window.setTimeout(updateState, 0);
 					}.bind(this), 20);
 					return;
 				}
 				_log("toggleContextTabPrivate() -> will use gBrowser.duplicateTab()");
 				tab = this.replaceTabAndTogglePrivate(tab, isPrivate);
+				this.updateContextTab(window, tab);
 				// Duplicated tab will be reloaded anyway
 				autoReload = stopLoading = false;
 			}
