@@ -11,7 +11,7 @@ var patcher = {
 		_log = function() {};
 	},
 	wrapFunction: function(obj, meth, key, callBefore, callAfter) {
-		var win = Components.utils.getGlobalForObject(obj);
+		var win = this.getGlobal(obj);
 		var name = key;
 		key = this.wrapNS + key;
 		var orig, wrapped;
@@ -105,7 +105,7 @@ var patcher = {
 		};
 	},
 	unwrapFunction: function(obj, meth, key, forceDestroy) {
-		var win = Components.utils.getGlobalForObject(obj);
+		var win = this.getGlobal(obj);
 		var name = key;
 		key = this.wrapNS + key;
 		if(!(key in win))
@@ -137,9 +137,15 @@ var patcher = {
 		}
 	},
 	isWrapped: function(obj, key) {
-		var win = Components.utils.getGlobalForObject(obj);
+		var win = this.getGlobal(obj);
 		key = this.wrapNS + key;
 		return key in win && win[key].enabled;
+	},
+	getGlobal: function(obj) {
+		var g = Components.utils.getGlobalForObject(obj);
+		if(g instanceof Components.interfaces.nsIDOMWindow) // Trick for [object Sandbox]
+			return g.window;
+		return g;
 	}
 };
 function _log() {}
