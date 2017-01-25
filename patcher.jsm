@@ -143,8 +143,8 @@ var patcher = {
 	},
 	getGlobal: function(obj) {
 		var g = Components.utils.getGlobalForObject(obj);
-		if(g instanceof Components.interfaces.nsIDOMWindow) // Trick for [object Sandbox]
-			return g.window;
+		if(g instanceof Components.interfaces.nsIDOMWindow)
+			return g.window; // Trick for [object Sandbox] in Firefox 45+
 		return g;
 	}
 };
