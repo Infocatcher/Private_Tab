@@ -1869,13 +1869,13 @@ var privateTab = {
 		else {
 			this.updateWindowTitle(window.gBrowser);
 		}
-		// Note: don't check our tabs for real private state to not break async duplication
+		// Show real private state in case of changes from another extensions
+		// (or if something went wrong in our code)
+		// Note: don't check our tabs to not break async duplication
 		if(!("_privateTabWaitInitialize" in tab)) window.setTimeout(function() {
-			// Someone may change "usePrivateBrowsing"...
-			// It's good to show real state
-			if(tab.parentNode) // Handle only not yet closed tabs
+			if(tab.parentNode && !("_privateTabWaitInitialize" in tab)) // Only for not yet closed tabs
 				this.setTabState(tab);
-		}.bind(this), 150);
+		}.bind(this), 200);
 	},
 	_dndPrivateNode: null,
 	get dndPrivateNode() {
