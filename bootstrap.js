@@ -3795,19 +3795,21 @@ var privateTab = {
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = true;
 		dupTab.collapsed = false; // Not really needed, just to ensure
-		if(isPinned) {
+		if(isPinned && "pinTab" in gBrowser) {
 			gBrowser.pinTab(dupTab);
 			// Will be unpinned. Really.
-			var onTabUnpinned;
+			var onTabUnpinned, cleanupTimer;
+			var cleanup = function() {
+				dupTab.removeEventListener("TabUnpinned", onTabUnpinned, false);
+				window.clearTimeout(cleanupTimer);
+			};
+			cleanupTimer = window.setTimeout(cleanup, 500);
 			dupTab.addEventListener("TabUnpinned", onTabUnpinned = function(e) {
-				dupTab.removeEventListener(e.type, onTabUnpinned, false);
-				_log("replaceTabAndTogglePrivate() -> pin tab again");
+				cleanup();
+				_log("replaceTabAndTogglePrivate() -> " + e.type + " -> pin tab again");
 				gBrowser.pinTab(dupTab);
 				gBrowser.moveTabTo(dupTab, pos); // Will be moved after unpinning, restore position
 			}, false);
-			window.setTimeout(function() { // Cleanup anyway
-				dupTab.removeEventListener("TabUnpinned", onTabUnpinned, false);
-			}, 500);
 		}
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
