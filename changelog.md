@@ -10,6 +10,7 @@
 `x` Don't toggle private state of not yet initialized tabs in Firefox 51+ to not break tab's contents: wait for loading and forbid too often toggle state calls (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Correctly remove wrappers for functions from another extensions like `window.TabScope._updateTitle()` in Firefox 45+ (now sandboxed, will used trick to get actual `window` object to store internal data).<br>
 `x` Correctly toggle private state with disabled multi-process mode in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
+`x` Correctly toggle private state of pinned tabs in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 
 ##### 0.2.1.1 (2017-01-21)
 `x` Correctly update window title and style, if toggled private state of selected non-remote tab (restored non-remote private tab) in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>, <a href="https://github.com/Infocatcher/Private_Tab/issues/239">#239</a>).<br>
