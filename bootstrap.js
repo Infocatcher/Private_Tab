@@ -1874,7 +1874,7 @@ var privateTab = {
 			// It's good to show real state
 			if(tab.parentNode) // Handle only not yet closed tabs
 				this.setTabState(tab);
-		}.bind(this), 50);
+		}.bind(this), 150);
 	},
 	_dndPrivateNode: null,
 	get dndPrivateNode() {
