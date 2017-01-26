@@ -3790,10 +3790,25 @@ var privateTab = {
 		var pos = "_tPos" in tab
 			? tab._tPos
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+		var isPinned = tab.pinned || false;
 		tab.collapsed = true;
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = true;
 		dupTab.collapsed = false; // Not really needed, just to ensure
+		if(isPinned) {
+			gBrowser.pinTab(dupTab);
+			// Will be unpinned. Really.
+			var onTabUnpinned;
+			dupTab.addEventListener("TabUnpinned", onTabUnpinned = function(e) {
+				dupTab.removeEventListener(e.type, onTabUnpinned, false);
+				_log("replaceTabAndTogglePrivate() -> pin tab again");
+				gBrowser.pinTab(dupTab);
+				gBrowser.moveTabTo(dupTab, pos); // Will be moved after unpinning, restore position
+			}, false);
+			window.setTimeout(function() { // Cleanup anyway
+				dupTab.removeEventListener("TabUnpinned", onTabUnpinned, false);
+			}, 500);
+		}
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
