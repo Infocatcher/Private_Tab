@@ -1869,7 +1869,8 @@ var privateTab = {
 		else {
 			this.updateWindowTitle(window.gBrowser);
 		}
-		window.setTimeout(function() {
+		// Note: don't check our tabs for real private state to not break async duplication
+		if(!("_privateTabWaitInitialize" in tab)) window.setTimeout(function() {
 			// Someone may change "usePrivateBrowsing"...
 			// It's good to show real state
 			if(tab.parentNode) // Handle only not yet closed tabs
@@ -3791,11 +3792,11 @@ var privateTab = {
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
 		tab.collapsed = true;
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
+		dupTab._privateTabWaitInitialize = true;
 		dupTab.collapsed = false; // Not really needed, just to ensure
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
-		dupTab._privateTabWaitInitialize = true;
 		var removeTab, startTime = Date.now();
 		window.setTimeout(removeTab = function() { // Wait for async duplication
 			if(this.isTabNotInitialized(dupTab) && Date.now() - startTime < 10e3) {
