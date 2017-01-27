@@ -1505,6 +1505,8 @@ var privateTab = {
 						: this.ss.duplicateTab(window, tab); // SeaMonkey
 					tab.pinned && this.forcePinTab(newTab, pos);
 					gBrowser.moveTabTo(newTab, pos);
+					if(tab.selected)
+						gBrowser.selectedTab = newTab;
 				}
 				else if(
 					this.isSeaMonkey
