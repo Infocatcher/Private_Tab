@@ -1500,11 +1500,10 @@ var privateTab = {
 					var pos = "_tPos" in tab
 						? tab._tPos
 						: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
-					var isPinned = tab.pinned || false;
 					var newTab = "duplicateTab" in gBrowser
 						? gBrowser.duplicateTab(tab)
 						: this.ss.duplicateTab(window, tab); // SeaMonkey
-					isPinned && this.forcePinTab(newTab, pos);
+					tab.pinned && this.forcePinTab(newTab, pos);
 					gBrowser.moveTabTo(newTab, pos);
 				}
 				else if(
@@ -3792,12 +3791,11 @@ var privateTab = {
 		var pos = "_tPos" in tab
 			? tab._tPos
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
-		var isPinned = tab.pinned || false;
 		tab.collapsed = true;
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = true;
 		dupTab.collapsed = false; // Not really needed, just to ensure
-		isPinned && this.forcePinTab(dupTab, pos);
+		tab.pinned && this.forcePinTab(dupTab, pos);
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
