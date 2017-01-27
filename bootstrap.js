@@ -3795,22 +3795,7 @@ var privateTab = {
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = true;
 		dupTab.collapsed = false; // Not really needed, just to ensure
-		if(isPinned && "pinTab" in gBrowser) {
-			gBrowser.pinTab(dupTab);
-			// Will be unpinned. Really.
-			var onTabUnpinned, cleanupTimer;
-			var cleanup = function() {
-				dupTab.removeEventListener("TabUnpinned", onTabUnpinned, false);
-				window.clearTimeout(cleanupTimer);
-			};
-			cleanupTimer = window.setTimeout(cleanup, 500);
-			dupTab.addEventListener("TabUnpinned", onTabUnpinned = function(e) {
-				cleanup();
-				_log("replaceTabAndTogglePrivate() -> " + e.type + " -> pin tab again");
-				gBrowser.pinTab(dupTab);
-				gBrowser.moveTabTo(dupTab, pos); // Will be moved after unpinning, restore position
-			}, false);
-		}
+		isPinned && this.forcePinTab(dupTab, pos);
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
@@ -3827,6 +3812,26 @@ var privateTab = {
 			_dbgv && _log("replaceTabAndTogglePrivate() -> removeTab() after " + (Date.now() - startTime) + " ms");
 		}.bind(this), 300);
 		return dupTab;
+	},
+	forcePinTab: function(tab, pos) {
+		var gBrowser = this.getTabBrowser(tab);
+		var window = tab.ownerDocument.defaultView;
+		if(!("pinTab" in gBrowser))
+			return;
+		gBrowser.pinTab(tab);
+		// Will be unpinned after duplicateTab() -> pinTab(). Really.
+		var onTabUnpinned, cleanupTimer;
+		var cleanup = function() {
+			tab.removeEventListener("TabUnpinned", onTabUnpinned, false);
+			window.clearTimeout(cleanupTimer);
+		};
+		cleanupTimer = window.setTimeout(cleanup, 500);
+		tab.addEventListener("TabUnpinned", onTabUnpinned = function(e) {
+			cleanup();
+			_log("replaceTabAndTogglePrivate() -> " + e.type + " -> pin tab again");
+			gBrowser.pinTab(tab);
+			gBrowser.moveTabTo(tab, pos); // Will be moved after unpinning, restore position
+		}, false);
 	},
 	isTabNotInitialized: function(tab) {
 		return tab.parentNode // Only if not closed
