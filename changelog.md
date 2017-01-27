@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.2.1.2 (2017-01-27)
 `x` Correctly toggle private state of unloaded (pending) tabs in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Don't toggle private state of not yet initialized tabs in Firefox 51+ to not break tab's contents: wait for loading and forbid too often toggle state calls (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Correctly remove wrappers for functions from another extensions like `window.TabScope._updateTitle()` in Firefox 45+ (now sandboxed, will used trick to get actual `window` object to store internal data).<br>
