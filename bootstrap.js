@@ -1500,9 +1500,11 @@ var privateTab = {
 					var pos = "_tPos" in tab
 						? tab._tPos
 						: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+					var isPinned = tab.pinned || false;
 					var newTab = "duplicateTab" in gBrowser
 						? gBrowser.duplicateTab(tab)
 						: this.ss.duplicateTab(window, tab); // SeaMonkey
+					isPinned && this.forcePinTab(newTab, pos);
 					gBrowser.moveTabTo(newTab, pos);
 				}
 				else if(
