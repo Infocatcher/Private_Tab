@@ -2574,13 +2574,19 @@ var privateTab = {
 
 			if(useDupTab) {
 				if("_privateTabWaitInitialize" in tab) {
-					_log("toggleContextTabPrivate(): found wait flag, do nothing");
-					return;
+					if(Date.now() - tab._privateTabWaitInitialize > 12e3) {
+						delete tab._privateTabWaitInitialize;
+						_log("toggleContextTabPrivate(): something went wrong, ignore too old wait flag");
+					}
+					else {
+						_log("toggleContextTabPrivate(): found wait flag, do nothing");
+						return;
+					}
 				}
 				if(this.isTabNotInitialized(tab)) {
 					// It's not safe to duplicate tab right now
 					_log("toggleContextTabPrivate(): tab isn't initialized, will wait");
-					tab._privateTabWaitInitialize = true;
+					tab._privateTabWaitInitialize = Date.now();
 					var waitTab, startTime = Date.now();
 					window.setTimeout(waitTab = function() {
 						if(this.isTabNotInitialized(tab) && Date.now() - startTime < 300) {
@@ -3795,7 +3801,7 @@ var privateTab = {
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
 		tab.collapsed = true;
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
-		dupTab._privateTabWaitInitialize = true;
+		dupTab._privateTabWaitInitialize = Date.now();
 		dupTab.collapsed = false; // Not really needed, just to ensure
 		tab.pinned && this.forcePinTab(dupTab, pos);
 		gBrowser.moveTabTo(dupTab, pos);
