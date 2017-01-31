@@ -1991,7 +1991,7 @@ var privateTab = {
 			if(origIsPrivate != undefined) {
 				if(tab == targetTab) {
 					_log("Highlight target tab as " + _p(isPrivate));
-					this.dispatchAPIEvent(targetTab, "PrivateTab:PrivateChanged", isPrivate);
+					this.dispatchPrivateChangedAPIEvent(targetTab, isPrivate);
 				}
 				else {
 					_log("Restore private state of target tab");
@@ -3684,6 +3684,22 @@ var privateTab = {
 			Components.utils.reportError(e);
 		}
 	},
+	dispatchPrivateChangedAPIEvent: function(tab, isPrivate) {
+		var window = tab.ownerDocument.defaultView;
+		var evt = new window.CustomEvent("PrivateTab:PrivateChanged", {
+			bubbles: true,
+			cancelable: false,
+			detail: +isPrivate,
+			view: window
+		});
+		Object.defineProperty(evt, "explicitOriginalTarget", {
+			value: tab._privateTabSourceTab || null,
+			enumerable: true,
+			configurable: true,
+			writable: false
+		});
+		return tab.dispatchEvent(evt);
+	},
 	dispatchAPIEvent: function(target, eventType, eventDetail) {
 		var window = target.defaultView
 			|| target.ownerDocument && target.ownerDocument.defaultView
@@ -3723,7 +3739,7 @@ var privateTab = {
 					+ "\nTab: " + _tab(tab)
 				);
 				if(!_silent)
-					this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+					this.dispatchPrivateChangedAPIEvent(tab, isPrivate);
 			}, this);
 			this.sendAsyncMessage(window, mm, {
 				action: "ToggleState",
@@ -3761,7 +3777,7 @@ var privateTab = {
 
 		_log("Set usePrivateBrowsing to " + isPrivate + "\nTab: " + _tab(tab));
 		if(!_silent)
-			this.dispatchAPIEvent(tab, "PrivateTab:PrivateChanged", isPrivate);
+			this.dispatchPrivateChangedAPIEvent(tab, isPrivate);
 		return isPrivate;
 	},
 	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
@@ -3773,6 +3789,10 @@ var privateTab = {
 		// Simplest way to get correct session state for duplicated tab
 		var origIsPrivate = tab.hasAttribute(this.privateAttr);
 		this.setPrivate(tab, isPrivate);
+		this.waitForTab(window, function(dupTab) {
+			// This will happens before we leave duplicateTab() statement
+			dupTab._privateTabSourceTab = tab;
+		});
 		if(this.isRemoteTab(tab) && "privateTab" in window) // Ensure private, but not on disabling/uninstalling
 			this.readyToOpenTab(window, isPrivate);
 		var dupTab = "duplicateTab" in gBrowser
