@@ -1378,7 +1378,9 @@ var privateTab = {
 			|| this.isPrivateTab(tab) != isPrivate
 		) {
 			_log("Make restored tab " + _p(isPrivate));
-			this.toggleTabPrivate(tab, isPrivate);
+			var newIsPrivate = this.toggleTabPrivate(tab, isPrivate);
+			if("_privateTabSourceTab" in tab && newIsPrivate === isPrivate)
+				this.dispatchPrivateChangedAPIEvent(tab, isPrivate);
 			if(isPrivate) {
 				this.onFirstPrivateTab(window, tab);
 				window.privateTab._onFirstPrivateTab(window, tab);
