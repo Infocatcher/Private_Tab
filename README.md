@@ -56,7 +56,7 @@ You can listen for following events:
 		<td>PrivateTab:PrivateChanged</td>
 		<td>tab</td>
 		<td>1 – private tab<br>0 – not private</td>
-		<td>Changed private state of the tab</td>
+		<td>Changed private state of the tab<br><strong>event.explicitOriginalTarget</strong> – initial tab in case of toggling using duplication (Firefox 51+, Private Tab 0.2.1.3+)</td>
 	</tr>
 	<tr>
 		<td>PrivateTab:OpenInNewTab</td>
