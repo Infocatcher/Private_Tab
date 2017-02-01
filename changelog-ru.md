@@ -6,6 +6,8 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`*` Обновлено и откорректировано API-событие `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: добавлена возможность отслеживания переключения с помощью дублирования вкладки в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
+
 ##### 0.2.1.2 (2017-01-27)
 `x` Исправлено переключение приватности выгруженных вкладок в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Добавлен запрет переключения приватности еще не загруженных вкладок в 51+ во избежание повреждения содержимого вкладок: добавлено ожидание загрузки и предотвращаются слишком частые вызовы переключения (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>

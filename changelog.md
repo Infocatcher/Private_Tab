@@ -6,6 +6,8 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
+
 ##### 0.2.1.2 (2017-01-27)
 `x` Correctly toggle private state of unloaded (pending) tabs in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Don't toggle private state of not yet initialized tabs in Firefox 51+ to not break tab's contents: wait for loading and forbid too often toggle state calls (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
