@@ -3791,10 +3791,6 @@ var privateTab = {
 		// Simplest way to get correct session state for duplicated tab
 		var origIsPrivate = tab.hasAttribute(this.privateAttr);
 		this.setPrivate(tab, isPrivate);
-		this.waitForTab(window, function(dupTab) {
-			// This will happens before we leave duplicateTab() statement
-			dupTab._privateTabSourceTab = tab;
-		});
 		if(this.isRemoteTab(tab) && "privateTab" in window) // Ensure private, but not on disabling/uninstalling
 			this.readyToOpenTab(window, isPrivate);
 		var dupTab = "duplicateTab" in gBrowser
@@ -3811,6 +3807,10 @@ var privateTab = {
 			? tab._tPos
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
 		tab.collapsed = true;
+		this.waitForTab(window, function(dupTab) {
+			// This will happens before we leave duplicateTab() statement
+			dupTab._privateTabSourceTab = tab;
+		});
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = Date.now();
 		dupTab.collapsed = false; // Not really needed, just to ensure
