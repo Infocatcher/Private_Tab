@@ -3810,6 +3810,14 @@ var privateTab = {
 		this.waitForTab(window, function(dupTab) {
 			// This will happens before we leave duplicateTab() statement
 			dupTab._privateTabSourceTab = tab;
+			window.addEventListener("SSTabRestoring", function onRestored(e) {
+				if((e.originalTarget || e.target) != dupTab)
+					return;
+				window.removeEventListener(e.type, onRestored, false);
+				window.setTimeout(function() {
+					delete dupTab._privateTabSourceTab;
+				}, 250);
+			}, false);
 		});
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = Date.now();
