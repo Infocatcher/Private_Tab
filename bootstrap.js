@@ -4373,7 +4373,7 @@ var privateTab = {
 	isMultiProcessWindow: function(window) {
 		return "gMultiProcessBrowser" in window && window.gMultiProcessBrowser;
 	},
-	getTabPrivacyContext: function(tab, _silent) {
+	getTabPrivacyContext: function(tab) {
 		var browser = tab.linkedBrowser;
 		if(!browser) {
 			Components.utils.reportError(
@@ -4385,22 +4385,14 @@ var privateTab = {
 			return this.getPrivacyContext(browser.contentWindow);
 		}
 		catch(e) {
-			if(!_silent) {
-				_log(
-					"getTabPrivacyContext() failed"
-					+ (_dbgv ? "\nCall stack:\n" + new Error().stack : "")
-				);
-				_dbgv && Components.utils.reportError(e);
-			}
+			_log("getTabPrivacyContext() failed, call stack:\n" + new Error().stack);
+			Components.utils.reportError(e);
 		}
 		return null;
 	},
 	isPrivateTab: function(tab) {
 		if(this.isRemoteTab(tab)) {
-			_log(
-				"isPrivateTab(): tab is remote, will check private attribute"
-				+ (_dbgv ? ". Call stack:\n" + new Error().stack : "")
-			);
+			_dbgv && _log("isPrivateTab(): tab is remote, will check private attribute");
 			return tab.getAttribute(this.privateAttr) == "true";
 		}
 		var privacyContext = this.getTabPrivacyContext(tab);
@@ -4408,7 +4400,7 @@ var privateTab = {
 	},
 	isPrivateTabAsync: function(tab, feedback, context) {
 		if(!this.isRemoteTab(tab)) {
-			var privacyContext = this.getTabPrivacyContext(tab, true);
+			var privacyContext = this.getTabPrivacyContext(tab);
 			feedback.call(context, privacyContext.usePrivateBrowsing);
 			return;
 		}
