@@ -4396,12 +4396,21 @@ var privateTab = {
 			return tab.getAttribute(this.privateAttr) == "true";
 		}
 		var privacyContext = this.getTabPrivacyContext(tab);
+		if(!privacyContext) {
+			_log("isPrivateTab(): privacyContext is " + privacyContext + ", will check private attribute");
+			return tab.getAttribute(this.privateAttr) == "true";
+		}
 		return privacyContext.usePrivateBrowsing;
 	},
 	isPrivateTabAsync: function(tab, feedback, context) {
 		if(!this.isRemoteTab(tab)) {
 			var privacyContext = this.getTabPrivacyContext(tab);
-			feedback.call(context, privacyContext.usePrivateBrowsing);
+			if(privacyContext)
+				feedback.call(context, privacyContext.usePrivateBrowsing);
+			else {
+				_log("isPrivateTabAsync(): privacyContext is " + privacyContext + ", will check private attribute");
+				feedback.call(context, tab.getAttribute(this.privateAttr) == "true");
+			}
 			return;
 		}
 		var window = tab.ownerDocument.defaultView;
