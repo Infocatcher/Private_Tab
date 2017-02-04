@@ -2247,6 +2247,8 @@ var privateTab = {
 	},
 	fixTabRemoteness: function(e) {
 		var tab = e.originalTarget || e.target;
+		if("_privateTabWillClosed" in tab)
+			return;
 		var isPrivate = tab.hasAttribute(this.privateAttr);
 		var window = e.currentTarget;
 		if(isPrivate == this.isPrivateWindow(window)) {
@@ -3834,6 +3836,7 @@ var privateTab = {
 			}
 			delete dupTab._privateTabWaitInitialize;
 			// Make tab empty to not save in undo close history
+			tab._privateTabWillClosed = true; // To ignore "TabRemotenessChange" event
 			this.ss.setTabState(tab, '{"entries":[]}');
 			gBrowser.removeTab(tab);
 			_dbgv && _log("replaceTabAndTogglePrivate() -> removeTab() after " + (Date.now() - startTime) + " ms");
