@@ -2230,6 +2230,8 @@ var privateTab = {
 	privateChangedHandler: function(e) {
 		var tab = e.originalTarget || e.target;
 		var isPrivate = e.detail == 1;
+		if(isPrivate == tab.hasAttribute(this.privateAttr)) // Looks already updated, ignore
+			return;
 		this.setTabState(tab, isPrivate);
 		if(tab.selected) {
 			var window = tab.ownerDocument.defaultView;
