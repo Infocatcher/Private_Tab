@@ -43,8 +43,12 @@ pref("extensions.privateTab.sendRefererHeader", 2);
 // 0 - don't send
 // 1 - only if private tab opened from private tab
 // 2 - always send (as Firefox itself do for "Open Link in New Private Window")
+
+// Additional options for checkbox in tab context menu, only for Firefox 50 and older
+// See https://github.com/Infocatcher/Private_Tab/issues/237
 pref("extensions.privateTab.toggleTabPrivateAutoReload", true);
 pref("extensions.privateTab.toggleTabPrivateAutoReload.stopLoading", true);
+
 pref("extensions.privateTab.workaroundForPendingTabs", true);
 pref("extensions.privateTab.dontUseTabsInPopupWindows", true);
 pref("extensions.privateTab.rememberOwnerTab", false);
