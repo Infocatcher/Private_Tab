@@ -3807,6 +3807,7 @@ var privateTab = {
 	replaceTabAndTogglePrivate: function(tab, isPrivate) {
 		var window = tab.ownerDocument.defaultView;
 		var gBrowser = this.getTabBrowser(tab);
+		var gURLBar = window.gURLBar;
 		var pos = "_tPos" in tab
 			? tab._tPos
 			: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
@@ -3818,11 +3819,20 @@ var privateTab = {
 				if((e.originalTarget || e.target) != dupTab)
 					return;
 				window.removeEventListener(e.type, onRestored, false);
+				if(typed != null) window.setTimeout(function() {
+					if(!dupTab.linkedBrowser) // Already closed?
+						return;
+					if(focusURLBar) // Force update
+						gURLBar.value = typed;
+					dupTab.linkedBrowser.userTypedValue = typed;
+				}, 100);
 				window.setTimeout(function() {
 					delete dupTab._privateTabSourceTab;
 				}, 250);
 			}, false);
 		});
+		var focusURLBar = gURLBar.focused;
+		var typed = tab.linkedBrowser.userTypedValue;
 		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
 		dupTab._privateTabWaitInitialize = Date.now();
 		dupTab.collapsed = false; // Not really needed, just to ensure
@@ -3830,6 +3840,8 @@ var privateTab = {
 		gBrowser.moveTabTo(dupTab, pos);
 		if(tab.selected)
 			gBrowser.selectedTab = dupTab;
+		if(focusURLBar && !gURLBar.focused)
+			gURLBar.focus();
 		var removeTab, startTime = Date.now();
 		window.setTimeout(removeTab = function() { // Wait for async duplication
 			if(this.isTabNotInitialized(dupTab) && Date.now() - startTime < 10e3) {
