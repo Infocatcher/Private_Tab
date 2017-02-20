@@ -27,9 +27,12 @@ try {
 		spec = "http://" + spec;
 	// Validate URI
 	var uri = Services.io.newURI(spec, null, null);
-	var testChannel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
-		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
-		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
+	try { // Firefox 44+
+		var testChannel = Services.io.newChannelFromURIWithLoadInfo(uri, null);
+	}
+	catch(e2) {
+		var testChannel = Services.io.newChannelFromURI(uri);
+	}
 	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
