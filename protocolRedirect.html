@@ -28,6 +28,7 @@ try {
 	// Validate URI
 	var uri = Services.io.newURI(spec, null, null);
 	var testChannel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
+		&& parseFloat(Services.appinfo.platformVersion) >= 44 // Throws in Firefox 37-43 with null nsILoadInfo
 		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
 		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
 	document.title = getLoadingTitle() || spec;

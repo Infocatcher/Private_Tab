@@ -86,11 +86,12 @@ var privateProtocol = {
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
 		var redirect = "chrome://privatetab/content/protocolRedirect.html#" + newSpec;
 		var channel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
+			&& (loadInfo || parseFloat(Services.appinfo.platformVersion) >= 44) // Throws in Firefox 37-43 with null nsILoadInfo
 			? Services.io.newChannelFromURIWithLoadInfo(
 				Services.io.newURI(redirect, null, null),
 				loadInfo
 			)
-			: Services.io.newChannel(redirect, null, null); // Removed in Firefox 48+
+			: Services.io.newChannel(redirect, null, null); // Deprecated in Firefox 48+
 		var ensurePrivate = function(reason) {
 			_log(reason + " => ensurePrivate()");
 			this.makeChannelPrivate(channel);
