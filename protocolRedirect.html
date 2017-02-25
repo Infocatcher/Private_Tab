@@ -25,12 +25,7 @@ try {
 		throw new Error("No URI");
 	if(!/^[^:]+:/.test(spec))
 		spec = "http://" + spec;
-	// Validate URI
-	var uri = Services.io.newURI(spec, null, null);
-	var testChannel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
-		&& parseFloat(Services.appinfo.platformVersion) >= 44 // Throws in Firefox 37-43 with null nsILoadInfo
-		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
-		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
+	var testChannel = validateURI(spec);
 	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
@@ -72,6 +67,13 @@ function updateUI() {
 	mm.sendAsyncMessage("PrivateTab:ProtocolURILoaded", {
 		URI: document.documentURI
 	});
+}
+function validateURI(spec) { // Returns test nsIChannel or throws
+	var uri = Services.io.newURI(spec, null, null);
+	return "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
+		&& parseFloat(Services.appinfo.platformVersion) >= 44 // Throws in Firefox 37-43 with null nsILoadInfo
+		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
+		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
 }
 function getLoadingTitle() {
 	function string(file, id) {
