@@ -4269,9 +4269,12 @@ var privateTab = {
 					if(
 						(
 							stack.indexOf("\nprivateTab.openNewPrivateTab@") != -1 // Firefox 52
-							|| stack.indexOf("\nopenNewPrivateTab@") != -1 // Firefox 53
+							|| stack.indexOf("\nopenNewPrivateTab@") != -1 // Firefox 53+
 						)
-						&& stack.indexOf("\n_linkBrowserToTab@chrome://browser/content/tabbrowser.xml:") != -1
+						&& (
+							stack.indexOf("\n_linkBrowserToTab@chrome://browser/content/tabbrowser.xml:") != -1
+							|| (_this.platformVersion >= 54 && prefs.getPref("browser.newtab.preload"))
+						)
 					) {
 						_log(key + "(): looks like privateTab.openNewPrivateTab() + preloaded about:newtab, override to true");
 						return { value: true };
