@@ -9,6 +9,8 @@
 `*` Обновлено и откорректировано API-событие `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: добавлена возможность отслеживания переключения с помощью дублирования вкладки в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
 `*` Переключение приватности через клонирование вкладки: теперь делается попытка восстановить текст в адресной строке (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Исправлен приватный протокол в Firefox 37-43 (возникало исключение в `nsIIOService.newChannelFromURIWithLoadInfo(…, null)`) (<a href="https://github.com/Infocatcher/Private_Tab/issues/247">#247</a>).<br>
+`+` Обновлена индонезийская (id) локаль, спасибо <a href="https://github.com/DhannyNara">Muhammad Anwari Ramadhan</a>.<br>
+`x` Исправлена возможность открытия новой приватной вкладки в Firefox 54+ (с <em>browser.newtab.preload</em> = true) (<a href="https://github.com/Infocatcher/Private_Tab/issues/252">#252</a>).<br>
 
 ##### 0.2.1.2 (2017-01-27)
 `x` Исправлено переключение приватности выгруженных вкладок в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>

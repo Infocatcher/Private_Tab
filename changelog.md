@@ -9,6 +9,8 @@
 `*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
 `*` Toggle private state using tab duplication: try restore text in URL bar (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Fixed private protocol in Firefox 37-43 (caused by `nsIIOService.newChannelFromURIWithLoadInfo(…, null)` failure) (<a href="https://github.com/Infocatcher/Private_Tab/issues/247">#247</a>).<br>
+`*` Updated Indonesian (id) locale, thanks to <a href="https://github.com/DhannyNara">Muhammad Anwari Ramadhan</a>.<br>
+`x` Fixed ability to open new private tab in Firefox 54+ (with <em>browser.newtab.preload</em> = true) (<a href="https://github.com/Infocatcher/Private_Tab/issues/252">#252</a>).<br>
 
 ##### 0.2.1.2 (2017-01-27)
 `x` Correctly toggle private state of unloaded (pending) tabs in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
