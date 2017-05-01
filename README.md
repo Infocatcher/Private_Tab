@@ -191,3 +191,25 @@ if("privateTab" in window) {
 	// Do something with "privateTab" object
 }
 ```
+
+##### Code examples:
+Open link in private tab using <a href="https://addons.mozilla.org/addon/firegestures/?src=search">FireGestures</a> extension:
+```js
+// Remember the active tab's position
+var tab = gBrowser.selectedTab;
+var pos = "_tPos" in tab
+	? tab._tPos
+	: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
+// Get the DOM node at the starting point of gesture
+var srcNode = FireGestures.sourceNode;
+// Get the link URL inside the node
+var linkURL = FireGestures.getLinkURL(srcNode);
+if (!linkURL)
+    throw "Not on a link";
+// Check the URL is safe
+FireGestures.checkURL(linkURL, srcNode.ownerDocument);
+// Open link in new private tab
+privateTab.readyToOpenTab(true);
+var newPrivateTab = gBrowser.addTab(linkURL);
+gBrowser.moveTabTo(newPrivateTab, pos + 1); // Place right after initial tab
+```
