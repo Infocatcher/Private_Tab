@@ -3,7 +3,8 @@
 #### Known issues:
 * We just inherit private state from selected tab and tries preserve private state of dropped link-like things, this is simple to implement, but may confuse a bit…
 * If you use "New Private Tab" + "New Tab" buttons after tabs toolbar, you need to manually remove "New Private Tab" button before disabling or uninstalling Private Tab. Or you can remove "New Tab" button, press OK in Customize Toolbar dialog and then place "New Tab" directly after tabs.
-* Can't open new private tab, if installed <a href="https://addons.mozilla.org/addon/scriptify/">Scriptify</a>-based extension: please use <a href="https://addons.mozilla.org/addon/greasemonkey/">Greasemonkey</a> or <a href="https://addons.mozilla.org/addon/scriptish/">Scriptish</a> instead (<a href="https://github.com/Infocatcher/Private_Tab/issues/110">#110</a>)
+* Can't open new private tab, if installed <a href="https://addons.mozilla.org/addon/scriptify/">Scriptify</a>-based extension: please use <a href="https://addons.mozilla.org/addon/greasemonkey/">Greasemonkey</a> or <a href="https://addons.mozilla.org/addon/scriptish/">Scriptish</a> instead (<a href="https://github.com/Infocatcher/Private_Tab/issues/110">#110</a>).
+* In Firefox 52+ `private:…` URI may be opened only in new tab due to fix for <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1318388">bug 1318388</a> (<a href="https://github.com/Infocatcher/Private_Tab/issues/251">#251</a>).
 
 #### Styles:
 You can use `.tabbrowser-tab[privateTab-isPrivate]` (private tab), `#main-window[privateTab-selectedTabIsPrivate]` (selected tab is private) and `#main-window[privateTab-isPrivate]` (built-in private window) selectors in styles for <a href="http://kb.mozillazine.org/UserChrome.css">userChrome.css</a>/<a href="https://addons.mozilla.org/addon/stylish/">Stylish</a>.
