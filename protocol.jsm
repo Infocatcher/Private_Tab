@@ -123,24 +123,10 @@ var privateProtocol = {
 	},
 
 	makeChannelPrivate: function(channel) {
-		try {
-			if(channel.notificationCallbacks) {
-				channel.notificationCallbacks
-					.getInterface(Components.interfaces.nsILoadContext)
-					.usePrivateBrowsing = true;
-				return;
-			}
-		}
-		catch(e) {
-			Components.utils.reportError(e);
-		}
-		try {
-			if(channel.loadGroup && channel.loadGroup.notificationCallbacks) {
-				channel.loadGroup.notificationCallbacks
-					.getInterface(Components.interfaces.nsILoadContext)
-					.usePrivateBrowsing = true;
-				return;
-			}
+		var loadContext = this.getLoadContext(channel);
+		if(loadContext) try {
+			loadContext.usePrivateBrowsing = true;
+			return;
 		}
 		catch(e) {
 			Components.utils.reportError(e);
@@ -153,5 +139,26 @@ var privateProtocol = {
 			Components.utils.reportError(e);
 		}
 		throw Components.results.NS_ERROR_NO_INTERFACE;
+	},
+	getLoadContext: function(channel) {
+		try {
+			if(channel.notificationCallbacks) {
+				return channel.notificationCallbacks
+					.getInterface(Components.interfaces.nsILoadContext);
+			}
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
+		try {
+			if(channel.loadGroup && channel.loadGroup.notificationCallbacks) {
+				return channel.loadGroup.notificationCallbacks
+					.getInterface(Components.interfaces.nsILoadContext);
+			}
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
+		return null;
 	}
 };
