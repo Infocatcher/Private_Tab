@@ -6,11 +6,16 @@ const P_CID = Components.ID("{e974cf10-11cb-4293-af88-e61c7dfe717c}"),
       P_SCHEME = "private",
       P_NAME = "Private Tab protocol handler";
 
-function _gLog() {}
-function _log(s) {
-	_gLog("[protocol] " + s);
-}
 Components.utils.import("resource://gre/modules/Services.jsm");
+this.__defineGetter__("_log", function() {
+	delete this._log;
+	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
+	return _log;
+});
+this.__defineSetter__("_log", function(logger) {
+	delete this._log;
+	_log = logger;
+});
 
 var privateProtocol = {
 	get compReg() {
@@ -19,14 +24,14 @@ var privateProtocol = {
 	},
 	init: function(logger) {
 		if(logger)
-			_gLog = logger;
+			_log = logger;
 		this.compReg.registerFactory(P_CID, P_NAME, P_CONTRACTID, this);
-		_log("Initialized");
+		_log("[protocol] Initialized");
 	},
 	destroy: function() {
 		this.compReg.unregisterFactory(P_CID, this);
-		_log("Destroyed");
-		_gLog = function() {};
+		_log("[protocol] Destroyed");
+		_log = function() {};
 	},
 
 	// nsIFactory
@@ -74,13 +79,13 @@ var privateProtocol = {
 	},
 	newChannel2: function(uri, loadInfo) {
 		var spec = uri.spec;
-		_log("newChannel(): spec = " + spec);
+		_log("[protocol] newChannel(): spec = " + spec);
 		var newSpec = "";
 		var schemePrefix = P_SCHEME + ":";
 		// Example: private:///#http://example.com/ (legacy) or private:http://example.com/
 		if(spec && spec.startsWith(schemePrefix))
 			newSpec = spec.substr(schemePrefix.length).replace(/^\/*#?/, "");
-		_log("newChannel(): newSpec = " + newSpec);
+		_log("[protocol] newChannel(): newSpec = " + newSpec);
 
 		// We can't use newChannel(newSpec, ...) here - strange things happens
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
@@ -93,7 +98,7 @@ var privateProtocol = {
 			)
 			: Services.io.newChannel(redirect, null, null); // Deprecated in Firefox 48+
 		var ensurePrivate = function(reason) {
-			_log(reason + " => ensurePrivate()");
+			_log("[protocol] " + reason + " => ensurePrivate()");
 			this.makeChannelPrivate(channel);
 			ensurePrivate = function() {}; // Don't call again in case of success
 		}.bind(this);
