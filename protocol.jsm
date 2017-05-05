@@ -134,6 +134,11 @@ var privateProtocol = {
 			return;
 		}
 		catch(e) {
+			if( // See https://github.com/Infocatcher/Private_Tab/issues/251
+				parseFloat(Services.appinfo.platformVersion) >= 52
+				&& this.fixTabFromLoadContext(loadContext)
+			)
+				return;
 			Components.utils.reportError(e);
 		}
 		if(channel instanceof Components.interfaces.nsIPrivateBrowsingChannel) try {
@@ -163,6 +168,34 @@ var privateProtocol = {
 		}
 		catch(e) {
 			Components.utils.reportError(e);
+		}
+		return null;
+	},
+	fixTabFromLoadContext: function(loadContext) {
+		if(Services.appinfo.processType == Services.appinfo.PROCESS_TYPE_CONTENT) {
+			_log("[protocol] fixTabFromLoadContext(): in content process");
+			//~ todo: try use Services.cpmm
+			return;
+		}
+		var tab = this.getTabFromContext(loadContext);
+		if(!tab) {
+			_log("[protocol] fixTabFromLoadContext(): tab not found");
+			return;
+		}
+		_log("[protocol] fixTabFromLoadContext(): tab found");
+	},
+	getTabFromContext: function(loadContext) {
+		var contentWindow = loadContext.associatedWindow;
+		var window = contentWindow
+			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIWebNavigation)
+			.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+			.rootTreeItem
+			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIDOMWindow);
+		if(window instanceof Components.interfaces.nsIDOMChromeWindow) {
+			var gBrowser = window.gBrowser;
+			return gBrowser && gBrowser._getTabForContentWindow(contentWindow);
 		}
 		return null;
 	}
