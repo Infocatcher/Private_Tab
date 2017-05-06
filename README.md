@@ -79,6 +79,7 @@ boolean [privateTab.isTabPrivate](#privatetabistabprivate)(in DOMNode tab)
 <br>void [privateTab.isTabPrivateAsync](#privatetabistabprivateasync)(in DOMNode tab, in function callback[, in object context])
 <br>boolean [privateTab.toggleTabPrivate](#privatetabtoggletabprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>DOMNode [privateTab.duplicateTabAndTogglePrivate](#privatetabduplicatetabandtoggleprivate)(in DOMNode tab[, in boolean isPrivate])
+<br>DOMNode [privateTab.replaceTabAndTogglePrivate](#privatetabreplacetabandtoggleprivate)(in DOMNode tab[, in boolean isPrivate])
 <br>void [privateTab.readyToOpenTab](#privatetabreadytoopentab)(in boolean isPrivate)
 <br>void [privateTab.readyToOpenTabs](#privatetabreadytoopentabs)(in boolean isPrivate)
 <br>boolean [privateTab.hasClosedTabs](#privatetabhasclosedtabs)
@@ -129,6 +130,12 @@ var pos = "_tPos" in tab
 	: Array.prototype.indexOf.call(gBrowser.tabs, tab); // SeaMonkey
 var dupTab = gBrowser.selectedTab = privateTab.duplicateTabAndTogglePrivate(tab);
 gBrowser.moveTabTo(dupTab, pos + 1); // Place right after initial tab
+```
+###### privateTab.replaceTabAndTogglePrivate()
+Changes tab private state using tab duplication (for Firefox 52+):
+```js
+// Duplicate selected tab, toggle private state of duplicated tab and then close initial tab
+privateTab.replaceTabAndTogglePrivate(gBrowser.selectedTab);
 ```
 ###### privateTab.readyToOpenTab()
 Allows to open private or not private tab (independent of any inheritance mechanism), example:
