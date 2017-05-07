@@ -99,8 +99,10 @@ var privateProtocol = {
 			: Services.io.newChannel(redirect, null, null); // Deprecated in Firefox 48+
 		var ensurePrivate = function(reason) {
 			_log("[protocol] " + reason + " => ensurePrivate()");
-			this.makeChannelPrivate(channel);
+			var isPrivate = this.makeChannelPrivate(channel);
 			ensurePrivate = function() {}; // Don't call again in case of success
+			if(!isPrivate) // Don't load, will use workaround with tab duplication
+				throw Components.results.NS_ERROR_ABORT;
 		}.bind(this);
 		var channelWrapper = {
 			__proto__: channel,
@@ -131,19 +133,19 @@ var privateProtocol = {
 		var loadContext = this.getLoadContext(channel);
 		if(loadContext) try {
 			loadContext.usePrivateBrowsing = true;
-			return;
+			return true;
 		}
 		catch(e) {
 			if( // See https://github.com/Infocatcher/Private_Tab/issues/251
 				parseFloat(Services.appinfo.platformVersion) >= 52
-				&& this.fixTabFromLoadContext(loadContext)
+				&& this.fixTabFromLoadContext(loadContext, channel.URI.ref)
 			)
-				return;
+				return undefined;
 			Components.utils.reportError(e);
 		}
 		if(channel instanceof Components.interfaces.nsIPrivateBrowsingChannel) try {
 			channel.setPrivate(true);
-			return;
+			return true;
 		}
 		catch(e) {
 			Components.utils.reportError(e);
@@ -171,7 +173,7 @@ var privateProtocol = {
 		}
 		return null;
 	},
-	fixTabFromLoadContext: function(loadContext) {
+	fixTabFromLoadContext: function(loadContext, uri) {
 		if(Services.appinfo.processType == Services.appinfo.PROCESS_TYPE_CONTENT) {
 			_log("[protocol] fixTabFromLoadContext(): in content process");
 			//~ todo: try use Services.cpmm
@@ -180,9 +182,24 @@ var privateProtocol = {
 		var tab = this.getTabFromContext(loadContext);
 		if(!tab) {
 			_log("[protocol] fixTabFromLoadContext(): tab not found");
-			return;
+			return false;
 		}
-		_log("[protocol] fixTabFromLoadContext(): tab found");
+		var window = tab.ownerDocument.defaultView;
+		var pt = window.privateTab || null;
+		if(!pt) {
+			_log("[protocol] fixTabFromLoadContext(): missing window.privateTab");
+			return false;
+		}
+		if(pt.isTabPrivate(tab)) {
+			_log("[protocol] fixTabFromLoadContext(): tab already private");
+			return true;
+		}
+		_log("[protocol] fixTabFromLoadContext(): will use workaround with tab duplication");
+		var dupTab = pt.replaceTabAndTogglePrivate(tab, true);
+		window.setTimeout(function() {
+			dupTab.linkedBrowser.loadURI(uri);
+		}, 200);
+		return true;
 	},
 	getTabFromContext: function(loadContext) {
 		var contentWindow = loadContext.associatedWindow;
