@@ -179,12 +179,15 @@ var privateProtocol = {
 			//~ todo: try use Services.cpmm
 			return;
 		}
-		var tab = this.getTabFromContext(loadContext);
+		var browser = loadContext.topFrameElement;
+		var window = browser && browser.ownerDocument.defaultView;
+		var tab = window.gBrowser
+			&& window.gBrowser.getTabForBrowser
+			&& window.gBrowser.getTabForBrowser(browser);
 		if(!tab) {
 			_log("[protocol] fixTabFromLoadContext(): tab not found");
 			return false;
 		}
-		var window = tab.ownerDocument.defaultView;
 		var pt = window.privateTab || null;
 		if(!pt) {
 			_log("[protocol] fixTabFromLoadContext(): missing window.privateTab");
@@ -200,20 +203,5 @@ var privateProtocol = {
 			dupTab.linkedBrowser.loadURI(uri);
 		}, 200);
 		return true;
-	},
-	getTabFromContext: function(loadContext) {
-		var contentWindow = loadContext.associatedWindow;
-		var window = contentWindow
-			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIWebNavigation)
-			.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-			.rootTreeItem
-			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIDOMWindow);
-		if(window instanceof Components.interfaces.nsIDOMChromeWindow) {
-			var gBrowser = window.gBrowser;
-			return gBrowser && gBrowser._getTabForContentWindow(contentWindow);
-		}
-		return null;
 	}
 };
