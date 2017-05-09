@@ -180,28 +180,16 @@ var privateProtocol = {
 			return;
 		}
 		var browser = loadContext.topFrameElement;
-		var window = browser && browser.ownerDocument.defaultView;
-		var tab = window.gBrowser
-			&& window.gBrowser.getTabForBrowser
-			&& window.gBrowser.getTabForBrowser(browser);
-		if(!tab) {
-			_log("[protocol] fixTabFromLoadContext(): tab not found");
+		if(!browser) {
+			_log("[protocol] fixTabFromLoadContext(): missing loadContext.topFrameElement");
 			return false;
 		}
+		var window = browser.ownerDocument.defaultView;
 		var pt = window.privateTab || null;
 		if(!pt) {
 			_log("[protocol] fixTabFromLoadContext(): missing window.privateTab");
 			return false;
 		}
-		if(pt.isTabPrivate(tab)) {
-			_log("[protocol] fixTabFromLoadContext(): tab already private");
-			return true;
-		}
-		_log("[protocol] fixTabFromLoadContext(): will use workaround with tab duplication");
-		var dupTab = pt.replaceTabAndTogglePrivate(tab, true);
-		window.setTimeout(function() {
-			dupTab.linkedBrowser.loadURI(uri);
-		}, 200);
-		return true;
+		return pt._fixBrowserFromProtocol(browser, uri);
 	}
 };

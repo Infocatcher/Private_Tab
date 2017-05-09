@@ -3590,6 +3590,24 @@ var privateTab = {
 			: bookmarkURI;
 		this.updateBookmarkFavicon(uri, tab);
 	},
+	fixBrowserFromProtocol: function(browser, uri) {
+		var tab = this.getTabForBrowser(browser);
+		if(!tab) {
+			_log("fixBrowserFromProtocol(): tab not found");
+			return false;
+		}
+		if(this.isPrivateTab(tab)) {
+			_log("fixBrowserFromProtocol(): tab already private");
+			return true;
+		}
+		_log("fixBrowserFromProtocol(): will use workaround with tab duplication");
+		var window = tab.ownerDocument.defaultView;
+		var dupTab = this.replaceTabAndTogglePrivate(tab, true);
+		window.setTimeout(function() {
+			dupTab.linkedBrowser.loadURI(uri);
+		}, 200);
+		return true;
+	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
 		_log("updateBookmarkFavicon()");
 		var browser = tab.linkedBrowser;
@@ -4811,6 +4829,9 @@ API.prototype = {
 	},
 	_handleProtocolBrowser: function(browser, bookmarkURI) {
 		privateTabInternal.handleProtocolBrowser(browser, bookmarkURI);
+	},
+	_fixBrowserFromProtocol: function(browser, uri) {
+		return privateTabInternal.fixBrowserFromProtocol(browser, uri);
 	},
 	// Public API:
 	isTabPrivate: function privateTab_isTabPrivate(tab) {
