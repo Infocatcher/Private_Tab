@@ -176,8 +176,13 @@ var privateProtocol = {
 	fixTabFromLoadContext: function(loadContext, uri) {
 		if(Services.appinfo.processType == Services.appinfo.PROCESS_TYPE_CONTENT) {
 			_log("[protocol] fixTabFromLoadContext(): in content process");
-			//~ todo: try use Services.cpmm
-			return;
+			var mm = loadContext.associatedWindow
+				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDocShell)
+				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIContentFrameMessageManager);
+			var res = mm.sendSyncMessage("PrivateTab:ProtocolReplaceTab", { URI: uri });
+			return res && res[0];
 		}
 		var browser = loadContext.topFrameElement;
 		if(!browser) {
