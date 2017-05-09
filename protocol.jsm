@@ -132,6 +132,8 @@ var privateProtocol = {
 	makeChannelPrivate: function(channel) {
 		var loadContext = this.getLoadContext(channel);
 		if(loadContext) try {
+			if(loadContext.usePrivateBrowsing) // Already private
+				return true;
 			loadContext.usePrivateBrowsing = true;
 			return true;
 		}
