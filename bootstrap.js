@@ -3610,7 +3610,10 @@ var privateTab = {
 		var dupTab = this.replaceTabAndTogglePrivate(tab, true);
 		window.setTimeout(function() {
 			dupTab.linkedBrowser.loadURI(uri);
-		}, 200);
+			window.setTimeout(function() {
+				this.handleProtocolBrowser(browser, uri);
+			}.bind(this), 10);
+		}.bind(this), 200);
 		return true;
 	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
