@@ -174,7 +174,7 @@ var privateProtocol = {
 		return null;
 	},
 	fixTabFromLoadContext: function(loadContext, uri) {
-		if(Services.appinfo.processType == Services.appinfo.PROCESS_TYPE_CONTENT) {
+		if(loadContext.useRemoteTabs) {
 			_log("[protocol] fixTabFromLoadContext(): in content process");
 			var mm = loadContext.associatedWindow
 				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
