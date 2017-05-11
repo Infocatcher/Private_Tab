@@ -14,7 +14,7 @@ this.__defineGetter__("_log", function() {
 });
 this.__defineSetter__("_log", function(logger) {
 	delete this._log;
-	_log = logger;
+	this._log = logger;
 });
 
 var privateProtocol = {
