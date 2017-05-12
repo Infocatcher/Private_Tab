@@ -104,29 +104,22 @@ var privateProtocol = {
 			if(!isPrivate) // Don't load, will use workaround with tab duplication
 				throw Components.results.NS_ERROR_ABORT;
 		}.bind(this);
-		var channelWrapper = {
-			__proto__: channel,
-			asyncOpen: function(aListener, aContext) {
-				ensurePrivate("nsIChannel.asyncOpen()");
-				return channel.asyncOpen.apply(this, arguments);
-			},
-			asyncOpen2: function(aListener) {
-				ensurePrivate("nsIChannel.asyncOpen2()");
-				return channel.asyncOpen2.apply(this, arguments);
-			},
-			open: function() {
-				ensurePrivate("nsIChannel.open()");
-				return channel.open.apply(this, arguments);
-			},
-			open2: function() {
-				ensurePrivate("nsIChannel.open2()");
-				return channel.open2.apply(this, arguments);
-			}
-		};
+		function proxy(method) {
+			return function() {
+				ensurePrivate("nsIChannel." + method + "()");
+				return channel[method].apply(this, arguments);
+			};
+		}
 		Services.tm.mainThread.dispatch(function() {
 			ensurePrivate("fallback delay");
 		}, Components.interfaces.nsIThread.DISPATCH_NORMAL);
-		return channelWrapper;
+		return {
+			__proto__: channel,
+			asyncOpen:  proxy("asyncOpen"),
+			asyncOpen2: proxy("asyncOpen2"),
+			open:       proxy("open"),
+			open2:      proxy("open2")
+		};
 	},
 
 	makeChannelPrivate: function(channel) {
