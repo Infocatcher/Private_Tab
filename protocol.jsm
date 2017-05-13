@@ -100,14 +100,15 @@ var privateProtocol = {
 		var ensurePrivate = function(reason) {
 			_log("[protocol] " + reason + " => ensurePrivate()");
 			var isPrivate = this.makeChannelPrivate(channel);
-			ensurePrivate = function() {}; // Don't call again in case of success
+			ensurePrivate = function() { return true; }; // Don't call again in case of success
 			if(!isPrivate) // Don't load, will use workaround with tab duplication
-				throw Components.results.NS_ERROR_ABORT;
+				channel.cancel(Components.results.NS_BINDING_ABORTED);
+			return isPrivate;
 		}.bind(this);
 		function proxy(method) {
 			return function() {
-				ensurePrivate("nsIChannel." + method + "()");
-				return channel[method].apply(this, arguments);
+				return ensurePrivate("nsIChannel." + method + "()")
+					&& channel[method].apply(this, arguments);
 			};
 		}
 		Services.tm.mainThread.dispatch(function() {
