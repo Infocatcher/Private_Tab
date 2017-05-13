@@ -11,6 +11,8 @@
 `x` Исправлен приватный протокол в Firefox 37-43 (возникало исключение в `nsIIOService.newChannelFromURIWithLoadInfo(…, null)`) (<a href="https://github.com/Infocatcher/Private_Tab/issues/247">#247</a>).<br>
 `+` Обновлена индонезийская (id) локаль, спасибо <a href="https://github.com/DhannyNara">Muhammad Anwari Ramadhan</a>.<br>
 `x` Исправлена возможность открытия новой приватной вкладки в Firefox 54+ (с <em>browser.newtab.preload</em> = true) (<a href="https://github.com/Infocatcher/Private_Tab/issues/252">#252</a>).<br>
+`+` Добавлен API <a href="https://github.com/Infocatcher/Private_Tab#privatetabreplacetabandtoggleprivate">privateTab.replaceTabAndTogglePrivate()</a>.<br>
+`x` Исправлена возможность открытия private:… ссылок в уже открытых вкладках (будет использоваться обходной путь с клонированием вкладки) (<a href="https://github.com/Infocatcher/Private_Tab/issues/251">#251</a>).<br>
 
 ##### 0.2.1.2 (2017-01-27)
 `x` Исправлено переключение приватности выгруженных вкладок в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>

@@ -11,6 +11,8 @@
 `x` Fixed private protocol in Firefox 37-43 (caused by `nsIIOService.newChannelFromURIWithLoadInfo(…, null)` failure) (<a href="https://github.com/Infocatcher/Private_Tab/issues/247">#247</a>).<br>
 `*` Updated Indonesian (id) locale, thanks to <a href="https://github.com/DhannyNara">Muhammad Anwari Ramadhan</a>.<br>
 `x` Fixed ability to open new private tab in Firefox 54+ (with <em>browser.newtab.preload</em> = true) (<a href="https://github.com/Infocatcher/Private_Tab/issues/252">#252</a>).<br>
+`+` Added <a href="https://github.com/Infocatcher/Private_Tab#privatetabreplacetabandtoggleprivate">privateTab.replaceTabAndTogglePrivate()</a> API.<br>
+`x` Fixed ability to open private:… URI in already opened tab (will be used workaround with tab duplication) (<a href="https://github.com/Infocatcher/Private_Tab/issues/251">#251</a>).<br>
 
 ##### 0.2.1.2 (2017-01-27)
 `x` Correctly toggle private state of unloaded (pending) tabs in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
