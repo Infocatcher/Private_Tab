@@ -1,8 +1,8 @@
 var EXPORTED_SYMBOLS = ["PrivateTabContent"];
 
+Components.utils.import("resource://gre/modules/Services.jsm");
 this.__defineGetter__("_log", function() {
 	delete this._log;
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
 	return _log;
 });
@@ -125,7 +125,6 @@ PrivateTabContent.prototype = {
 			var req = doc.imageRequest;
 			var image = req && req.image;
 			try {
-				var {Services} = Components.utils.import("resource://gre/modules/Services.jsm", {});
 				var maxSize = Services.prefs.getIntPref("browser.chrome.image_icons.max_size");
 			}
 			catch(e) {
