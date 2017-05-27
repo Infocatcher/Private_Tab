@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.2.2 (2017-05-27)
 `*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
 `*` Toggle private state using tab duplication: try restore text in URL bar (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
 `x` Fixed private protocol in Firefox 37-43 (caused by `nsIIOService.newChannelFromURIWithLoadInfo(…, null)` failure) (<a href="https://github.com/Infocatcher/Private_Tab/issues/247">#247</a>).<br>
