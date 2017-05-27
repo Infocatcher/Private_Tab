@@ -18,6 +18,10 @@ this.__defineSetter__("_log", function(logger) {
 });
 
 var privateProtocol = {
+	get platformVersion() {
+		delete this.platformVersion;
+		return this.platformVersion = parseFloat(Services.appinfo.platformVersion);
+	},
 	get compReg() {
 		return Components.manager
 			.QueryInterface(Components.interfaces.nsIComponentRegistrar);
@@ -91,7 +95,7 @@ var privateProtocol = {
 		// Also we can't use nsIPrivateBrowsingChannel.setPrivate(true) for chrome:// URI
 		var redirect = "chrome://privatetab/content/protocolRedirect.html#" + newSpec;
 		var channel = "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
-			&& (loadInfo || parseFloat(Services.appinfo.platformVersion) >= 44) // Throws in Firefox 37-43 with null nsILoadInfo
+			&& (loadInfo || this.platformVersion >= 44) // Throws in Firefox 37-43 with null nsILoadInfo
 			? Services.io.newChannelFromURIWithLoadInfo(
 				Services.io.newURI(redirect, null, null),
 				loadInfo
@@ -133,7 +137,7 @@ var privateProtocol = {
 		}
 		catch(e) {
 			if( // See https://github.com/Infocatcher/Private_Tab/issues/251
-				parseFloat(Services.appinfo.platformVersion) >= 52
+				this.platformVersion >= 52
 				&& this.fixTabFromLoadContext(loadContext, channel.URI.ref)
 			)
 				return undefined;
