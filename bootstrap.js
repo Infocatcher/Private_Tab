@@ -1061,7 +1061,20 @@ var privateTab = {
 							_log("swapDocShells(): can't get, tab not found for " + _str(_spec(otherBrowser)));
 							return;
 						}
-						before.isPrivate = _this.isPrivateTab(tab);
+						var isPrivate = _this.isPrivateTab(tab);
+						if(
+							isPrivate
+							&& this.getAttribute("remote") != "true"
+							&& otherBrowser.getAttribute("remote") != "true"
+							&& !this.docShell.hasLoadedNonBlankURI
+						) {
+							_log("swapDocShells(): usePrivateBrowsing = true, inheritPrivateBrowsingId = false");
+							this.docShell.QueryInterface(Components.interfaces.nsILoadContext)
+								.usePrivateBrowsing = true;
+							otherBrowser.docShell.inheritPrivateBrowsingId = false;
+							return;
+						}
+						before.isPrivate = isPrivate;
 						_log("swapDocShells(): usePrivateBrowsing: " + before.isPrivate);
 					}
 					catch(e) {
