@@ -1,7 +1,8 @@
 #!/bin/sh
 
 PROG=false
-XPI=private_tab-latest.xpi
+VER=`sed -nr 's%^\s*<em:version>([.0-9a-z]+)</em:version>\s*$%\1%p' install.rdf`
+XPI=private_tab-${VER}.xpi
 FILES='install.rdf *.manifest *.js *.jsm *.xul *.xml *.html *.css license* *.png defaults modules components locale chrome idl'
 
 for z in 7za 7z zip
