@@ -11,10 +11,12 @@
 		<em:version>0.2.2</em:version>
 		<em:description>Adds private tabs</em:description>
 		<em:creator>Infocatcher</em:creator>
+		<!--
 		<em:updateURL>http://infocatcher.ucoz.net/ext/fx/private_tab/update.rdf</em:updateURL>
 		<em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLgtEbrhCdZetIAanFNvkT441WwBgXcg1Zzlo5s5
 		              j9VLByj/L6UXAVqSria1dejjkKfxVbRXvqalJ7mENRambKpZ4AfV3dBCKUDjME56CMaAK7+DxMqaM3
 		              KEDKXn8XfqL2qkFsgcVjqh6AfltKRcyLGkU9+YQ82EXo6xm47hywoQIDAQAB</em:updateKey>
+		-->
 
 		<em:targetApplication> <!-- Firefox -->
 			<Description>
@@ -159,6 +161,16 @@
 				<em:description>プライベートタブを追加します</em:description>
 				<em:creator>Infocatcher</em:creator>
 				<em:translator>charishi</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
+				<em:locale>nl</em:locale>
+				<em:name>Private Tab</em:name>
+				<em:description>Voegt privétabbladen toe.</em:description>
+				<em:creator>Infocatcher</em:creator>
+				<em:translator>Tonnes</em:translator>
 			</Description>
 		</em:localized>
 
