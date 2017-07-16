@@ -6,6 +6,9 @@
 `*` - improved<br>
 
 ##### master/HEAD
+`x` Added trick to drag private tab to another window (with disabled multi-process mode, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">thanks to Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
+`+` Added Dutch locale (nl), thanks to <a href="https://github.com/TonnesM">TonnesM</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/268">#268</a>).<br>
+
 ##### 0.2.2 (2017-05-27)
 `*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
 `*` Toggle private state using tab duplication: try restore text in URL bar (<a href="https://github.com/Infocatcher/Private_Tab/issues/237">#237</a>).<br>
