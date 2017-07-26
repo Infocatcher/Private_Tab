@@ -8,7 +8,7 @@
 ##### master/HEAD
 `x` Добавлен хак для перетаскивания приватной вкладки в другое окно (при отключенном мультипроцессном режиме, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">спасибо Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
 `+` Добавлена Dutch локаль (nl), спасибо <a href="https://github.com/TonnesM">TonnesM</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/268">#268</a>).<br>
-`+` Добавлена болгарская локаль (bg), спасибо <a href="https://github.com/spacy01">Peyu Yovev</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/270">#270</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/271">#271</a>).<br>
+`+` Добавлена болгарская локаль (bg), спасибо <a href="https://github.com/spacy01">Peyu Yovev</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/270">#270</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/271">#271</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/272">#272</a>).<br>
 
 ##### 0.2.2 (2017-05-27)
 `*` Обновлено и откорректировано API-событие `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: добавлена возможность отслеживания переключения с помощью дублирования вкладки в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
