@@ -45,9 +45,10 @@
 			<Description>
 				<em:locale>ar</em:locale>
 				<em:name>Private Tab</em:name>
-				<em:description>Adds private tabs</em:description>
+				<em:description>إضافة علامات تبويب خاصة</em:description>
 				<em:creator>Infocatcher</em:creator>
 				<em:translator>infinity</em:translator>
+				<em:translator>tahani5</em:translator>
 			</Description>
 		</em:localized>
 
