@@ -4722,63 +4722,62 @@ var privateTab = {
 		var newTabBtn = this.isAustralis
 			&& prefs.get("fixAfterTabsButtonsAccessibility")
 			&& this.getNewTabButton(window);
-		if(newTabBtn) {
-			var origStyle = newTabBtn.hasAttribute("style") && newTabBtn.getAttribute("style");
-			// Force show to get correct size (may be hidden, if there is many tabs)
-			newTabBtn.style.visibility = "visible";
-			var cs = window.getComputedStyle(newTabBtn, null);
-			var origBinding = cs.MozBinding;
-			var ext = /^url\("([^"]+)"\)$/.test(origBinding)
-				&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
-			var icon = newTabBtn.ownerDocument.getAnonymousElementByAttribute(newTabBtn, "class", "toolbarbutton-icon");
-			var csi = icon ? window.getComputedStyle(icon, null) : {};
-			var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
-				Math.max(0, (
-					parseFloat(cs.height) - parseFloat(csi.height || 16)
-					+ parseFloat(cs.marginTop) + parseFloat(cs.marginBottom)
-					- parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
-					- parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
-					- parseFloat(csi.marginTop || 0) - parseFloat(csi.marginBottom || 0)
-				)/2) + "px "
-				+ Math.max(0, (
-					parseFloat(cs.width) - parseFloat(csi.width || 16)
-					+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
-					- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
-					- parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
-					- parseFloat(csi.marginLeft || 0) - parseFloat(csi.marginRight || 0)
-				)/2) + "px"
-			);
-			if(origStyle === false)
-				newTabBtn.removeAttribute("style");
-			else
-				newTabBtn.setAttribute("style", origStyle);
-			_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
-			var btnBinding = this.trimMultilineString('\
-				<?xml version="1.0"?>\n\
-				<bindings id="privateTabBindings"\n\
-					xmlns="http://www.mozilla.org/xbl"\n\
-					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
-					<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
-						extends="' + ext + '" />\n\
-				</bindings>');
-			var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
-			var cssStr = '\
-				/* Private Tab: fix width of clickable area for buttons after last tab */\n\
-				@-moz-document url("' + window.document.documentURI + '") {\n\
-					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button {\n\
-						pointer-events: none;\n\
-						-moz-binding: url("' + btnBindingData + '");\n\
-					}\n\
-					#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
-						pointer-events: auto;\n\
-						width: auto !important;\n\
-						height: auto !important;\n\
-						padding: ' + padding + ' !important;\n\
-					}\n\
-				}';
-			return this.newCssURI(cssStr);
-		}
-		return null;
+		if(!newTabBtn)
+			return null;
+		var origStyle = newTabBtn.hasAttribute("style") && newTabBtn.getAttribute("style");
+		// Force show to get correct size (may be hidden, if there is many tabs)
+		newTabBtn.style.visibility = "visible";
+		var cs = window.getComputedStyle(newTabBtn, null);
+		var origBinding = cs.MozBinding;
+		var ext = /^url\("([^"]+)"\)$/.test(origBinding)
+			&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
+		var icon = newTabBtn.ownerDocument.getAnonymousElementByAttribute(newTabBtn, "class", "toolbarbutton-icon");
+		var csi = icon ? window.getComputedStyle(icon, null) : {};
+		var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
+			Math.max(0, (
+				parseFloat(cs.height) - parseFloat(csi.height || 16)
+				+ parseFloat(cs.marginTop) + parseFloat(cs.marginBottom)
+				- parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
+				- parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+				- parseFloat(csi.marginTop || 0) - parseFloat(csi.marginBottom || 0)
+			)/2) + "px "
+			+ Math.max(0, (
+				parseFloat(cs.width) - parseFloat(csi.width || 16)
+				+ parseFloat(cs.marginLeft) + parseFloat(cs.marginRight)
+				- parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+				- parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+				- parseFloat(csi.marginLeft || 0) - parseFloat(csi.marginRight || 0)
+			)/2) + "px"
+		);
+		if(origStyle === false)
+			newTabBtn.removeAttribute("style");
+		else
+			newTabBtn.setAttribute("style", origStyle);
+		_log("After tabs button binding:\n" + origBinding + "\n=> " + ext + "\npadding: " + padding);
+		var btnBinding = this.trimMultilineString('\
+			<?xml version="1.0"?>\n\
+			<bindings id="privateTabBindings"\n\
+				xmlns="http://www.mozilla.org/xbl"\n\
+				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">\n\
+				<binding id="toolbarbutton" display="xul:hbox" role="xul:toolbarbutton"\n\
+					extends="' + ext + '" />\n\
+			</bindings>');
+		var btnBindingData = "data:application/xml," + encodeURIComponent(btnBinding) + "#toolbarbutton";
+		var cssStr = '\
+			/* Private Tab: fix width of clickable area for buttons after last tab */\n\
+			@-moz-document url("' + window.document.documentURI + '") {\n\
+				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button {\n\
+					pointer-events: none;\n\
+					-moz-binding: url("' + btnBindingData + '");\n\
+				}\n\
+				#TabsToolbar[' + this.fixAfterTabsA11yAttr + '] .tabs-newtab-button > .toolbarbutton-icon {\n\
+					pointer-events: auto;\n\
+					width: auto !important;\n\
+					height: auto !important;\n\
+					padding: ' + padding + ' !important;\n\
+				}\n\
+			}';
+		return this.newCssURI(cssStr);
 	},
 	newCssURI: function(cssStr) {
 		cssStr = this.trimMultilineString(cssStr);
