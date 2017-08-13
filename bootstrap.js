@@ -4651,6 +4651,9 @@ var privateTab = {
 					text-align: center;\n\
 					margin: 1px;\n\
 				}\n\
+				#' + this.afterTabsButtonId + ' > .toolbarbutton-menu-dropmarker {\n\
+					display: none; /* Quick fix for Firefox 57+ */\n\
+				}\n\
 			}\n\
 			@-moz-document url("' + document.documentURI + '"),\n\
 				url("chrome://global/content/customizeToolbar.xul") {\n\
