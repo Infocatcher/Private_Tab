@@ -55,6 +55,7 @@ pref("extensions.privateTab.rememberOwnerTab", false);
 pref("extensions.privateTab.openPlacesInPrivateTabs.callNativeMenuItems", true);
 pref("extensions.privateTab.fixAppButtonWidth", true);
 pref("extensions.privateTab.fixAfterTabsButtonsAccessibility", true);
+pref("extensions.privateTab.fixAfterTabsButtonsAccessibility.force", false);
 // Fix width of clickable area for "New Tab" and "New Private Tab" buttons after last tab
 pref("extensions.privateTab.fixAfterTabsButtonsAccessibility.iconPadding", "");
 // Custom padding for button's icon (to override autodetected value), example: "6px 11px"

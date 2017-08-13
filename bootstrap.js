@@ -744,10 +744,7 @@ var privateTab = {
 				this.updateTabsInTitlebar(document, true);
 			}
 		}
-		else if(
-			pName == "fixAfterTabsButtonsAccessibility"
-			|| pName == "fixAfterTabsButtonsAccessibility.iconPadding"
-		)
+		else if(pName.startsWith("fixAfterTabsButtonsAccessibility"))
 			this.reloadStyles();
 		else if(pName == "dragAndDropTabsBetweenDifferentWindows") {
 			for(var window of this.windows)
@@ -4722,9 +4719,16 @@ var privateTab = {
 		// Correct clickable area for buttons after last tab:
 		// we use extending binding with display="xul:hbox" to make button's icon accessible,
 		// buttons becomes not clickable (no "command" event), so we add "click" listener
-		var newTabBtn = this.isAustralis
-			&& prefs.get("fixAfterTabsButtonsAccessibility")
-			&& this.getNewTabButton(window);
+		if(
+			!this.isAustralis
+			|| !prefs.get("fixAfterTabsButtonsAccessibility")
+			|| (
+				this.platformVersion >= 57 // Tabs (and buttons) should be squared
+				&& !prefs.get("fixAfterTabsButtonsAccessibility.force")
+			)
+		)
+			return null;
+		var newTabBtn = this.getNewTabButton(window);
 		if(!newTabBtn)
 			return null;
 		var origStyle = newTabBtn.hasAttribute("style") && newTabBtn.getAttribute("style");
