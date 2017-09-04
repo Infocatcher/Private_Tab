@@ -234,6 +234,16 @@
 
 		<em:localized>
 			<Description>
+				<em:locale>sv-SE</em:locale>
+				<em:name>Privat flik</em:name>
+				<em:description>Lägger till privata flikar.</em:description>
+				<em:creator>Infocatcher</em:creator>
+                <em:translator>John Ankarström</em:translator>
+			</Description>
+		</em:localized>
+
+		<em:localized>
+			<Description>
 				<em:locale>tr</em:locale>
 				<em:name>Private Tab</em:name>
 				<em:description>Gizli sekmeler ekler</em:description>
