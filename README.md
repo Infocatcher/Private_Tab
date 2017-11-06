@@ -1,5 +1,8 @@
 ﻿Works only in Gecko 20.0 and higher because used API doesn't exist in older versions!
 
+#### WebExtensions and compatibility with Firefox 57+
+<a href="https://github.com/Infocatcher/Private_Tab/issues/254">Issue #254</a> + <a href="https://github.com/Infocatcher/Private_Tab_WE#issues">Private Tab WE</a> repository
+
 #### Known issues:
 * We just inherit private state from selected tab and tries preserve private state of dropped link-like things, this is simple to implement, but may confuse a bit…
 * If you use "New Private Tab" + "New Tab" buttons after tabs toolbar, you need to manually remove "New Private Tab" button before disabling or uninstalling Private Tab. Or you can remove "New Tab" button, press OK in Customize Toolbar dialog and then place "New Tab" directly after tabs.
