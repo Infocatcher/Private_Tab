@@ -2545,7 +2545,7 @@ var privateTab = {
 	get toggleUsingDupTab() {
 		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
 		delete this.toggleUsingDupTab;
-		return this.toggleUsingDupTab = this.platformVersion >= 51;
+		return this.toggleUsingDupTab = this.platformVersion >= 51 || Services.appinfo.name == "Basilisk";
 	},
 	toggleContextTabPrivate: function(window, toggleReload) {
 		var gBrowser = window.gBrowser;
