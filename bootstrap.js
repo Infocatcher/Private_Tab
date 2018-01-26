@@ -5017,7 +5017,10 @@ var prefs = {
 		switch(ps.getPrefType(pName)) {
 			case ps.PREF_BOOL:   return ps.getBoolPref(pName);
 			case ps.PREF_INT:    return ps.getIntPref(pName);
-			case ps.PREF_STRING: return ps.getComplexValue(pName, Components.interfaces.nsISupportsString).data;
+			case ps.PREF_STRING:
+				if("getStringPref" in ps) // Firefox 58+
+					return ps.getStringPref(pName);
+				return ps.getComplexValue(pName, Components.interfaces.nsISupportsString).data;
 		}
 		return defaultVal;
 	},
@@ -5030,6 +5033,8 @@ var prefs = {
 			case ps.PREF_BOOL:   ps.setBoolPref(pName, val); break;
 			case ps.PREF_INT:    ps.setIntPref(pName, val);  break;
 			case ps.PREF_STRING:
+				if("setStringPref" in ps) // Firefox 58+
+					return ps.setStringPref(pName, val);
 				var ss = Components.interfaces.nsISupportsString;
 				var str = Components.classes["@mozilla.org/supports-string;1"]
 					.createInstance(ss);
