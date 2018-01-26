@@ -73,13 +73,13 @@ var privateProtocol = {
 		return false;
 	},
 	newURI: function(spec, originCharset, baseURI) {
-		//var uri = Components.classes["@mozilla.org/network/simple-uri;1"]
-		//	.createInstance(Components.interfaces.nsIURI);
-		//uri.spec = spec; // Read-only in Firefox 58+
-		var uri = Components.classes["@mozilla.org/network/standard-url;1"]
-			.createInstance(Components.interfaces.nsIStandardURL);
-		uri.init(uri.URLTYPE_NO_AUTHORITY, 0, spec, originCharset, baseURI);
-		return uri.QueryInterface(Components.interfaces.nsIURI);
+		var uri = Components.classes["@mozilla.org/network/simple-uri;1"]
+			.createInstance(Components.interfaces.nsIURI);
+		// nsIURI.spec is read-only in Firefox 58+: https://bugzilla.mozilla.org/show_bug.cgi?id=1431204
+		if("mutate" in uri)
+			return uri.mutate().setSpec(spec).finalize();
+		uri.spec = spec;
+		return uri;
 	},
 	newChannel: function(uri) {
 		return this.newChannel2(uri, null);
