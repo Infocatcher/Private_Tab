@@ -47,8 +47,10 @@ catch(e) {
 }
 
 function updateUI() {
-	var dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
-		.getService(Components.interfaces.inIDOMUtils);
+	var dwu = "inIDOMUtils" in Components.interfaces
+		? Components.classes["@mozilla.org/inspector/dom-utils;1"]
+			.getService(Components.interfaces.inIDOMUtils)
+		: InspectorUtils; // Firefox 59+
 	var browser = dwu.getParentForNode(document, true);
 	if(
 		browser instanceof Components.interfaces.nsIDOMXULElement

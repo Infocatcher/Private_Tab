@@ -3980,8 +3980,10 @@ var privateTab = {
 	},
 	get dwu() {
 		delete this.dwu;
-		return this.dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
-			.getService(Components.interfaces.inIDOMUtils);
+		return this.dwu = "inIDOMUtils" in Components.interfaces
+			? Components.classes["@mozilla.org/inspector/dom-utils;1"]
+				.getService(Components.interfaces.inIDOMUtils)
+			: InspectorUtils; // Firefox 59+
 	},
 	getTopWindow: function(window) {
 		for(;;) {
