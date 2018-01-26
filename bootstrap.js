@@ -1629,7 +1629,19 @@ var privateTab = {
 		return prefs.get("rememberClosedPrivateTabs")
 			&& prefs.get("rememberClosedPrivateTabs.cleanup") > 0;
 	},
-	getClosedPrivateTabs: function(window) {
+	get getClosedPrivateTabs() {
+		var fn = this._getClosedPrivateTabs.toString()
+			.replace(/__yield/g, "yield");
+		try {
+			new Function("function test() { yield 0; }");
+		}
+		catch(e) { // Firefox 58+: SyntaxError: yield expression is only valid in generators
+			fn = fn.replace("function", "function*"); // Firefox 26+
+		}
+		delete this.getClosedPrivateTabs;
+		return this.getClosedPrivateTabs = eval("(" + fn + ")");
+	},
+	_getClosedPrivateTabs: function(window) {
 		var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
 		for(var i = 0, l = closedTabs.length; i < l; ++i) {
 			var closedTab = closedTabs[i];
@@ -1639,7 +1651,7 @@ var privateTab = {
 				"attributes" in state
 				&& this.privateAttr in state.attributes
 			)
-				yield i;
+				__yield(i);
 		}
 	},
 	forgetClosedTab: function(window, silentFail, _secondTry) {
