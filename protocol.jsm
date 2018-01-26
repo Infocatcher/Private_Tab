@@ -7,12 +7,12 @@ const P_CID = Components.ID("{e974cf10-11cb-4293-af88-e61c7dfe717c}"),
       P_NAME = "Private Tab protocol handler";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-this.__defineGetter__("_log", function() {
+__defineGetter__.call(this, "_log", function() {
 	delete this._log;
 	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
 	return _log;
 });
-this.__defineSetter__("_log", function(logger) {
+__defineSetter__.call(this, "_log", function(logger) {
 	delete this._log;
 	this._log = logger;
 });

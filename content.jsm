@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["PrivateTabContent"];
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-this.__defineGetter__("_log", function() {
+__defineGetter__.call(this, "_log", function() {
 	delete this._log;
 	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
 	return _log;
