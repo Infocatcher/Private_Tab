@@ -3980,14 +3980,14 @@ var privateTab = {
 	},
 	get dwu() {
 		delete this.dwu;
-		return this.dwu = "inIDOMUtils" in Components.interfaces
-			? Components.classes["@mozilla.org/inspector/dom-utils;1"]
-				.getService(Components.interfaces.inIDOMUtils)
-			: InspectorUtils; // Firefox 59+
+		return this.dwu = Components.classes["@mozilla.org/inspector/dom-utils;1"]
+			.getService(Components.interfaces.inIDOMUtils);
 	},
 	getTopWindow: function(window) {
+		var dwu = window.InspectorUtils // Firefox 59+
+			|| this.dwu;
 		for(;;) {
-			var browser = this.dwu.getParentForNode(window.document, true);
+			var browser = dwu.getParentForNode(window.document, true);
 			if(!browser)
 				break;
 			window = browser.ownerDocument.defaultView.top;
