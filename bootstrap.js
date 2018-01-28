@@ -2737,7 +2737,7 @@ var privateTab = {
 		if(newTabBtn) {
 			var tb2 = tb.cloneNode(true);
 			tb2.id = this.afterTabsButtonId;
-			tb2.className = "tabs-newtab-button";
+			tb2.className = newTabBtn.className || "tabs-newtab-button";
 			var btnBar = newTabBtn.parentNode;
 			if(newTabBtn.hasAttribute("onmouseover")) {
 				// See view-source:chrome://browser/content/tabbrowser.xml
