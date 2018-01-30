@@ -10,6 +10,12 @@
 `+` Added Dutch locale (nl), thanks to <a href="https://github.com/TonnesM">TonnesM</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/268">#268</a>).<br>
 `+` Added Bulgarian locale (bg), thanks to <a href="https://github.com/spacy01">Peyu Yovev</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/270">#270</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/271">#271</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/272">#272</a>).<br>
 `+` Updated Arabic (ar) locale, thanks to <a href="https://github.com/tahani5">tahani5</a>.<br>
+`*` Better appearance of button after last tab in Firefox 57+ (for <em>extensions.legacy.enabled</em> = true, also introduced <em>extensions.privateTab.fixAfterTabsButtonsAccessibility.force</em> preference).<br>
+`*` Compatibility enhancements for Basilisk.<br>
+`x` Fixed generator function usage in Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1083482">bug 1083482</a>).<br>
+`x` Fixed string preferences in Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1414096">bug 1414096</a>).<br>
+`x` Fixed private protocol in Firefox 58+ (strange things with __defineGetter__(), nsIURI.spec is now read-only) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1431204">bug 1431204</a>).<br>
+`x` Fixed inIDOMUtils usage in Firefox 59+, now used window.InspectorUtils  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1427419">bug 1427419</a>).<br>
 
 ##### 0.2.2 (2017-05-27)
 `*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>

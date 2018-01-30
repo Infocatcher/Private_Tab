@@ -10,6 +10,12 @@
 `+` Добавлена Dutch локаль (nl), спасибо <a href="https://github.com/TonnesM">TonnesM</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/268">#268</a>).<br>
 `+` Добавлена болгарская локаль (bg), спасибо <a href="https://github.com/spacy01">Peyu Yovev</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/270">#270</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/271">#271</a>, <a href="https://github.com/Infocatcher/Private_Tab/pull/272">#272</a>).<br>
 `+` Обновлена арабская (ar) локаль, спасибо <a href="https://github.com/tahani5">tahani5</a>.<br>
+`*` Улучшен внешний вид кнопки после последней вкладки в Firefox 57+ (для <em>extensions.legacy.enabled</em> = true, также добавлена настройка <em>extensions.privateTab.fixAfterTabsButtonsAccessibility.force</em>).<br>
+`*` Корректировки для совместимости с Basilisk.<br>
+`x` Исправлено использование функций-генераторов в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1083482">bug 1083482</a>).<br>
+`x` Исправлены строковые настройки в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1414096">bug 1414096</a>).<br>
+`x` Исправлен приватный протокол в Firefox 58+ (странное поведение с __defineGetter__(), доступный только для чтения nsIURI.spec) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1431204">bug 1431204</a>).<br>
+`x` Исправлено использование inIDOMUtils в Firefox 59+, теперь используется window.InspectorUtils  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1427419">bug 1427419</a>).<br>
 
 ##### 0.2.2 (2017-05-27)
 `*` Обновлено и откорректировано API-событие `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: добавлена возможность отслеживания переключения с помощью дублирования вкладки в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
