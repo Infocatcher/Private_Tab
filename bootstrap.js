@@ -47,6 +47,12 @@ var privateTab = {
 
 		for(var window of this.windows)
 			this.initWindow(window, reason);
+		if(reason == APP_STARTUP) {
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1336227
+			// browser.startup.blankWindow = true, Firefox 60+
+			var blankWindow = Services.wm.getMostRecentWindow("navigator:blank");
+			blankWindow && this.observe(blankWindow, "domwindowopened");
+		}
 		Services.ww.registerNotification(this);
 		if(this.oldSessionStore)
 			Services.obs.addObserver(this, "sessionstore-state-write", false);
