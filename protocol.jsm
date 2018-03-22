@@ -73,8 +73,16 @@ var privateProtocol = {
 		return false;
 	},
 	newURI: function(spec, originCharset, baseURI) {
-		var uri = Components.classes["@mozilla.org/network/simple-uri;1"]
-			.createInstance(Components.interfaces.nsIURI);
+		var uri = "@mozilla.org/network/simple-uri;1" in Components.classes // Removed in Firefox 61+
+			&& Components.classes["@mozilla.org/network/simple-uri;1"]
+				.createInstance(Components.interfaces.nsIURI);
+		if(!uri) {
+			var mutator = Components.classes["@mozilla.org/network/simple-uri-mutator;1"]
+				.createInstance(Components.interfaces.nsIURIMutator);
+			return (this.newURI = function(spec, originCharset, baseURI) {
+				return mutator.setSpec(spec).finalize();
+			})(spec);
+		}
 		// nsIURI.spec is read-only in Firefox 58+: https://bugzilla.mozilla.org/show_bug.cgi?id=1431204
 		if("mutate" in uri)
 			return uri.mutate().setSpec(spec).finalize();
