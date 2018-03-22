@@ -4287,7 +4287,9 @@ var privateTab = {
 			var diw = window.DownloadsIndicatorView;
 			if(diw._initialized) {
 				//~ hack: cleanup raw download data, see DownloadsCommon.getData()
-				var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
+				//var global = Components.utils.getGlobalForObject(window.DownloadsCommon);
+				// Global object was changed in Firefox 57+ https://bugzilla.mozilla.org/show_bug.cgi?id=1186409
+				var global = Components.utils.import("resource:///modules/DownloadsCommon.jsm", {});
 				var data = isPrivate
 					? global.DownloadsIndicatorData
 					: global.PrivateDownloadsIndicatorData;
