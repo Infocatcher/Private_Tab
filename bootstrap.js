@@ -3368,9 +3368,15 @@ var privateTab = {
 		return prefs.get("keysHighPriority");
 	},
 	hotkeys: undefined,
+	get KeyEvent() {
+		delete this.KeyEvent;
+		return this.KeyEvent = Components.interfaces.nsIDOMKeyEvent
+			// Removed in Firefox 60+ https://bugzilla.mozilla.org/show_bug.cgi?id=1436508
+			|| Services.appShell.hiddenDOMWindow.KeyboardEvent;
+	},
 	get accelKey() {
 		var accelKey = "ctrlKey";
-		var ke = Components.interfaces.nsIDOMKeyEvent;
+		var ke = this.KeyEvent;
 		switch(prefs.getPref("ui.key.accelKey")) {
 			case ke.DOM_VK_ALT:  accelKey = "altKey";  break;
 			case ke.DOM_VK_META: accelKey = "metaKey";
@@ -3416,7 +3422,7 @@ var privateTab = {
 				k._key = key;
 			}
 			else { // VK_*
-				k.code = Components.interfaces.nsIDOMKeyEvent["DOM_" + key];
+				k.code = this.KeyEvent["DOM_" + key];
 				var chr = getVKChar(key);
 				if(chr)
 					k._key = chr;
