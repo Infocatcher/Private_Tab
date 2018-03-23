@@ -16,6 +16,9 @@
 `x` Fixed string preferences in Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1414096">bug 1414096</a>).<br>
 `x` Fixed private protocol in Firefox 58+ (strange things with __defineGetter__(), nsIURI.spec is now read-only) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1431204">bug 1431204</a>).<br>
 `x` Fixed inIDOMUtils usage in Firefox 59+, now used window.InspectorUtils  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1427419">bug 1427419</a>).<br>
+`x` Correctly handle first browser window in Firefox 60+ (<em>browser.startup.blankWindow</em> = true, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=755523#p755523">thanks to Dumby</a>) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1336227">bug 1336227</a>).<br>
+`x` Fixed hotkeys hotkeys in Firefox 60+, added replacement for removed nsIDOMKeyEvent <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1436508">bug 1436508</a>.<br>
+`x` Fixed accessing to DownloadsCommon.jsm internals in Firefox 57+.<br>
 
 ##### 0.2.2 (2017-05-27)
 `*` Updated and corrected `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: added ability to track toggling using tab duplication in Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>

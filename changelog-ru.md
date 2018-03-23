@@ -16,6 +16,9 @@
 `x` Исправлены строковые настройки в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1414096">bug 1414096</a>).<br>
 `x` Исправлен приватный протокол в Firefox 58+ (странное поведение с __defineGetter__(), доступный только для чтения nsIURI.spec) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1431204">bug 1431204</a>).<br>
 `x` Исправлено использование inIDOMUtils в Firefox 59+, теперь используется window.InspectorUtils  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1427419">bug 1427419</a>).<br>
+`x` Исправлена обработка первого окна браузера в Firefox 60+ (<em>browser.startup.blankWindow</em> = true, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=755523#p755523">спасибо Dumby</a>) (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1336227">bug 1336227</a>).<br>
+`x` Исправлены горячие клавиши в Firefox 60+, добавлена замена для удаленного nsIDOMKeyEvent <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1436508">bug 1436508</a>.<br>
+`x` Исправлена работа с внутренними данными DownloadsCommon.jsm в Firefox 57+.<br>
 
 ##### 0.2.2 (2017-05-27)
 `*` Обновлено и откорректировано API-событие `PrivateTab:PrivateChanged` <a href="https://github.com/Infocatcher/Private_Tab#events">API event</a>: добавлена возможность отслеживания переключения с помощью дублирования вкладки в Firefox 51+ (<a href="https://github.com/Infocatcher/Private_Tab/issues/244">#244</a>).<br>
