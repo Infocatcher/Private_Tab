@@ -4578,10 +4578,13 @@ var privateTab = {
 	rootPrivateAttr: "privateTab-selectedTabIsPrivate",
 	get ss() {
 		delete this.ss;
-		return this.ss = (
-			Components.classes["@mozilla.org/browser/sessionstore;1"]
-			|| Components.classes["@mozilla.org/suite/sessionstore;1"]
-		).getService(Components.interfaces.nsISessionStore);
+		return this.ss = "nsISessionStore" in Components.interfaces
+			? (
+				Components.classes["@mozilla.org/browser/sessionstore;1"]
+				|| Components.classes["@mozilla.org/suite/sessionstore;1"]
+			).getService(Components.interfaces.nsISessionStore)
+			// Firefox 61+ https://bugzilla.mozilla.org/show_bug.cgi?id=1450559
+			: Components.utils.import("resource:///modules/sessionstore/SessionStore.jsm", {}).SessionStore;
 	},
 	get oldSessionStore() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
 		delete this.oldSessionStore;
