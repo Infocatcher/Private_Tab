@@ -4221,7 +4221,12 @@ var privateTab = {
 			window.setTimeout(function() { // Pseudo async
 				// Based on code from chrome://browser/content/browser.js
 				if(this.isAustralis) {
-					window.TabsInTitlebar._update(true);
+					var {TabsInTitlebar} = window;
+					if("_update" in TabsInTitlebar)
+						TabsInTitlebar._update(true);
+					// Looks useless: will be updated from Firefox side
+					//else
+					//	TabsInTitlebar.update(); // Firefox 61+
 					_log("updateTabsInTitlebar() => TabsInTitlebar._update(true)");
 				}
 				else {
