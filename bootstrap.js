@@ -489,7 +489,7 @@ var privateTab = {
 			this.appButtonNA = false;
 			this.fixAppButtonWidth(document);
 			this.updateWindowTitle(gBrowser);
-		}.bind(this), 0);
+		}.bind(this), 5);
 
 		// See https://github.com/Infocatcher/Private_Tab/issues/83
 		// It's better to handle "TabOpen" before other extensions, but after our waitForTab()
