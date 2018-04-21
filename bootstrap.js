@@ -2533,15 +2533,21 @@ var privateTab = {
 	getNotPopupWindow: function(window, force) {
 		if(window.toolbar && window.toolbar.visible)
 			return window;
-		if(force || prefs.get("dontUseTabsInPopupWindows")) try {
-			var {RecentWindow} = Components.utils.import("resource:///modules/RecentWindow.jsm", {});
-			return RecentWindow.getMostRecentBrowserWindow({
+		if(!(force || prefs.get("dontUseTabsInPopupWindows")))
+			return null;
+		var jsm = {
+			"RecentWindow": "getMostRecentBrowserWindow",
+			"BrowserWindowTracker": "getTopWindow" // Firefox 61+, https://bugzilla.mozilla.org/show_bug.cgi?id=1034036
+		};
+		for(var name in jsm) try {
+			var o = Components.utils.import("resource:///modules/" + name + ".jsm", {})[name];
+			return o[jsm[name]]({
 				allowPopups: false
 			});
 		}
 		catch(e) {
-			if(RecentWindow || !this.isSeaMonkey)
-				Components.utils.reportError(e);
+			o && Components.utils.reportError(e);
+			_log("Failed to use " + name + "." + jsm[name] + "()");
 		}
 		return null;
 	},
