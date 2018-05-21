@@ -3674,7 +3674,13 @@ var privateTab = {
 					return;
 				_log("updateBookmarkFavicon(): tab icon: " + _str(icon));
 				var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
-					.getService(Components.interfaces.mozIAsyncFavicons);
+					.getService(
+						Components.interfaces.mozIAsyncFavicons
+						// Firefox 62+:
+						// https://bugzilla.mozilla.org/show_bug.cgi?id=1460570
+						// Merge mozIAsyncFavicons into nsIFaviconService
+						|| Components.interfaces.nsIFaviconService
+					);
 				faviconService.setAndFetchFaviconForPage(
 					bookmarkURI,
 					Services.io.newURI(icon, null, null),
