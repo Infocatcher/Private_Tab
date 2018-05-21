@@ -53,7 +53,7 @@ function updateUI() {
 		: InspectorUtils; // Firefox 59+
 	var browser = dwu.getParentForNode(document, true);
 	if(
-		browser instanceof Components.interfaces.nsIDOMXULElement
+		isXULElement(browser)
 		&& browser.localName.toLowerCase() == "browser"
 	) {
 		var win = browser.ownerDocument.defaultView;
@@ -69,6 +69,12 @@ function updateUI() {
 	mm.sendAsyncMessage("PrivateTab:ProtocolURILoaded", {
 		URI: document.documentURI
 	});
+}
+function isXULElement(node) {
+	// https://bugzilla.mozilla.org/show_bug.cgi?format=default&id=1452185
+	return "nsIDOMXULElement" in Components.interfaces
+		? node instanceof Components.interfaces.nsIDOMXULElement
+		: node && ChromeUtils.getClassName(node) == "XULElement"; // Firefox 61+
 }
 function validateURI(spec) { // Returns test nsIChannel or throws
 	var uri = Services.io.newURI(spec, null, null);
