@@ -1441,8 +1441,9 @@ var privateTab = {
 			return;
 		// See SessionStoreInternal.onTabClose() in resource:///modules/sessionstore/SessionStore.jsm
 		//~ todo: find some way to not copy code from SessionStore.jsm
-		var tabStateScope = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
-		var TabState = tabStateScope.TabState;
+		var {TabState} = Components.utils.import("resource:///modules/sessionstore/TabState.jsm", {});
+		// Global object was changed in Firefox 57+ https://bugzilla.mozilla.org/show_bug.cgi?id=1186409
+		var g = Components.utils.getGlobalForObject(TabState);
 		var tabState = TabState.collect(tab);
 		if(!tabState.isPrivate) {
 			_log("tabClosingHandler(): tab has private attribute, but TabState.jsm doesn't return isPrivate flag");
@@ -1462,7 +1463,7 @@ var privateTab = {
 				|| !(this.privateAttr in tabState.attributes)
 			) {
 				var attrs = tabState.attributes
-					|| (tabState.attributes = new tabStateScope.Object());
+					|| (tabState.attributes = new g.Object());
 				attrs[this.privateAttr] = "true";
 				_log("tabClosingHandler(): fix private attribute");
 			}
@@ -1478,7 +1479,7 @@ var privateTab = {
 				pos: tab._tPos, // Note: missing in SeaMonkey, but SeaMonkey still use old nsISessionStore
 				closedAt: Date.now()
 			};
-			var undoData = new tabStateScope.Object();
+			var undoData = new g.Object();
 			if("assign" in Object) // Firefox 34+
 				Object.assign(undoData, _undoData);
 			else {
