@@ -22,9 +22,6 @@ PrivateTabContent.prototype = {
 	get isPrivate() {
 		return this.privacyContext.usePrivateBrowsing;
 	},
-	set isPrivate(isPrivate) {
-		this.privacyContext.usePrivateBrowsing = isPrivate;
-	},
 	init: function() {
 		++this.instances.count;
 		this.fg.addEventListener("unload", this, false);
@@ -81,7 +78,7 @@ PrivateTabContent.prototype = {
 			_log("[frame script] handleSessionRestoring(): private state is already " + isPrivate);
 		else {
 			_log("[frame script] handleSessionRestoring(): private state -> " + isPrivate);
-			this.isPrivate = isPrivate;
+			this.privacyContext.usePrivateBrowsing = isPrivate;
 		}
 	},
 
@@ -92,7 +89,7 @@ PrivateTabContent.prototype = {
 		else if(isPrivate == this.isPrivate) // Nothing to do
 			needChange = false;
 		if(needChange)
-			this.isPrivate = isPrivate;
+			this.privacyContext.usePrivateBrowsing = isPrivate;
 		!silent && this.fg.sendAsyncMessage("PrivateTab:PrivateChanged", {
 			isPrivate: isPrivate,
 			reallyChanged: needChange
