@@ -3585,7 +3585,6 @@ var privateTab = {
 			_log("isEmptyTab(): found duplicateTab() in stack => not empty");
 			return false;
 		}
-		// We should check tab label for SeaMonkey and old Firefox
 		var emptyTabLabel = this.getTabBrowserString("tabs.emptyTabTitle", gBrowser)
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
 		return tabLabel == emptyTabLabel;
