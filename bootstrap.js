@@ -3615,11 +3615,20 @@ var privateTab = {
 		return false;
 	},
 	getTabBrowserString: function(id, gBrowser) {
-		try {
+		if("mStringBundle" in gBrowser) try {
 			return gBrowser.mStringBundle.getString(id);
 		}
 		catch(e) {
+			return undefined;
 		}
+		var window = gBrowser.ownerDocument.defaultView;
+		if("gTabBrowserBundle" in window) try { // Firefox 58+
+			return window.gTabBrowserBundle.GetStringFromName(id);
+		}
+		catch(e) {
+			return undefined;
+		}
+		_log("getTabBrowserString() failed: not found string bundle");
 		return undefined;
 	},
 	handleProtocolBrowser: function(browser, bookmarkURI) {
