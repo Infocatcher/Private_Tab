@@ -3615,21 +3615,16 @@ var privateTab = {
 		return false;
 	},
 	getTabBrowserString: function(id, gBrowser) {
-		if("mStringBundle" in gBrowser) try {
-			return gBrowser.mStringBundle.getString(id);
-		}
-		catch(e) {
+		function s(o, m) {
+			try { return o[m](id); }
+			catch(e) {}
 			return undefined;
 		}
-		var window = gBrowser.ownerDocument.defaultView;
-		if("gTabBrowserBundle" in window) try { // Firefox 58+
-			return window.gTabBrowserBundle.GetStringFromName(id);
-		}
-		catch(e) {
-			return undefined;
-		}
-		_log("getTabBrowserString() failed: not found string bundle");
-		return undefined;
+		if("mStringBundle" in gBrowser)
+			return s(gBrowser.mStringBundle, "getString");
+		if("gTabBrowserBundle" in window) // Firefox 58+
+			return s(window.gTabBrowserBundle, "GetStringFromName");
+		return Components.utils.reportError(LOG_PREFIX + "getTabBrowserString() failed: string bundle not found");
 	},
 	handleProtocolBrowser: function(browser, bookmarkURI) {
 		var tab = this.getTabForBrowser(browser);
