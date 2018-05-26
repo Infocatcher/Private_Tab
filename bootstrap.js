@@ -92,20 +92,8 @@ var privateTab = {
 			this.restoreAppButtonWidth();
 			this.patchPrivateBrowsingUtils(false);
 
-			if(reason != ADDON_DISABLE) {
-				var emptyLabels = { __proto__: null };
-				var hasData = false;
-				for(var label in this.emptyTabLabels) {
-					if(this.emptyTabLabels[label] == "API") {
-						hasData = true;
-						emptyLabels[label] = "API";
-					}
-				}
-				if(hasData) {
-					_log("Save data from privateTab.tabLabelIsEmpty() API");
-					this.storage.set("emptyTabLabels", emptyLabels);
-				}
-			}
+			if(reason != ADDON_DISABLE)
+				this.saveEmptyTabLabels();
 		}
 
 		prefs.destroy();
@@ -441,20 +429,7 @@ var privateTab = {
 				this.patchTabBrowserDND(window, gBrowser, true);
 				this.patchViewSource(window, true);
 			}.bind(this), 50);
-			// Import data from privateTab.tabLabelIsEmpty() API
-			if(!this.emptyTabLabelsImported) {
-				this.emptyTabLabelsImported = true;
-				var emptyLabels = this.storage.get("emptyTabLabels", null);
-				if(emptyLabels) {
-					this.storage.set("emptyTabLabels", null);
-					for(var label in emptyLabels) {
-						if(!(label in this.emptyTabLabels)) {
-							_log("Import tabLabelIsEmpty() API: \"" + label + "\"");
-							this.emptyTabLabels[label] = "API";
-						}
-					}
-				}
-			}
+			this.importEmptyTabLabels();
 			if("TrackingProtection" in window) { // Firefox 42+
 				var identityPopup = document.getElementById("identity-popup");
 				identityPopup && identityPopup.addEventListener("popupshowing", this, true);
@@ -3589,7 +3564,6 @@ var privateTab = {
 			|| this.getTabBrowserString("tabs.untitled", gBrowser);
 		return tabLabel == emptyTabLabel;
 	},
-	emptyTabLabelsImported: false,
 	emptyTabLabels: {
 		"": true,
 		"undefined": true,
@@ -3601,6 +3575,30 @@ var privateTab = {
 		"Super Start": true, // Super Start 7.0+, extensions.superstart.page.preload = true
 		"chrome://fastdial/content/fastdial.html": true,
 		__proto__: null
+	},
+	saveEmptyTabLabels: function() {
+		var emptyLabels = { __proto__: null };
+		var hasData = false;
+		for(var label in this.emptyTabLabels)
+			if(this.emptyTabLabels[label] == "API")
+				emptyLabels[label] = "API", hasData = true;
+		if(!hasData)
+			return;
+		_log("Save data from privateTab.tabLabelIsEmpty() API");
+		this.storage.set("emptyTabLabels", emptyLabels);
+	},
+	importEmptyTabLabels: function() {
+		this.importEmptyTabLabels = function() {}; // Only once
+		var emptyLabels = this.storage.get("emptyTabLabels", null);
+		if(!emptyLabels)
+			return;
+		this.storage.set("emptyTabLabels", null);
+		for(var label in emptyLabels) {
+			if(!(label in this.emptyTabLabels)) {
+				_log("Import tabLabelIsEmpty() API: \"" + label + "\"");
+				this.emptyTabLabels[label] = "API";
+			}
+		}
 	},
 	isBlankTab: function(tab) {
 		var window = tab.ownerDocument.defaultView;
