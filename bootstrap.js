@@ -3619,6 +3619,7 @@ var privateTab = {
 		}
 		if("mStringBundle" in gBrowser)
 			return s(gBrowser.mStringBundle, "getString");
+		var window = gBrowser.ownerDocument.defaultView;
 		if("gTabBrowserBundle" in window) // Firefox 58+
 			return s(window.gTabBrowserBundle, "GetStringFromName");
 		return Components.utils.reportError(LOG_PREFIX + "getTabBrowserString() failed: string bundle not found");
