@@ -2431,7 +2431,10 @@ var privateTab = {
 			referrerURI: referer,
 			charset: options.charset || null,
 			ownerTab: ownerTab,
-			relatedToCurrent: openAsChild
+			relatedToCurrent: openAsChild,
+			triggeringPrincipal: sourceDocument
+				? sourceDocument.nodePrincipal
+				: Services.scriptSecurityManager.getSystemPrincipal()
 		});
 
 		var inBackground = prefs.get("loadInBackground");
