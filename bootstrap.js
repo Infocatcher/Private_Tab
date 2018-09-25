@@ -578,10 +578,13 @@ var privateTab = {
 			if(reason != WINDOW_CLOSED) try {
 				var TrackingProtection = window.TrackingProtection;
 				TrackingProtection.updateEnabled();
-				if(!TrackingProtection.enabled)
+				if("icon" in TrackingProtection && !TrackingProtection.enabled)
 					TrackingProtection.icon.removeAttribute("state");
 				var XULBrowserWindow = window.XULBrowserWindow;
-				if(XULBrowserWindow && "_state" in XULBrowserWindow)
+				if(
+					XULBrowserWindow && "_state" in XULBrowserWindow
+					&& "onSecurityChange" in TrackingProtection
+				)
 					TrackingProtection.onSecurityChange(XULBrowserWindow._state, true /*aIsSimulated*/);
 			}
 			catch(e) {
@@ -4218,7 +4221,11 @@ var privateTab = {
 			this.updateTabsInTitlebar(document);
 		if(prefs.get("patchDownloads"))
 			this.updateDownloadPanel(window, isPrivate);
-		if(!isPrivate && "TrackingProtection" in window) window.setTimeout(function() { // Firefox 42+
+		if(
+			!isPrivate
+			&& "TrackingProtection" in window
+			&& "icon" in window.TrackingProtection
+		) window.setTimeout(function() { // Firefox 42+
 			var TrackingProtection = window.TrackingProtection;
 			if(!TrackingProtection.enabled && TrackingProtection.icon.hasAttribute("state")) {
 				TrackingProtection.icon.removeAttribute("state");
