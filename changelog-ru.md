@@ -6,6 +6,15 @@
 `*` - улучшено<br>
 
 ##### master/HEAD
+`x` Исправлено использование nsISessionStore в Firefox 61+(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1450559">bug 1450559</a>, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=756422#p756422">спасибо Dumby</a>).<br>
+`x` Исключены попытки обновления удаленного функционала для вкладок в заголовке окна в Firefox 61+.<br>
+`x` Теперь используется `BrowserWindowTracker.getTopWindow()` вместо удаленного `RecentWindow.getMostRecentBrowserWindow()` в Firefox 61+, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=756915#p756915">спасибо Dumby</a>.<br>
+`x` Исправлено определение XULElement в Firefox 61+.<br>
+`x` Теперь используется nsIFaviconService вместо удаленного mozIAsyncFavicons в Firefox 62+.<br>
+`x` Исправлена работа <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true в Firefox 57+.<br>
+`x` Исправлено определение новых пустых вкладок в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1409784">bug 1409784</a>).<br>
+`x` Исключены попытки обновления удаленного TrackingProtection.icon в Firefox 63+.<br>
+
 ##### 0.2.3pre (2018-03-23)
 `x` Добавлен хак для перетаскивания приватной вкладки в другое окно (при отключенном мультипроцессном режиме, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">спасибо Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
 `+` Добавлена Dutch локаль (nl), спасибо <a href="https://github.com/TonnesM">TonnesM</a> (<a href="https://github.com/Infocatcher/Private_Tab/pull/268">#268</a>).<br>
