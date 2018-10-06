@@ -2097,7 +2097,8 @@ var privateTab = {
 		_log("updateTabTooltip()");
 		var document = window.document;
 		var tab = document.tooltipNode;
-		var hide = !tab || tab.localName != "tab" || !this.isPrivateTab(tab);
+		var hide = !tab || tab.localName != "tab"
+			|| (tab.parentNode ? !this.isPrivateTab(tab) : !tab.hasAttribute(this.privateAttr));
 		var label = document.getElementById(this.tabTipId);
 		if(!label && !hide) {
 			var tabTip = this.getTabTooltip(document);
