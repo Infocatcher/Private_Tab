@@ -3258,7 +3258,7 @@ var privateTab = {
 			var isPrivate = state
 				&& "attributes" in state
 				&& this.privateAttr in state.attributes;
-			this.setPrivate(tab, isPrivate);
+			this.setPrivate(item, isPrivate);
 		}, this);
 	},
 	destroyControls: function(window, force) {
