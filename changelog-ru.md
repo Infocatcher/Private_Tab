@@ -14,6 +14,8 @@
 `x` Исправлена работа <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true в Firefox 57+.<br>
 `x` Исправлено определение новых пустых вкладок в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1409784">bug 1409784</a>).<br>
 `x` Исключены попытки обновления удаленного TrackingProtection.icon в Firefox 63+.<br>
+`x` Исправления для совместимости с Pale Moon 28.1+.<br>
+`x` Исправлена подсветка закрытых приватных вкладок в меню.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Добавлен хак для перетаскивания приватной вкладки в другое окно (при отключенном мультипроцессном режиме, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">спасибо Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>

@@ -14,6 +14,8 @@
 `x` Fixed <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true in Firefox 57+.<br>
 `x` Correctly detect new empty tabs in Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1409784">bug 1409784</a>).<br>
 `x` Don't try to update removed TrackingProtection.icon in Firefox 63+.<br>
+`x` Compatibility fixes for Pale Moon 28.1+.<br>
+`x` Correctly highlight closed private tabs in menus.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Added trick to drag private tab to another window (with disabled multi-process mode, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">thanks to Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
