@@ -599,8 +599,11 @@ var privateTab = {
 		delete window.privateTab;
 	},
 	get platformVersion() {
+		var pv = parseFloat(Services.appinfo.platformVersion);
+		if(Services.appinfo.name == "Pale Moon" || Services.appinfo.name == "Basilisk")
+			pv = pv >= 4.1 ? 56 : 28;
 		delete this.platformVersion;
-		return this.platformVersion = parseFloat(Services.appinfo.platformVersion);
+		return this.platformVersion = pv;
 	},
 	get isSeaMonkey() {
 		delete this.isSeaMonkey;
@@ -2552,9 +2555,7 @@ var privateTab = {
 	get toggleUsingDupTab() {
 		// Unable to toggle in Firefox 51+, see https://bugzilla.mozilla.org/show_bug.cgi?id=1318388#c39
 		delete this.toggleUsingDupTab;
-		return this.toggleUsingDupTab = this.platformVersion >= 51
-			|| Services.appinfo.name == "Pale Moon" && this.platformVersion >= 4.1
-			|| Services.appinfo.name == "Basilisk";
+		return this.toggleUsingDupTab = this.platformVersion >= 51;
 	},
 	toggleContextTabPrivate: function(window, toggleReload) {
 		var gBrowser = window.gBrowser;

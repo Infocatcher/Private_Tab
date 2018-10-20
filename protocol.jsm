@@ -19,8 +19,11 @@ __defineSetter__.call(this, "_log", function(logger) {
 
 var privateProtocol = {
 	get platformVersion() {
+		var pv = parseFloat(Services.appinfo.platformVersion);
+		if(Services.appinfo.name == "Pale Moon" || Services.appinfo.name == "Basilisk")
+			pv = pv >= 4.1 ? 56 : 28;
 		delete this.platformVersion;
-		return this.platformVersion = parseFloat(Services.appinfo.platformVersion);
+		return this.platformVersion = pv;
 	},
 	get compReg() {
 		return Components.manager
