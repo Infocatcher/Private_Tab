@@ -14,7 +14,7 @@
 `x` Исправлена работа <em>extensions.privateTab.rememberClosedPrivateTabs</em> = true в Firefox 57+.<br>
 `x` Исправлено определение новых пустых вкладок в Firefox 58+ (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1409784">bug 1409784</a>).<br>
 `x` Исключены попытки обновления удаленного TrackingProtection.icon в Firefox 63+.<br>
-`x` Исправления для совместимости с Pale Moon 28.1+.<br>
+`x` Исправления для совместимости с Pale Moon 28.1+ и Basilisk.<br>
 `x` Исправлена подсветка закрытых приватных вкладок в меню.<br>
 
 ##### 0.2.3pre (2018-03-23)
