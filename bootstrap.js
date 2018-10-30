@@ -5063,7 +5063,7 @@ var prefs = {
 			: (cache[pName] = this.getPref(this.ns + pName, defaultVal));
 	},
 	set: function(pName, val) {
-		return this.setPref(this.ns + pName, val);
+		this.setPref(this.ns + pName, val);
 	},
 	getPref: function(pName, defaultVal, prefBranch) {
 		var ps = prefBranch || Services.prefs;
@@ -5086,15 +5086,16 @@ var prefs = {
 			case ps.PREF_BOOL:   ps.setBoolPref(pName, val); break;
 			case ps.PREF_INT:    ps.setIntPref(pName, val);  break;
 			case ps.PREF_STRING:
-				if("setStringPref" in ps) // Firefox 58+
-					return ps.setStringPref(pName, val);
+				if("setStringPref" in ps) { // Firefox 58+
+					ps.setStringPref(pName, val);
+					break;
+				}
 				var ss = Components.interfaces.nsISupportsString;
 				var str = Components.classes["@mozilla.org/supports-string;1"]
 					.createInstance(ss);
 				str.data = val;
 				ps.setComplexValue(pName, ss, str);
 		}
-		return this;
 	},
 	getValueType: function(val) {
 		switch(typeof val) {
