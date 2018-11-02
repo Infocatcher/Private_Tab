@@ -2697,6 +2697,14 @@ var privateTab = {
 			"cmd_newNavigatorTab"
 		);
 	},
+	getAfterTabsButton: function(window) {
+		return window.document.getElementById(this.afterTabsButtonId)
+			|| window.document.getAnonymousElementByAttribute(
+				window.gBrowser.tabContainer,
+				"id",
+				this.afterTabsButtonId
+			);
+	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
 			|| document.getAnonymousElementByAttribute(
@@ -2939,7 +2947,7 @@ var privateTab = {
 		this.updateShowAfterTabs(document, tbBtn);
 		if(!tbBtn)
 			return;
-		var afterTabsBtn = document.getElementById(this.afterTabsButtonId);
+		var afterTabsBtn = this.getAfterTabsButton(window);
 		var newTabBtn = this.getNewTabButton(window);
 		if(this.hasNodeAfter(tbBtn, "new-tab-button")) {
 			_log('Move "New Tab" button after "New Private Tab" button');
@@ -3269,7 +3277,7 @@ var privateTab = {
 		this.destroyNode(this.getPaletteButton(window), force);
 		// Force destroy toolbar button in Australis menu
 		this.destroyNode(document.getElementById(this.toolbarButtonId), force);
-		this.destroyNode(document.getElementById(this.afterTabsButtonId), force);
+		this.destroyNode(this.getAfterTabsButton(window), force);
 
 		var newTabBtn = this.getNewTabButton(window);
 		if(newTabBtn) {
