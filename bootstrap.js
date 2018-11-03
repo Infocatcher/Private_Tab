@@ -2691,19 +2691,14 @@ var privateTab = {
 			.appendChild(btn);
 	},
 	getNewTabButton: function(window) {
-		return window.document.getAnonymousElementByAttribute(
-			window.gBrowser.tabContainer,
-			"command",
-			"cmd_newNavigatorTab"
-		);
+		return this.getTabContainerChild(window, "command", "cmd_newNavigatorTab");
 	},
 	getAfterTabsButton: function(window) {
 		return window.document.getElementById(this.afterTabsButtonId)
-			|| window.document.getAnonymousElementByAttribute(
-				window.gBrowser.tabContainer,
-				"id",
-				this.afterTabsButtonId
-			);
+			|| this.getTabContainerChild(window, "id", this.afterTabsButtonId);
+	},
+	getTabContainerChild: function(window, attr, val) {
+		return window.document.getAnonymousElementByAttribute(window.gBrowser.tabContainer, attr, val);
 	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
@@ -3181,7 +3176,7 @@ var privateTab = {
 				&& "gNavToolbox" in window
 				&& window.gNavToolbox.palette
 				&& window.gNavToolbox.palette.getElementsByAttribute("id", "alltabs-popup")[0]
-			|| document.getAnonymousElementByAttribute(window.gBrowser.tabContainer, "anonid", "alltabs-popup"); // SeaMonkey
+			|| this.getTabContainerChild(window, "anonid", "alltabs-popup") // SeaMonkey
 	},
 	setupListAllTabs: function(window, init) {
 		_log("setupListAllTabs(" + init + ")");
