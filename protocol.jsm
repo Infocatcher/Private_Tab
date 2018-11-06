@@ -190,11 +190,13 @@ var privateProtocol = {
 	fixTabFromLoadContext: function(loadContext, uri) {
 		if(loadContext.useRemoteTabs) {
 			_log("[protocol] fixTabFromLoadContext(): in content process");
-			var mm = loadContext.associatedWindow
-				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDocShell)
-				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIContentFrameMessageManager);
+			var mm = "nsIContentFrameMessageManager" in Components.interfaces
+				? loadContext.associatedWindow
+					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIDocShell)
+					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIContentFrameMessageManager)
+				: loadContext.associatedWindow.docShell.messageManager; // Firefox 63+
 			var res = mm.sendSyncMessage("PrivateTab:ProtocolReplaceTab", { URI: uri });
 			return res && res[0];
 		}

@@ -62,10 +62,12 @@ function updateUI() {
 		return;
 	}
 	// Looks like multi-process mode
-	var mm = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		.getInterface(Components.interfaces.nsIDocShell)
-		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		.getInterface(Components.interfaces.nsIContentFrameMessageManager);
+	var mm = "nsIContentFrameMessageManager" in Components.interfaces
+		? window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIDocShell)
+			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIContentFrameMessageManager)
+		: window.docShell.messageManager; // Firefox 63+
 	mm.sendAsyncMessage("PrivateTab:ProtocolURILoaded", {
 		URI: document.documentURI
 	});
