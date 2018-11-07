@@ -16,6 +16,9 @@
 `x` Исключены попытки обновления удаленного TrackingProtection.icon в Firefox 63+.<br>
 `x` Исправления для совместимости с Pale Moon 28.1+ и Basilisk.<br>
 `x` Исправлена подсветка закрытых приватных вкладок в меню.<br>
+`x` Исправлена кнопка после последней вкладки в Firefox 65+ (теперь доступна только через getAnonymousElementByAttribute()).<br>
+`x` Исправлен приватный протокол в Firefox 63+: восстановлено обновление иконки закладки без nsIContentFrameMessageManager (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1475727">bug 1475727</a>).<br>
+`x` Исправлена валидация about:… ссылок типа private:about:newtab.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Добавлен хак для перетаскивания приватной вкладки в другое окно (при отключенном мультипроцессном режиме, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">спасибо Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
