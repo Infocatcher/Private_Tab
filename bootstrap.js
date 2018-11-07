@@ -2438,6 +2438,7 @@ var privateTab = {
 			relatedToCurrent: openAsChild,
 			triggeringPrincipal: sourceDocument
 				? sourceDocument.nodePrincipal
+					|| options.ownerTab && options.ownerTab.linkedBrowser.contentPrincipal
 				: Services.scriptSecurityManager.getSystemPrincipal()
 		});
 
