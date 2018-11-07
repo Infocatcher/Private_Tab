@@ -80,6 +80,17 @@ function isXULElement(node) {
 }
 function validateURI(spec) { // Returns test nsIChannel or throws
 	var uri = Services.io.newURI(spec, null, null);
+	if(uri.scheme == "about" && "nsIAboutModule" in Components.interfaces) {
+		var req = new XMLHttpRequest();
+		req.open("head", "about:config", true); // Trick to get privileged nsILoadInfo
+		var loadInfo = req.channel.loadInfo;
+		return Components.classes[
+			"@mozilla.org/network/protocol/about;1?what="
+			+ (uri.path || uri.pathQueryRef || "").replace(/[?&#].*$/, "")
+		]
+			.getService(Components.interfaces.nsIAboutModule)
+			.newChannel(uri, loadInfo /* nsILoadInfo since Firefox 36 */);
+	}
 	var pv = parseFloat(Services.appinfo.platformVersion);
 	if(Services.appinfo.name == "Pale Moon" || Services.appinfo.name == "Basilisk")
 		pv = pv >= 4.1 ? 56 : 28;
