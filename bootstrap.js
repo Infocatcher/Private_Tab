@@ -2314,6 +2314,7 @@ var privateTab = {
 			charset: cmData.charSet
 				|| ownerDoc.characterSet,
 			ownerTab: window.gBrowser.selectedTab,
+			sourcePrincipal: principal,
 			openAsChild: true
 		});
 	},
@@ -2437,8 +2438,7 @@ var privateTab = {
 			ownerTab: ownerTab,
 			relatedToCurrent: openAsChild,
 			triggeringPrincipal: sourceDocument
-				? sourceDocument.nodePrincipal
-					|| options.ownerTab && options.ownerTab.linkedBrowser.contentPrincipal
+				? options.sourcePrincipal
 				: Services.scriptSecurityManager.getSystemPrincipal()
 		});
 
