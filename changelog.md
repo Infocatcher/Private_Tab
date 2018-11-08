@@ -19,6 +19,7 @@
 `x` Fixed button after last tab in Firefox 65+ (now accessible only using getAnonymousElementByAttribute()).<br>
 `x` Fixed private protocol in Firefox 63+: correctly update bookmark favicon without nsIContentFrameMessageManager (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1475727">bug 1475727</a>).<br>
 `x` Correctly validate about:… URIs like private:about:newtab.<br>
+`x` Fixed context menu in Firefox 64+, specify triggeringPrincipal to open link in private tab.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Added trick to drag private tab to another window (with disabled multi-process mode, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">thanks to Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
