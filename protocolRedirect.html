@@ -25,7 +25,9 @@ try {
 		throw new Error("No URI");
 	if(!/^[^:]+:/.test(spec))
 		spec = "http://" + spec;
-	var testChannel = validateURI(spec);
+	var isValid = isValidURI(spec);
+	if(!isValid)
+		throw new Error("Invalid URI: " + spec);
 	document.title = getLoadingTitle() || spec;
 	location.replace(spec);
 }
@@ -38,7 +40,7 @@ catch(e) {
 		setFavicon("chrome://global/skin/icons/warning-16.png");
 		if(!spec)
 			out = "Missing URI";
-		else if(!testChannel)
+		else if(!isValid)
 			out = "Malformed URI: " + spec;
 	}
 	out && document.getElementById("output").appendChild(document.createTextNode(out));
@@ -78,26 +80,16 @@ function isXULElement(node) {
 		? node instanceof Components.interfaces.nsIDOMXULElement
 		: node && ChromeUtils.getClassName(node) == "XULElement"; // Firefox 61+
 }
-function validateURI(spec) { // Returns test nsIChannel or throws
-	var uri = Services.io.newURI(spec, null, null);
-	if(uri.scheme == "about" && "nsIAboutModule" in Components.interfaces) {
+function isValidURI(spec) {
+	try {
+		Services.io.newURI(spec, null, null); // Forbid relative URIs
 		var req = new XMLHttpRequest();
-		req.open("head", "about:config", true); // Trick to get privileged nsILoadInfo
-		var loadInfo = req.channel.loadInfo;
-		return Components.classes[
-			"@mozilla.org/network/protocol/about;1?what="
-			+ (uri.path || uri.pathQueryRef || "").replace(/[?&#].*$/, "")
-		]
-			.getService(Components.interfaces.nsIAboutModule)
-			.newChannel(uri, loadInfo /* nsILoadInfo since Firefox 36 */);
+		req.open("head", spec, true); // Simple way to try create nsIChannel instance
+		return !!req.channel;
 	}
-	var pv = parseFloat(Services.appinfo.platformVersion);
-	if(Services.appinfo.name == "Pale Moon" || Services.appinfo.name == "Basilisk")
-		pv = pv >= 4.1 ? 56 : 28;
-	return "newChannelFromURIWithLoadInfo" in Services.io // Firefox 37+
-		&& pv >= 44 // Throws in Firefox 37-43 with null nsILoadInfo
-		? Services.io.newChannelFromURIWithLoadInfo(uri, null)
-		: Services.io.newChannelFromURI(uri); // Deprecated in Firefox 48+
+	catch(e) {
+	}
+	return false;
 }
 function getLoadingTitle() {
 	function string(file, id) {
