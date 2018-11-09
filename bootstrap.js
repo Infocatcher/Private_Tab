@@ -2899,13 +2899,11 @@ var privateTab = {
 		}
 	},
 	showAfterTabs: function(tbb, document) {
-		if(
-			!tbb
-			|| !tbb.parentNode
-			|| tbb.parentNode.id != "TabsToolbar"
-		)
-			return false;
-		for(var ps = tbb.previousSibling; ps; ps = ps.previousSibling) {
+		var inTabsToolbar = tbb && tbb.parentNode && (
+			tbb.parentNode.id == "TabsToolbar"
+			|| tbb.parentNode.id == "TabsToolbar-customization-target"
+		);
+		if(inTabsToolbar) for(var ps = tbb.previousSibling; ps; ps = ps.previousSibling) {
 			var id = ps.id;
 			if(id == "new-tab-button" || id == "tabmixScrollBox")
 				continue;
@@ -4747,18 +4745,18 @@ var privateTab = {
 				*/\n\
 				#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[' + this.hasNewTabAfter + ']\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#tabbrowser-tabs:not([overflow="true"])\n\
 					~ #new-tab-button {\n\
 					visibility: collapse;\n\
 				}\n\
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[' + this.hasNewTabAfter + ']\n\
-					> #tabbrowser-tabs:not([overflow="true"])\n\
+					#tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
 				}\n\
