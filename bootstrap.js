@@ -2666,6 +2666,7 @@ var privateTab = {
 	toolbarButtonId: "privateTab-toolbar-openNewPrivateTab",
 	afterTabsButtonId: "privateTab-afterTabs-openNewPrivateTab",
 	showAfterTabsAttr: "privateTab-showButtonAfterTabs",
+	hasNewTabAfter: "privateTab-hasNewTabAfter",
 	fixAfterTabsA11yAttr: "privateTab-fixAfterTabsButtonsAccessibility",
 	contextId: "privateTab-context-openInNewPrivateTab",
 	tabContextId: "privateTab-tabContext-toggleTabPrivate",
@@ -2837,16 +2838,16 @@ var privateTab = {
 		var window = document.defaultView;
 		if(tbb === undefined)
 			tbb = document.getElementById(this.toolbarButtonId);
+		var tabsToolbar = document.getElementById("TabsToolbar");
 		var showAfterTabs = this.showAfterTabs(tbb);
-		if(showAfterTabs) {
-			var tabsToolbar = tbb.parentNode;
+		if(showAfterTabs)
 			tabsToolbar.setAttribute(this.showAfterTabsAttr, "true");
-		}
-		else {
-			var tabsToolbar = document.getElementById("TabsToolbar");
-			if(tabsToolbar)
-				tabsToolbar.removeAttribute(this.showAfterTabsAttr);
-		}
+		else
+			tabsToolbar.removeAttribute(this.showAfterTabsAttr);
+		if(tbb && tbb.nextElementSibling && tbb.nextElementSibling.id == "new-tab-button")
+			tabsToolbar.setAttribute(this.hasNewTabAfter, "true");
+		else
+			tabsToolbar.removeAttribute(this.hasNewTabAfter);
 		if(this.isAustralis) window.setTimeout(function() {
 			// Don't apply fix, if tab bar is vertical
 			// (and wait for vertical tab bar initialization)
@@ -4748,7 +4749,7 @@ var privateTab = {
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #' + this.toolbarButtonId + ',\n\
-				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[' + this.hasNewTabAfter + ']\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					~ #new-tab-button {\n\
 					visibility: collapse;\n\
@@ -4756,7 +4757,7 @@ var privateTab = {
 				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					#' + this.afterTabsButtonId + ',\n\
-				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[currentset*="' + this.toolbarButtonId + ',new-tab-button"]\n\
+				#TabsToolbar[' + this.showAfterTabsAttr + ']:not([customizing="true"])[' + this.hasNewTabAfter + ']\n\
 					> #tabbrowser-tabs:not([overflow="true"])\n\
 					.tabs-newtab-button[command="cmd_newNavigatorTab"] {\n\
 					visibility: visible !important;\n\
