@@ -7,15 +7,7 @@ const P_CID = Components.ID("{e974cf10-11cb-4293-af88-e61c7dfe717c}"),
       P_NAME = "Private Tab protocol handler";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-__defineGetter__.call(this, "_log", function() {
-	delete this._log;
-	Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
-	return _log;
-});
-__defineSetter__.call(this, "_log", function(logger) {
-	delete this._log;
-	this._log = logger;
-});
+var _log;
 
 var privateProtocol = {
 	get platformVersion() {
@@ -32,13 +24,15 @@ var privateProtocol = {
 	init: function(logger) {
 		if(logger)
 			_log = logger;
+		else
+			Services.scriptloader.loadSubScript("chrome://privatetab/content/log.js");
 		this.compReg.registerFactory(P_CID, P_NAME, P_CONTRACTID, this);
-		_log("[protocol] Initialized");
+		_log("[protocol] Initialized" + (logger ? "" : " + loaded log.js"));
 	},
 	destroy: function() {
 		this.compReg.unregisterFactory(P_CID, this);
 		_log("[protocol] Destroyed");
-		_log = function() {};
+		_log = null;
 	},
 
 	// nsIFactory
