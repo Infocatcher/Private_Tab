@@ -16,7 +16,7 @@
 `x` Don't try to update removed TrackingProtection.icon in Firefox 63+.<br>
 `x` Compatibility fixes for Pale Moon 28.1+ and Basilisk.<br>
 `x` Correctly highlight closed private tabs in menus.<br>
-`x` Fixed button after last tab in Firefox 65+ (now accessible only using getAnonymousElementByAttribute()).<br>
+`x` Fixed button after last tab in Firefox 65+ (now accessible only using getAnonymousElementByAttribute(), also set special attribute instead of [currentset*=…] trick in styles).<br>
 `x` Fixed private protocol in Firefox 63+: correctly update bookmark favicon without nsIContentFrameMessageManager (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1475727">bug 1475727</a>).<br>
 `x` Correctly validate about:… URIs like private:about:newtab.<br>
 `x` Fixed context menu in Firefox 64+, specify triggeringPrincipal to open link in private tab.<br>

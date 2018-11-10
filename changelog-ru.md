@@ -16,7 +16,7 @@
 `x` Исключены попытки обновления удаленного TrackingProtection.icon в Firefox 63+.<br>
 `x` Исправления для совместимости с Pale Moon 28.1+ и Basilisk.<br>
 `x` Исправлена подсветка закрытых приватных вкладок в меню.<br>
-`x` Исправлена кнопка после последней вкладки в Firefox 65+ (теперь доступна только через getAnonymousElementByAttribute()).<br>
+`x` Исправлена кнопка после последней вкладки в Firefox 65+ (теперь доступна только через getAnonymousElementByAttribute(), также теперь используется специальный атрибут вместо использования трюка c [currentset*=…] в стилях).<br>
 `x` Исправлен приватный протокол в Firefox 63+: восстановлено обновление иконки закладки без nsIContentFrameMessageManager (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1475727">bug 1475727</a>).<br>
 `x` Исправлена валидация about:… ссылок типа private:about:newtab.<br>
 `x` Исправлено контекстное меню в Firefox 64+, теперь передается triggeringPrincipal для открытия ссылок в приватных вкладках.<br>
