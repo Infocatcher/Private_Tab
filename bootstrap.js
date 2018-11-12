@@ -3874,7 +3874,7 @@ var privateTab = {
 			this.dispatchPrivateChangedAPIEvent(tab, isPrivate);
 		return isPrivate;
 	},
-	duplicateTabAndTogglePrivate: function(tab, isPrivate) {
+	duplicateTabAndTogglePrivate: function(tab, isPrivate, dontAnimate) {
 		var window = tab.ownerDocument.defaultView;
 		var gBrowser = this.getTabBrowser(tab);
 		if(isPrivate === undefined)
@@ -3885,9 +3885,20 @@ var privateTab = {
 		this.setPrivate(tab, isPrivate);
 		if(this.isRemoteTab(tab) && "privateTab" in window) // Ensure private, but not on disabling/uninstalling
 			this.readyToOpenTab(window, isPrivate);
-		var dupTab = "duplicateTab" in gBrowser
-			? gBrowser.duplicateTab(tab)
-			: this.ss.duplicateTab(window, tab); // SeaMonkey
+		// Force disable animations, duplicateTab() API doesn't provide such ability
+		var animateTabs = dontAnimate && prefs.getPref("browser.tabs.animate");
+		animateTabs && prefs.setPref("browser.tabs.animate", false);
+		var animateUI = dontAnimate && prefs.getPref("toolkit.cosmeticAnimations.enabled");
+		animateUI && prefs.setPref("toolkit.cosmeticAnimations.enabled", false);
+		try {
+			var dupTab = "duplicateTab" in gBrowser
+				? gBrowser.duplicateTab(tab)
+				: this.ss.duplicateTab(window, tab); // SeaMonkey
+		}
+		finally { // Always restore prefs
+			animateTabs && prefs.setPref("browser.tabs.animate", true);
+			animateUI && prefs.setPref("toolkit.cosmeticAnimations.enabled", true);
+		}
 		// And then restore original state
 		this.setPrivate(tab, origIsPrivate);
 		return dupTab;
@@ -3921,7 +3932,7 @@ var privateTab = {
 		});
 		var focusURLBar = gURLBar.focused;
 		var typed = tab.linkedBrowser.userTypedValue;
-		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate);
+		var dupTab = this.duplicateTabAndTogglePrivate(tab, isPrivate, true);
 		dupTab._privateTabWaitInitialize = Date.now();
 		dupTab.collapsed = false; // Not really needed, just to ensure
 		tab.pinned && this.forcePinTab(dupTab, pos);
@@ -3940,7 +3951,7 @@ var privateTab = {
 			// Make tab empty to not save in undo close history
 			tab._privateTabWillClosed = true; // To ignore "TabRemotenessChange" event
 			this.ss.setTabState(tab, '{"entries":[]}');
-			gBrowser.removeTab(tab);
+			gBrowser.removeTab(tab, { animate: false });
 			_dbgv && _log("replaceTabAndTogglePrivate() -> removeTab() after " + (Date.now() - startTime) + " ms");
 		}.bind(this), 300);
 		return dupTab;
