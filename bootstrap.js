@@ -54,7 +54,7 @@ var privateTab = {
 			blankWindow && this.observe(blankWindow, "domwindowopened");
 		}
 		Services.ww.registerNotification(this);
-		if(this.oldSessionStore)
+		if(this.canFilterSession)
 			Services.obs.addObserver(this, "sessionstore-state-write", false);
 		else if(
 			window
@@ -82,7 +82,7 @@ var privateTab = {
 
 		if(reason != APP_SHUTDOWN) {
 			// nsISessionStore may save data after our shutdown
-			if(this.oldSessionStore)
+			if(this.canFilterSession)
 				Services.obs.removeObserver(this, "sessionstore-state-write");
 			else
 				this.dontSaveClosedPrivateTabs(false);
@@ -1411,7 +1411,7 @@ var privateTab = {
 			this.cleanupClosedTab(e);
 	},
 	tabClosingHandler: function(e) {
-		if(this.oldSessionStore || !prefs.get("rememberClosedPrivateTabs"))
+		if(this.canFilterSession || !prefs.get("rememberClosedPrivateTabs"))
 			return;
 		//~ hack: manually add closed private tab to undo close history
 		var tab = e.originalTarget || e.target;
@@ -1547,7 +1547,7 @@ var privateTab = {
 		}
 		_log("Private tab closed: " + _tab(tab) + "\nTry don't save it in undo close history");
 		var silentFail = false;
-		if(!this.oldSessionStore)
+		if(!this.canFilterSession)
 			silentFail = true;
 		else if(tab.hasAttribute("closedownloadtabs-closed")) {
 			// https://github.com/Infocatcher/Close_Download_Tabs
@@ -4623,9 +4623,9 @@ var privateTab = {
 			// Firefox 61+ https://bugzilla.mozilla.org/show_bug.cgi?id=1450559
 			: Components.utils.import("resource:///modules/sessionstore/SessionStore.jsm", {}).SessionStore;
 	},
-	get oldSessionStore() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
-		delete this.oldSessionStore;
-		return this.oldSessionStore = this.platformVersion < 29
+	get canFilterSession() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
+		delete this.canFilterSession;
+		return this.canFilterSession = this.platformVersion < 29
 			|| this.isSeaMonkey
 			|| Services.appinfo.name == "Pale Moon";
 	},
