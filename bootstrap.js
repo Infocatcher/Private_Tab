@@ -4625,7 +4625,9 @@ var privateTab = {
 	},
 	get oldSessionStore() { // See https://bugzilla.mozilla.org/show_bug.cgi?id=899276
 		delete this.oldSessionStore;
-		return this.oldSessionStore = this.platformVersion < 29 || this.isSeaMonkey;
+		return this.oldSessionStore = this.platformVersion < 29
+			|| this.isSeaMonkey
+			|| Services.appinfo.name == "Pale Moon";
 	},
 
 	_stylesLoaded: false,
