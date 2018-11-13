@@ -4261,32 +4261,30 @@ var privateTab = {
 			&& "_sizePlaceholder" in window.TabsInTitlebar
 			&& (force || !this.appButtonCssURI)
 		) {
-			window.setTimeout(function() { // Pseudo async
-				// Based on code from chrome://browser/content/browser.js
-				if(this.isAustralis) {
-					var {TabsInTitlebar} = window;
-					if("_update" in TabsInTitlebar)
-						TabsInTitlebar._update(true);
-					// Looks useless: will be updated from Firefox side
-					//else
-					//	TabsInTitlebar.update(); // Firefox 61+
-					_log("updateTabsInTitlebar() => TabsInTitlebar._update(true)");
-				}
-				else {
-					var sizePlaceholder = function(type, baseNodeId) {
-						var baseNode = document.getElementById(baseNodeId);
-						if(baseNode) {
-							var rect = baseNode.getBoundingClientRect();
-							if(rect.width) {
-								_log("Update size placeholder for #" + baseNodeId);
-								window.TabsInTitlebar._sizePlaceholder(type, rect.width);
-							}
+			// Based on code from chrome://browser/content/browser.js
+			if(this.isAustralis) {
+				var {TabsInTitlebar} = window;
+				if("_update" in TabsInTitlebar)
+					TabsInTitlebar._update(true);
+				// Looks useless: will be updated from Firefox side
+				//else
+				//	TabsInTitlebar.update(); // Firefox 61+
+				_log("updateTabsInTitlebar() => TabsInTitlebar._update(true)");
+			}
+			else {
+				var sizePlaceholder = function(type, baseNodeId) {
+					var baseNode = document.getElementById(baseNodeId);
+					if(baseNode) {
+						var rect = baseNode.getBoundingClientRect();
+						if(rect.width) {
+							_log("Update size placeholder for #" + baseNodeId);
+							window.TabsInTitlebar._sizePlaceholder(type, rect.width);
 						}
-					};
-					sizePlaceholder("appmenu-button", "appmenu-button-container");
-					sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
-				}
-			}.bind(this), 0);
+					}
+				};
+				sizePlaceholder("appmenu-button", "appmenu-button-container");
+				sizePlaceholder("caption-buttons", "titlebar-buttonbox-container");
+			}
 		}
 	},
 	updateDownloadPanel: function(window, isPrivate) {
