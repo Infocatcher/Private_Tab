@@ -145,7 +145,9 @@ var privateProtocol = {
 		}
 		catch(e) {
 			if( // See https://github.com/Infocatcher/Private_Tab/issues/251
-				this.platformVersion >= 52
+				(this.platformVersion >= 52
+				|| Services.appinfo.name == "Pale Moon" && this.platformVersion >= 4.1
+				|| Services.appinfo.name == "Basilisk")
 				&& this.fixTabFromLoadContext(loadContext, channel.URI.ref)
 			)
 				return undefined;
