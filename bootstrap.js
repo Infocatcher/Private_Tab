@@ -2130,7 +2130,7 @@ var privateTab = {
 				mi.setAttribute("checked", "true");
 			else
 				mi.removeAttribute("checked");
-			var accel = document.getAnonymousElementByAttribute(mi, "class", "menu-accel-container");
+			var accel = this.getAnonChild(document, mi, "class", "menu-accel-container");
 			if(accel)
 				accel.hidden = !tab.selected;
 			//mi.disabled = this.isPendingTab(tab);
@@ -2700,25 +2700,27 @@ var privateTab = {
 			|| this.getTabContainerChild(window, "id", this.afterTabsButtonId);
 	},
 	getTabContainerChild: function(window, attr, val) {
-		return window.document.getAnonymousElementByAttribute(window.gBrowser.tabContainer, attr, val);
+		return this.getAnonChild(window.document, window.gBrowser.tabContainer, attr, val);
 	},
 	getTabContextMenu: function(document) {
 		return document.getElementById("tabContextMenu")
-			|| document.getAnonymousElementByAttribute(
-				document.defaultView.gBrowser,
-				"anonid",
-				"tabContextMenu"
-			);
+			|| this.getAnonChild(document, document.defaultView.gBrowser, "anonid", "tabContextMenu");
 	},
 	getTabTooltip: function(document) {
 		var tabTip = document.getElementById("tabbrowser-tab-tooltip");
 		if(!tabTip) { // SeaMonkey
 			var gBrowser = document.defaultView.gBrowser;
-			var tabStrip = document.getAnonymousElementByAttribute(gBrowser, "anonid", "strip");
+			var tabStrip = this.getAnonChild(document, gBrowser, "anonid", "strip");
 			if(tabStrip && tabStrip.firstChild && tabStrip.firstChild.localName == "tooltip")
 				tabTip = tabStrip.firstChild;
 		}
 		return tabTip;
+	},
+	getAnonChild: function(document, parentNode, attr, val) {
+		if("getAnonymousElementByAttribute" in document)
+			return document.getAnonymousElementByAttribute(parentNode, attr, val);
+		// Firefox 72+
+		return parentNode.querySelector("[" + attr + '="' + val + '"]');
 	},
 	initToolbarButton: function(document) {
 		var window = document.defaultView;
@@ -4817,7 +4819,7 @@ var privateTab = {
 		var origBinding = cs.MozBinding;
 		var ext = /^url\("([^"]+)"\)$/.test(origBinding)
 			&& RegExp.$1 || "chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton";
-		var icon = newTabBtn.ownerDocument.getAnonymousElementByAttribute(newTabBtn, "class", "toolbarbutton-icon");
+		var icon = this.getAnonChild(newTabBtn.ownerDocument, newTabBtn, "class", "toolbarbutton-icon");
 		var csi = icon ? window.getComputedStyle(icon, null) : {};
 		var padding = prefs.get("fixAfterTabsButtonsAccessibility.iconPadding") || (
 			Math.max(0, (
