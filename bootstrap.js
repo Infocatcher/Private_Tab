@@ -1,6 +1,8 @@
 const WINDOW_LOADED = -1;
 const WINDOW_CLOSED = -2;
 
+const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 this.__defineGetter__("patcher", function() {
@@ -3015,7 +3017,7 @@ var privateTab = {
 		var tabTip = this.getTabTooltip(document);
 		if(tabTip) {
 			tabTip.addEventListener("popupshowing", this, false);
-			var tabTipLabel = document.createElement("label");
+			var tabTipLabel = document.createElementNS(XULNS, "label");
 			tabTipLabel.id = this.tabTipId;
 			tabTipLabel.className = "tooltip-label";
 			tabTipLabel.setAttribute("value", this.getLocalized("privateTabTip"));
@@ -3313,7 +3315,7 @@ var privateTab = {
 		window.removeEventListener("popupshowing", this.initPlacesContext, true);
 	},
 	createNode: function(document, nodeName, id, attrs) {
-		var mi = document.createElement(nodeName);
+		var mi = document.createElementNS(XULNS, nodeName);
 		mi.id = id;
 		for(var name in attrs)
 			mi.setAttribute(name, attrs[name]);
@@ -3468,7 +3470,7 @@ var privateTab = {
 		if(!keys)
 			return;
 
-		keyset = document.createElement("keyset");
+		keyset = document.createElementNS(XULNS, "keyset");
 		keyset.id = keysetId;
 		keyset.setAttribute("privateTab-command", "<nothing>");
 		document.documentElement.appendChild(keyset);
@@ -3476,7 +3478,7 @@ var privateTab = {
 		for(var kId in keys) {
 			var k = keys[kId];
 			var id = "privateTab-key-" + kId + uid;
-			var key = document.createElement("key");
+			var key = document.createElementNS(XULNS, "key");
 			key.setAttribute("id", id);
 			k._key       && key.setAttribute("key",       k._key);
 			k._keyCode   && key.setAttribute("keycode",   k._keyCode);
