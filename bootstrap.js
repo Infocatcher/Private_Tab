@@ -4713,6 +4713,7 @@ var privateTab = {
 			@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");\n\
 			@-moz-document url("' + document.documentURI + '") {\n\
 				.tabbrowser-tab[' + this.privateAttr + '],\n\
+				.tabbrowser-tab[' + this.privateAttr + '] .tab-text, /* Firefox 75+? */\n\
 				menuitem[' + this.privateAttr + '],\n\
 				.subviewbutton[' + this.privateAttr + '] {\n\
 					text-decoration: underline' + important + ';\n\
