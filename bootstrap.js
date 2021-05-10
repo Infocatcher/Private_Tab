@@ -1313,7 +1313,7 @@ var privateTab = {
 		if(!isEmpty || makeEmptyTabPrivate == -1) {
 			if(isEmpty)
 				_log("Inherit private state for new empty tab");
-			if(this.isPrivateContent(window))
+			if(this.shouldMakeTabPrivate(window))
 				isPrivate = true;
 			else if(this.isPrivateWindow(window))
 				isPrivate = false; // Override browser behavior!
@@ -4496,6 +4496,18 @@ var privateTab = {
 			Components.utils.reportError(e);
 		}
 		return tab.hasAttribute(this.privateAttr);
+	},
+	shouldMakeTabPrivate: function(window) {
+		var gBrowser = window.gBrowser;
+		var tst = gBrowser && gBrowser.treeStyleTab || null;
+		if(tst) {
+			var parentTab = tst.getTabById(tst.parentTab);
+			if(parentTab && parentTab.parentNode) {
+				_log("Will inherit private state from Tree Style Tab's parent tab:\n" + parentTab.label);
+				return this.isPrivateTab(parentTab);
+			}
+		}
+		return this.isPrivateContent(window);
 	},
 	getContentWindow: function(window) {
 		// Note: with enabled Electrolysis window.content may refers to
