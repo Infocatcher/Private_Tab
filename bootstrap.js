@@ -4500,7 +4500,7 @@ var privateTab = {
 	shouldMakeTabPrivate: function(window) {
 		var gBrowser = window.gBrowser;
 		var tst = gBrowser && gBrowser.treeStyleTab || null;
-		if(tst) {
+		if(tst) try {
 			var parentTab = tst.getTabById(tst.parentTab);
 			_dbgv && _log("shouldMakeTabPrivate(): parent tab: " + parentTab);
 			if(parentTab && parentTab.parentNode) {
@@ -4509,6 +4509,9 @@ var privateTab = {
 				_log("Will inherit private state from Tree Style Tab's parent tab:\n" + tabInfo);
 				return this.isPrivateTab(parentTab);
 			}
+		}
+		catch(e) {
+			Components.utils.reportError(e);
 		}
 		return this.isPrivateContent(window);
 	},
