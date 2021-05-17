@@ -3872,7 +3872,6 @@ var privateTab = {
 			// Error: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsILoadContext.usePrivateBrowsing]
 			_log("toggleTabPrivate(): unable to set .usePrivateBrowsing -> " + isPrivate + "\nTab: " + _tab(tab));
 			Components.utils.reportError(e);
-			return;
 		}
 
 		// Workaround for browser.newtab.preload = true
