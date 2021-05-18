@@ -4511,8 +4511,8 @@ var privateTab = {
 			var parentTab = tst.getTabById(tst.parentTab);
 			_dbgv && _log("shouldMakeTabPrivate(): parent tab: " + parentTab);
 			if(parentTab && parentTab.parentNode) {
-				var tabInfo = (parentTab.label || "").substr(0, 150)+ "\n"
-					+ (parentTab.linkedBrowser && parentTab.linkedBrowser.currentURI.spec || "").substr(0, 150);
+				var tabInfo = _tab(parentTab)+ "\n"
+					+ _str(parentTab.linkedBrowser && parentTab.linkedBrowser.currentURI.spec || "");
 				_log("Will inherit private state from Tree Style Tab's parent tab:\n" + tabInfo);
 				return this.isPrivateTab(parentTab);
 			}
