@@ -3865,13 +3865,14 @@ var privateTab = {
 			}
 		}
 
-		try { // This is strange, but simply try/catch (with catched error!) may fix our dropHandler()
+		try {
 			privacyContext.usePrivateBrowsing = isPrivate;
 		}
 		catch(e) {
 			// Error: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsILoadContext.usePrivateBrowsing]
 			_log("toggleTabPrivate(): unable to set .usePrivateBrowsing -> " + isPrivate + "\nTab: " + _tab(tab));
 			Components.utils.reportError(e);
+			return;
 		}
 
 		// Workaround for browser.newtab.preload = true
