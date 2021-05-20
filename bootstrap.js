@@ -2363,8 +2363,8 @@ var privateTab = {
 			return loadURIWithFlags.apply(this, arguments);
 		};
 		function destroyLoadURIWrapper() {
+			_log("openPlacesInPrivateTabs(): remove wrapper for browser.loadURIWithFlags()");
 			if(loadURIWithFlagsDesc) {
-				_log("openPlacesInPrivateTabs(): remove wrapper for browser.loadURIWithFlags()");
 				Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
 				loadURIWithFlagsDesc = undefined;
 			}
