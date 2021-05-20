@@ -3916,7 +3916,7 @@ var privateTab = {
 		this.setPrivate(tab, origIsPrivate);
 		return dupTab;
 	},
-	replaceTabAndTogglePrivate: function(tab, isPrivate) {
+	replaceTabAndTogglePrivate: function(tab, isPrivate, onSuccess) {
 		var window = tab.ownerDocument.defaultView;
 		var gBrowser = this.getTabBrowser(tab);
 		var gURLBar = window.gURLBar;
@@ -3941,6 +3941,7 @@ var privateTab = {
 				window.setTimeout(function() {
 					delete dupTab._privateTabSourceTab;
 				}, 250);
+				onSuccess && onSuccess(dupTab);
 			}, false);
 		});
 		var focusURLBar = gURLBar.focused;
