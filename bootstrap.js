@@ -1992,6 +1992,39 @@ var privateTab = {
 			_log("Will use source or target private state: " + isPrivateSource + " || " + isPrivateTarget);
 		}
 
+		var browser = targetTab.linkedBrowser;
+		var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
+		function destroyLoadURIWrapper() {
+			_log("dropHandler(): remove wrapper for browser.loadURIWithFlags()");
+			if(loadURIWithFlagsDesc) {
+				Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
+				loadURIWithFlagsDesc = undefined;
+			}
+			else {
+				delete browser.loadURIWithFlags;
+			}
+		}
+
+		browser.loadURIWithFlags = function privateTabWrapper(uri) {
+			_log("dropHandler() -> browser.loadURIWithFlags(): " + uri);
+			destroyLoadURIWrapper();
+			if(isPrivate == this.isPrivateTab(targetTab)) {
+				_log("dropHandler() -> browser.loadURIWithFlags(): already correct private state");
+				return;
+			}
+			if(!this.toggleUsingDupTab) {
+				this.toggleTabPrivate(targetTab, isPrivate);
+				return;
+			}
+			this.replaceTabAndTogglePrivate(targetTab, isPrivate, function(tab) {
+				_log("dropHandler() -> browser.loadURIWithFlags(): load URI into cloned tab");
+				tab.linkedBrowser.loadURI(uri);
+			});
+		}.bind(this);
+
+		return; //~ todo: rewrite this.waitForTab() part + don't handle replaceTabAndTogglePrivate()
+
+
 		var origIsPrivate;
 		if(targetTab && dndBehavior != 2 && isPrivate != this.isPrivateTab(targetTab)) {
 			origIsPrivate = !isPrivate;
