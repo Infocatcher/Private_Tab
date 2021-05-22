@@ -2006,18 +2006,21 @@ var privateTab = {
 		}
 
 		browser.loadURIWithFlags = function privateTabWrapper(uri) {
-			_log("dropHandler() -> browser.loadURIWithFlags(): " + uri);
+			const _lp = "dropHandler() -> browser.loadURIWithFlags(): ";
+			_log(_lp + uri);
 			destroyLoadURIWrapper();
 			if(isPrivate == this.isPrivateTab(targetTab)) {
-				_log("dropHandler() -> browser.loadURIWithFlags(): already correct private state");
+				_log(_lp + "already correct private state: " + _p(isPrivate));
 				return;
 			}
 			if(!this.toggleUsingDupTab) {
+				_log(_lp + "change state to " + _p(isPrivate));
 				this.toggleTabPrivate(targetTab, isPrivate);
 				return;
 			}
+			_log(_lp + "will use workaround with tab duplication");
 			this.replaceTabAndTogglePrivate(targetTab, isPrivate, function(tab) {
-				_log("dropHandler() -> browser.loadURIWithFlags(): load URI into cloned tab");
+				_log(_lp + "load URI into duplicated tab");
 				tab.linkedBrowser.loadURI(uri);
 			});
 		}.bind(this);
