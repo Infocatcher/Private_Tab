@@ -3714,7 +3714,7 @@ var privateTab = {
 		return true;
 	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
-		_log("updateBookmarkFavicon()");
+		_log("updateBookmarkFavicon() for " + _str(bookmarkURI.spec));
 		var browser = tab.linkedBrowser;
 		var window = browser.ownerDocument.defaultView;
 		var _this = this;
