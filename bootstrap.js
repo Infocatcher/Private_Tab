@@ -3704,13 +3704,14 @@ var privateTab = {
 		}
 		_log("fixBrowserFromProtocol(): will use workaround with tab duplication");
 		var window = tab.ownerDocument.defaultView;
-		var dupTab = this.replaceTabAndTogglePrivate(tab, true);
-		window.setTimeout(function() {
-			dupTab.linkedBrowser.loadURI(uri);
+		this.replaceTabAndTogglePrivate(tab, true, function(dupTab) {
+			var dupBrowser = dupTab.linkedBrowser;
+			dupBrowser.loadURI(uri);
 			window.setTimeout(function() {
-				this.handleProtocolBrowser(browser, uri);
+				var pUri = /^private:/i.test(uri) ? uri : "private:" + uri;
+				this.handleProtocolBrowser(dupBrowser, pUri);
 			}.bind(this), 10);
-		}.bind(this), 200);
+		}.bind(this));
 		return true;
 	},
 	updateBookmarkFavicon: function(bookmarkURI, tab) {
