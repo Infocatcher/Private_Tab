@@ -1992,38 +1992,41 @@ var privateTab = {
 			_log("Will use source or target private state: " + isPrivateSource + " || " + isPrivateTarget);
 		}
 
-		var browser = targetTab.linkedBrowser;
-		var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
-		function destroyLoadURIWrapper() {
-			_log("dropHandler(): remove wrapper for browser.loadURIWithFlags()");
-			if(loadURIWithFlagsDesc) {
-				Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
-				loadURIWithFlagsDesc = undefined;
-			}
-			else {
-				delete browser.loadURIWithFlags;
-			}
-		}
+		if(targetTab && dndBehavior != 2 && isPrivate != this.isPrivateTab(targetTab)) {
+			_log("Dropped link may be opened in already existing tab, will use wrapper for browser.loadURIWithFlags()");
+			var browser = targetTab.linkedBrowser;
+			var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
+			var destroyLoadURIWrapper = function() {
+				_log("dropHandler(): remove wrapper for browser.loadURIWithFlags()");
+				if(loadURIWithFlagsDesc) {
+					Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
+					loadURIWithFlagsDesc = undefined;
+				}
+				else {
+					delete browser.loadURIWithFlags;
+				}
+			};
 
-		browser.loadURIWithFlags = function privateTabWrapper(uri) {
-			const _lp = "dropHandler() -> browser.loadURIWithFlags(): ";
-			_log(_lp + uri);
-			destroyLoadURIWrapper();
-			if(isPrivate == this.isPrivateTab(targetTab)) {
-				_log(_lp + "already correct private state: " + _p(isPrivate));
-				return;
-			}
-			if(!this.toggleUsingDupTab) {
-				_log(_lp + "change state to " + _p(isPrivate));
-				this.toggleTabPrivate(targetTab, isPrivate);
-				return;
-			}
-			_log(_lp + "will use workaround with tab duplication");
-			this.replaceTabAndTogglePrivate(targetTab, isPrivate, function(tab) {
-				_log(_lp + "load URI into duplicated tab");
-				tab.linkedBrowser.loadURI(uri);
-			});
-		}.bind(this);
+			browser.loadURIWithFlags = function privateTabWrapper(uri) {
+				const _lp = "dropHandler() -> browser.loadURIWithFlags(): ";
+				_log(_lp + uri);
+				destroyLoadURIWrapper();
+				if(isPrivate == this.isPrivateTab(targetTab)) {
+					_log(_lp + "already correct private state: " + _p(isPrivate));
+					return;
+				}
+				if(!this.toggleUsingDupTab) {
+					_log(_lp + "change state to " + _p(isPrivate));
+					this.toggleTabPrivate(targetTab, isPrivate);
+					return;
+				}
+				_log(_lp + "will use workaround with tab duplication");
+				this.replaceTabAndTogglePrivate(targetTab, isPrivate, function(tab) {
+					_log(_lp + "load URI into duplicated tab");
+					tab.linkedBrowser.loadURI(uri);
+				});
+			}.bind(this);
+		}
 
 		return; //~ todo: rewrite this.waitForTab() part + don't handle replaceTabAndTogglePrivate()
 
