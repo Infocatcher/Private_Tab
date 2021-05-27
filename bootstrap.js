@@ -2545,19 +2545,23 @@ var privateTab = {
 	},
 	waitForTab: function(window, callback) {
 		_log("waitForTab()");
-		function tabOpen(e) {
+		function destroy(timer) {
 			window.removeEventListener("TabOpen", tabOpen, true);
-			window.clearTimeout(timer);
+			timer && window.clearTimeout(timer);
+		}
+		function tabOpen(e) {
+			destroy(timer);
 			var tab = e.originalTarget || e.target;
 			_log("waitForTab(): opened tab");
 			callback(tab);
 		}
 		window.addEventListener("TabOpen", tabOpen, true);
 		var timer = window.setTimeout(function() {
-			window.removeEventListener("TabOpen", tabOpen, true);
+			destroy();
 			_log("waitForTab(): nothing");
 			callback(null);
 		}, 0);
+		return destroy;
 	},
 	getNotPopupWindow: function(window, force) {
 		if(window.toolbar && window.toolbar.visible)
