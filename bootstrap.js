@@ -1998,6 +1998,7 @@ var privateTab = {
 			var loadURIWithFlagsDesc = Object.getOwnPropertyDescriptor(browser, "loadURIWithFlags");
 			var destroyLoadURIWrapper = function() {
 				_log("dropHandler(): remove wrapper for browser.loadURIWithFlags()");
+				stopWait && stopWait();
 				if(loadURIWithFlagsDesc) {
 					Object.defineProperty(browser, "loadURIWithFlags", loadURIWithFlagsDesc);
 					loadURIWithFlagsDesc = undefined;
@@ -2028,42 +2029,16 @@ var privateTab = {
 			}.bind(this);
 		}
 
-		return; //~ todo: rewrite this.waitForTab() part + don't handle replaceTabAndTogglePrivate()
-
-
-		var origIsPrivate;
-		if(targetTab && dndBehavior != 2 && isPrivate != this.isPrivateTab(targetTab)) {
-			origIsPrivate = !isPrivate;
-			_log(
-				"Dropped link may be opened in already existing tab, so make it "
-				+ _p(isPrivate)
-			);
-			this.toggleTabPrivate(targetTab, isPrivate, true);
-		}
-
-		this.waitForTab(window, function(tab) {
+		var stopWait = this.waitForTab(window, function(tab) {
 			if(!tab) {
 				if(!targetTab)
 					return;
 				tab = targetTab;
 			}
-			if(origIsPrivate != undefined) {
-				if(tab == targetTab) {
-					_log("Highlight target tab as " + _p(isPrivate));
-					this.dispatchPrivateChangedAPIEvent(targetTab, isPrivate);
-				}
-				else {
-					_log("Restore private state of target tab");
-					this.toggleTabPrivate(targetTab, origIsPrivate, true);
-				}
-			}
 			tab._privateTabIgnore = true; // We should always set this flag!
-			_log(
-				"drop: make " + (tab == targetTab ? "current" : "new") + " tab "
-				+ _p(isPrivate)
-			);
+			_log("drop: make " + (tab == targetTab ? "current" : "new") + " tab " + _p(isPrivate));
 			// Strange things happens in private windows, so we force set private flag
-			if(this.isPrivateTab(tab) != isPrivate || isPrivate)
+			if(this.isPrivateTab(tab) != isPrivate)
 				this.toggleTabPrivate(tab, isPrivate);
 			else
 				_log("Already correct private state, ignore");
