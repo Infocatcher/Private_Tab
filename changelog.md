@@ -27,6 +27,8 @@
 `x` Correctly highlight private tabs in Firefox 75+.<br>
 `x` Correctly detect browser.xhtml in Firefox 69+(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1553188">bug 1553188</a>).<br>
 `*` Experimental: inherit private state from parent tab of (XUL-based) Tree Style Tab.<br>
+`x` Correctly update bookmark favicon, if private:… URI was opened in current tab (with tab duplication trick).<br>
+`x` Correctly handle dropped link from private tab into non-private tab in Firefox 51+: will be used tab duplication trick.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Added trick to drag private tab to another window (with disabled multi-process mode, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">thanks to Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
