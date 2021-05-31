@@ -2030,6 +2030,7 @@ var privateTab = {
 		}
 
 		var stopWait = this.waitForTab(window, function(tab) {
+			destroyLoadURIWrapper && destroyLoadURIWrapper();
 			if(!tab) {
 				if(!targetTab)
 					return;
