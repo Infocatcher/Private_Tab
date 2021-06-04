@@ -2022,9 +2022,9 @@ var privateTab = {
 					return;
 				}
 				_log(_lp + "will use workaround with tab duplication");
-				this.replaceTabAndTogglePrivate(targetTab, isPrivate, function(tab) {
+				this.replaceTabAndTogglePrivate(targetTab, isPrivate, function onSuccess(dupTab) {
 					_log(_lp + "load URI into duplicated tab");
-					tab.linkedBrowser.loadURI(uri);
+					dupTab.linkedBrowser.loadURI(uri);
 				});
 			}.bind(this);
 		}
@@ -3687,7 +3687,7 @@ var privateTab = {
 		}
 		_log("fixBrowserFromProtocol(): will use workaround with tab duplication");
 		var window = tab.ownerDocument.defaultView;
-		this.replaceTabAndTogglePrivate(tab, true, function(dupTab) {
+		this.replaceTabAndTogglePrivate(tab, true, function onSuccess(dupTab) {
 			var dupBrowser = dupTab.linkedBrowser;
 			dupBrowser.loadURI(uri);
 			window.setTimeout(function() {
