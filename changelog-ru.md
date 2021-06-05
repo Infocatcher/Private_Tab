@@ -29,6 +29,7 @@
 `*` Экспериментальное: добавлено наследование приватного состояния родительской вкладки (XUL-версии) Tree Style Tab.<br>
 `x` Исправлено обновление иконки закладки при открытии private:… ссылки в текущей вкладке (через клонирование вкладки).<br>
 `x` Исправлена обработка перетаскивания ссылки из приватной вкладки в обычную в Firefox 51+: будет использовано переключение приватности клонированием вкладки.<br>
+`*` Улучшена API-функция <a href="https://github.com/Infocatcher/Private_Tab#privatetabduplicatetabandtoggleprivate">privateTab.duplicateTabAndTogglePrivate()</a>: добавлен аргумент onSuccessCallback.<br>
 
 ##### 0.2.3pre (2018-03-23)
 `x` Добавлен хак для перетаскивания приватной вкладки в другое окно (при отключенном мультипроцессном режиме, <a href="https://forum.mozilla-russia.org/viewtopic.php?pid=737516#p737516">спасибо Dumby</a>) (<a href="https://github.com/Infocatcher/Private_Tab/issues/242">#242</a>).<br>
