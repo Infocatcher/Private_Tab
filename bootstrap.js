@@ -3675,7 +3675,7 @@ var privateTab = {
 			: bookmarkURI;
 		this.updateBookmarkFavicon(uri, tab);
 	},
-	fixBrowserFromProtocol: function(browser, uri) {
+	fixBrowserFromProtocol: function(browser, uriStr) {
 		var tab = this.getTabForBrowser(browser);
 		if(!tab) {
 			_log("fixBrowserFromProtocol(): tab not found");
@@ -3689,9 +3689,9 @@ var privateTab = {
 		var window = tab.ownerDocument.defaultView;
 		this.replaceTabAndTogglePrivate(tab, true, function onSuccess(dupTab) {
 			var dupBrowser = dupTab.linkedBrowser;
-			dupBrowser.loadURI(uri);
+			dupBrowser.loadURI(uriStr);
 			window.setTimeout(function() {
-				var pUri = /^private:/i.test(uri) ? uri : "private:" + uri;
+				var pUri = /^private:/i.test(uriStr) ? uriStr : "private:" + uriStr;
 				this.handleProtocolBrowser(dupBrowser, pUri);
 			}.bind(this), 10);
 		}.bind(this));
